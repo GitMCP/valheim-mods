@@ -11,8 +11,11 @@
 #
 # Usage: tools/run-test-server.sh [path/to/Mod.csproj ...]
 #        defaults to every mod under src/
+#        CONFIGURATION=Release to test what actually gets shipped
 
 set -euo pipefail
+
+configuration="${CONFIGURATION:-Debug}"
 
 BEPINEX_VERSION=5.4.2350
 BEPINEX_URL="https://thunderstore.io/package/download/denikson/BepInExPack_Valheim/${BEPINEX_VERSION}/"
@@ -115,8 +118,8 @@ mkdir -p "$plugin_dir"
 find "$plugin_dir" -maxdepth 1 -type f \( -name '*.dll' -o -name '*.pdb' \) -delete
 
 for proj in "${projects[@]}"; do
-  log "Building and deploying $(basename "$proj")"
-  dotnet build "$proj" -t:Deploy -p:ModDeployPath="$plugin_dir" --nologo -v minimal
+  log "Building and deploying $(basename "$proj") ($configuration)"
+  dotnet build "$proj" -c "$configuration" -t:Deploy -p:ModDeployPath="$plugin_dir" --nologo -v minimal
 done
 
 log "Starting server. Watch for 'method(s) patched'; Ctrl-C to stop."
