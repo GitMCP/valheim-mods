@@ -1,0 +1,17 @@
+<Project>
+  <PropertyGroup>
+    <!--
+      Copy this file to Environment.props (git-ignored) to point the build at a real
+      game install instead of the reference assemblies in lib/valheim.
+    -->
+
+    <!-- Base Valheim folder. -->
+    <!-- <ValheimInstall>C:\Program Files (x86)\Steam\steamapps\common\Valheim</ValheimInstall> -->
+
+    <!-- Overrides ValheimInstall if you keep managed assemblies somewhere else. -->
+    <!-- <ValheimManagedDir>C:\refs\valheim\Managed</ValheimManagedDir> -->
+
+    <!-- `dotnet build -t:Deploy` copies the built plugin here. -->
+    <!-- <ModDeployPath>$(ValheimInstall)\BepInEx\plugins\HelloValheim</ModDeployPath> -->
+  </PropertyGroup>
+</Project>

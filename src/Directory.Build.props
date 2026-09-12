@@ -1,0 +1,20 @@
+<Project>
+
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <PropertyGroup>
+    <!-- Valheim runs Mono against the .NET Framework 4.6.2 profile. -->
+    <TargetFramework>net462</TargetFramework>
+    <Nullable>disable</Nullable>
+
+    <!-- BepInEx loads the bare dll, so skip the usual SDK output plumbing. -->
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <DebugType>portable</DebugType>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+
+    <!-- Game references have no matching NuGet package and no framework metadata. -->
+    <NoWarn>$(NoWarn);MSB3277;CS0436</NoWarn>
+  </PropertyGroup>
+
+</Project>

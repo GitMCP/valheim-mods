@@ -1,0 +1,18 @@
+## Build output
+bin/
+obj/
+artifacts/
+*.user
+*.suo
+
+## Local machine paths and secrets
+Environment.props
+
+## Reference assemblies fetched from the Valheim dedicated server.
+## These are Iron Gate's copyrighted binaries -- never commit them.
+lib/valheim/
+lib/bepinex/
+
+## SteamCMD working files
+.steam/
+steamcmd/

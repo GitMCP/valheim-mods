@@ -1,0 +1,25 @@
+<Project>
+
+  <!-- Optional per-machine overrides (git-ignored). See Environment.props.example. -->
+  <Import Project="$(MSBuildThisFileDirectory)Environment.props"
+          Condition="Exists('$(MSBuildThisFileDirectory)Environment.props')" />
+
+  <PropertyGroup>
+    <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <!--
+    Where the game's managed assemblies live. Resolution order:
+      1. ValheimManagedDir, set explicitly in Environment.props
+      2. VALHEIM_INSTALL (a real game install, e.g. a Steam library path)
+      3. lib/valheim, populated by tools/fetch-game-libs.sh
+  -->
+  <PropertyGroup>
+    <ValheimInstall Condition="'$(ValheimInstall)' == '' and '$(VALHEIM_INSTALL)' != ''">$(VALHEIM_INSTALL)</ValheimInstall>
+    <ValheimManagedDir Condition="'$(ValheimManagedDir)' == '' and '$(ValheimInstall)' != ''">$(ValheimInstall)/valheim_Data/Managed</ValheimManagedDir>
+    <ValheimManagedDir Condition="'$(ValheimManagedDir)' == ''">$(RepoRoot)lib/valheim</ValheimManagedDir>
+    <ValheimManagedDir>$([MSBuild]::EnsureTrailingSlash('$(ValheimManagedDir)'))</ValheimManagedDir>
+  </PropertyGroup>
+
+</Project>
