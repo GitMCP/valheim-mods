@@ -65,9 +65,9 @@ switch (command)
         var pattern = new Regex(args[1], RegexOptions.IgnoreCase);
         foreach (var type in EnumerateTypes(mlc, assemblyPaths)
                      .Where(t => pattern.IsMatch(t.Name))
-                     .OrderBy(t => t.FullName))
+                     .OrderBy(t => t.Name))
         {
-            Console.WriteLine($"{type.FullName}  [{type.Assembly.GetName().Name}]");
+            Console.WriteLine($"{SafeName(type)}  [{type.Assembly.GetName().Name}]");
         }
 
         return 0;
@@ -82,7 +82,7 @@ switch (command)
         }
 
         var target = EnumerateTypes(mlc, assemblyPaths)
-            .FirstOrDefault(t => t.FullName == args[1] || t.Name == args[1]);
+            .FirstOrDefault(t => SafeName(t) == args[1] || t.Name == args[1]);
 
         if (target is null)
         {
@@ -95,8 +95,32 @@ switch (command)
                                    BindingFlags.Instance | BindingFlags.Static |
                                    BindingFlags.DeclaredOnly;
 
-        Console.WriteLine($"// {target.FullName} : {target.BaseType?.Name}  [{target.Assembly.GetName().Name}]");
+        Console.WriteLine($"// {SafeName(target)} : {SafeBaseName(target)}  [{target.Assembly.GetName().Name}]");
 
+        try
+        {
+            PrintMembers(target, flags, filter);
+        }
+        catch (FileNotFoundException ex)
+        {
+            // Third-party assemblies (Jotunn and friends) reference BepInEx and other
+            // assemblies that do not live alongside the game's. Metadata for those
+            // members cannot be resolved without them.
+            Console.Error.WriteLine($"Incomplete: {ex.Message}");
+            Console.Error.WriteLine($"Copy the missing assembly into {managedDir} to read those members.");
+            return 2;
+        }
+
+        return 0;
+    }
+
+    default:
+        Console.Error.WriteLine($"Unknown command: {command}");
+        return 1;
+}
+
+static void PrintMembers(Type target, BindingFlags flags, Regex? filter)
+{
         foreach (var field in target.GetFields(flags).OrderBy(f => f.Name))
         {
             if (filter is not null && !filter.IsMatch(field.Name))
@@ -105,6 +129,18 @@ switch (command)
             }
 
             Console.WriteLine($"{FieldAccess(field)} {(field.IsStatic ? "static " : "")}{Short(field.FieldType)} {field.Name};");
+        }
+
+        foreach (var ctor in target.GetConstructors(flags))
+        {
+            if (filter is not null && !filter.IsMatch(target.Name))
+            {
+                continue;
+            }
+
+            var ctorParameters = string.Join(", ", ctor.GetParameters()
+                .Select(p => $"{Short(p.ParameterType)} {p.Name}"));
+            Console.WriteLine($"{CtorAccess(ctor)} {target.Name}({ctorParameters});");
         }
 
         foreach (var method in target.GetMethods(flags).OrderBy(m => m.Name))
@@ -118,13 +154,6 @@ switch (command)
                 .Select(p => $"{Short(p.ParameterType)} {p.Name}"));
             Console.WriteLine($"{MethodAccess(method)} {(method.IsStatic ? "static " : "")}{Short(method.ReturnType)} {method.Name}({parameters});");
         }
-
-        return 0;
-    }
-
-    default:
-        Console.Error.WriteLine($"Unknown command: {command}");
-        return 1;
 }
 
 static IEnumerable<Type> EnumerateTypes(MetadataLoadContext mlc, IEnumerable<string> paths)
@@ -158,8 +187,35 @@ static IEnumerable<Type> EnumerateTypes(MetadataLoadContext mlc, IEnumerable<str
     }
 }
 
+static string SafeName(Type type)
+{
+    try
+    {
+        return type.FullName ?? type.Name;
+    }
+    catch (FileNotFoundException)
+    {
+        return type.Name;
+    }
+}
+
+static string SafeBaseName(Type type)
+{
+    try
+    {
+        return type.BaseType?.Name ?? "-";
+    }
+    catch (FileNotFoundException)
+    {
+        return "?";
+    }
+}
+
 static string FieldAccess(FieldInfo field) =>
     field.IsPublic ? "public" : field.IsFamily ? "protected" : field.IsAssembly ? "internal" : "private";
+
+static string CtorAccess(ConstructorInfo ctor) =>
+    ctor.IsPublic ? "public" : ctor.IsFamily ? "protected" : ctor.IsAssembly ? "internal" : "private";
 
 static string MethodAccess(MethodInfo method) =>
     method.IsPublic ? "public" : method.IsFamily ? "protected" : method.IsAssembly ? "internal" : "private";
