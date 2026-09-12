@@ -9,7 +9,7 @@ is `cursor/valheim-mod-scaffold-020c`, where `artifacts/` stays git-ignored.
 | `Bicicreta.dll` | Manual install: drop it in `BepInEx/plugins`. |
 | `Bicicreta-0.6.0.zip` | Thunderstore layout, for importing into a mod manager. |
 
-Built in Release configuration from commit `14cceee` of
+Built in Release configuration from commit `525095b` of
 `cursor/valheim-mod-scaffold-020c`. These exact bytes were then loaded into the Valheim
 dedicated server under BepInEx, which registered the creature and the hammer piece and
 applied all six patches with no exceptions.
@@ -84,8 +84,8 @@ not doing it for you.
 ## Checking what you downloaded
 
 ```
-SHA-256  Bicicreta.dll         694155e25b39e1917f05c2602b04e143971dc55b700f3e9c553e304d310daa21
-SHA-256  Bicicreta-0.6.0.zip   6d62d1055f20916eaadfdb469ab2cbdcb3690333a84de6a96a4e0b2907e97e42
+SHA-256  Bicicreta.dll         b95ce01ff996ee0dd1f9eddd690e320c7fe8656cf917362fd88b33c261149fe7
+SHA-256  Bicicreta-0.6.0.zip   08ade49314aaa43180d3c86defb396614b158f4854fe518a18d1d6ef14a4c2a3
 ```
 
 See the repo README for how to build one of these yourself, and for the in-game steps to
