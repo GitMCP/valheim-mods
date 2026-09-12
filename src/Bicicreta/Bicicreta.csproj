@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>Bicicreta</AssemblyName>
+    <RootNamespace>Bicicreta</RootNamespace>
+    <Version>0.7.0</Version>
+    <Authors>GitMCP</Authors>
+    <Description>Adds a buildable, rideable bicycle to Valheim.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!--
+      Wraps prefab, recipe, piece, and localisation registration, and enforces that
+      server and clients run the same mod version.
+
+      Its build assets are excluded because they add references to a
+      publicized_assemblies/ layout produced by Jotunn's own prebuild step, which needs
+      a local game install. This repo publicizes the assemblies itself, and the two
+      reference sets otherwise collide.
+    -->
+    <PackageReference Include="JotunnLib" Version="2.30.0" ExcludeAssets="build" />
+  </ItemGroup>
+
+</Project>

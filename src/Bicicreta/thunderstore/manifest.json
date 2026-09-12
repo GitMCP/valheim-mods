@@ -1,0 +1,10 @@
+{
+  "name": "Bicicreta",
+  "version_number": "0.1.0",
+  "website_url": "https://github.com/GitMCP/valheim-mods",
+  "description": "Adds a buildable, rideable bicycle.",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2350",
+    "ValheimModding-Jotunn-2.30.0"
+  ]
+}

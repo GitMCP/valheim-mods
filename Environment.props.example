@@ -1,0 +1,25 @@
+<Project>
+  <PropertyGroup>
+    <!--
+      Copy this file to Environment.props (git-ignored) for per-machine paths.
+
+      Most machines need none of this: a Steam install in its default location is found
+      automatically, and so is lib/valheim from tools/fetch-game-libs.sh. Set these when
+      the game lives somewhere else, such as a Steam library on another drive, or when
+      deploying into a mod manager profile rather than the game folder.
+    -->
+
+    <!-- Base Valheim folder. -->
+    <!-- <ValheimInstall>D:\SteamLibrary\steamapps\common\Valheim</ValheimInstall> -->
+
+    <!-- Overrides ValheimInstall if you keep managed assemblies somewhere else. -->
+    <!-- <ValheimManagedDir>C:\refs\valheim\Managed</ValheimManagedDir> -->
+
+    <!--
+      `dotnet build -t:Deploy` copies the built plugin here. Defaults to the BepInEx
+      install in ValheimInstall; an r2modman profile looks like
+      %APPDATA%\r2modmanPlus-local\Valheim\profiles\Default\BepInEx\plugins
+    -->
+    <!-- <ModDeployPath>$(ValheimInstall)\BepInEx\plugins</ModDeployPath> -->
+  </PropertyGroup>
+</Project>
