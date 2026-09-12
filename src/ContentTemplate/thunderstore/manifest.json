@@ -1,0 +1,10 @@
+{
+  "name": "ContentTemplate",
+  "version_number": "0.1.0",
+  "website_url": "",
+  "description": "Starting point for Valheim mods that add items, pieces, and recipes.",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2350",
+    "ValheimModding-Jotunn-2.30.0"
+  ]
+}
