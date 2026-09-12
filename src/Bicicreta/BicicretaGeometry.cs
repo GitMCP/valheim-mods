@@ -26,5 +26,11 @@ namespace Bicicreta
         internal const float BodyHeight = 1.3f;
 
         internal const float BodyRadius = 0.45f;
+
+        /// <summary>
+        /// How far from the middle a collision can hurt something: far enough to cover
+        /// the whole bicycle, near enough that riding past is not riding into.
+        /// </summary>
+        internal const float HitRadius = Wheelbase / 2f + BodyRadius;
     }
 }

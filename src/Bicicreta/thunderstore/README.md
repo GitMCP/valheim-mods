@@ -10,6 +10,10 @@ asked to do.
 It cannot be petted, ordered about, or renamed, it is silent, and it is the size of a
 bicycle rather than of the animal it is built from.
 
+It will not damage your buildings, trees, ore, carts or ships, whether you ride it into
+them or park it next to a fight. It has no attacks at all; the only harm it can do is to
+run an enemy over.
+
 Because it adds content, it must be installed on the **server and on every client**. A
 client whose version does not match the server's is refused with a clear message.
 
