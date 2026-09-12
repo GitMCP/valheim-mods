@@ -3,8 +3,12 @@
 Adds a bicycle you can build and ride.
 
 Build one with the hammer (Misc category, near a workbench), and it appears ready to
-ride. Mounting, steering, stamina, and dismounting work exactly as they do for a saddled
-lox, because underneath that is what the game is being asked to do.
+ride. Aim anywhere on it and press use to mount. Steering, stamina, and dismounting work
+exactly as they do for a saddled lox, because underneath that is what the game is being
+asked to do.
+
+It cannot be petted, ordered about, or renamed, it is silent, and it is the size of a
+bicycle rather than of the animal it is built from.
 
 Because it adds content, it must be installed on the **server and on every client**. A
 client whose version does not match the server's is refused with a clear message.
@@ -36,4 +40,6 @@ are authoritative and are synced to clients.
 ## Known limitation
 
 It does not yet have a bicycle model. A real one needs a Unity AssetBundle, so for now
-the lox is hidden and the cart's wheels are shown in its place.
+the lox is hidden and a bicycle is assembled from two of the cart's wheels with the
+cart's body shrunk between them for a frame. It also still moves with the lox's walking
+animation, which is what carries it along.
