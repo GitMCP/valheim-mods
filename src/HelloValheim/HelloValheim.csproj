@@ -1,0 +1,91 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>HelloValheim</AssemblyName>
+    <RootNamespace>HelloValheim</RootNamespace>
+    <Version>0.1.0</Version>
+    <Authors>your-name</Authors>
+    <Description>Minimal Valheim BepInEx plugin scaffold.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Core" Version="5.4.21" PrivateAssets="all" />
+    <PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" PrivateAssets="all" />
+    <PackageReference Include="HarmonyX" Version="2.10.2" PrivateAssets="all" />
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!--
+    Game assemblies. ValheimManagedDir is resolved in Directory.Build.props.
+    assembly_* are publicized so private game members are reachable from patches;
+    nothing here is copied to the output, since the game already loads it all.
+  -->
+  <ItemGroup>
+    <PublicizedGameRef Include="$(ValheimManagedDir)assembly_*.dll" />
+    <PublicizedGameRef Include="$(ValheimManagedDir)Assembly-CSharp.dll" />
+    <PublicizedGameRef Include="$(ValheimManagedDir)gui_framework.dll" />
+    <PublicizedGameRef Include="$(ValheimManagedDir)SoftReferenceableAssets.dll" />
+    <PublicizedGameRef Include="$(ValheimManagedDir)Splatform.dll" />
+
+    <GameRef Include="$(ValheimManagedDir)UnityEngine*.dll" />
+    <GameRef Include="$(ValheimManagedDir)Unity.*.dll" />
+    <GameRef Include="$(ValheimManagedDir)com.rlabrecque.steamworks.net.dll" />
+    <GameRef Include="$(ValheimManagedDir)Newtonsoft.Json.dll" />
+
+    <!-- HintPath is rebuilt from each item's own name, since an item transform
+         cannot carry the source path into the new item's metadata. -->
+    <Reference Include="@(PublicizedGameRef->'%(Filename)')" Publicize="true" Private="false">
+      <HintPath>$(ValheimManagedDir)%(Identity).dll</HintPath>
+    </Reference>
+    <Reference Include="@(GameRef->'%(Filename)')" Private="false">
+      <HintPath>$(ValheimManagedDir)%(Identity).dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="ValidateGameReferences" BeforeTargets="BeforeResolveReferences">
+    <Error Condition="!Exists('$(ValheimManagedDir)assembly_valheim.dll')"
+           Text="Valheim reference assemblies not found at '$(ValheimManagedDir)'. Run tools/fetch-game-libs.sh, or point ValheimInstall at a game install in Environment.props." />
+  </Target>
+
+  <!-- `dotnet build -t:Deploy` drops the plugin straight into a local BepInEx install. -->
+  <Target Name="Deploy" DependsOnTargets="Build">
+    <Error Condition="'$(ModDeployPath)' == ''"
+           Text="Set ModDeployPath in Environment.props to deploy." />
+    <Copy SourceFiles="$(TargetPath);$(TargetDir)$(AssemblyName).pdb"
+          DestinationFolder="$(ModDeployPath)"
+          SkipUnchangedFiles="true"
+          ContinueOnError="true" />
+    <Message Importance="high" Text="Deployed $(AssemblyName) to $(ModDeployPath)" />
+  </Target>
+
+  <!-- `dotnet build -t:Package` builds an uploadable Thunderstore archive. -->
+  <Target Name="Package" DependsOnTargets="Build">
+    <PropertyGroup>
+      <ThunderstoreDir>$(MSBuildProjectDirectory)/thunderstore/</ThunderstoreDir>
+      <PackageStageDir>$(BaseIntermediateOutputPath)thunderstore/</PackageStageDir>
+      <PackageZipPath>$(RepoRoot)artifacts/$(AssemblyName)-$(Version).zip</PackageZipPath>
+    </PropertyGroup>
+
+    <!-- Version lives in this project file only; the manifest copy is stamped on the
+         way into the archive so the two can never disagree. -->
+    <PropertyGroup>
+      <ManifestTemplate>$([System.IO.File]::ReadAllText('$(ThunderstoreDir)manifest.json'))</ManifestTemplate>
+      <StampedManifest>$([System.Text.RegularExpressions.Regex]::Replace('$(ManifestTemplate)', '("version_number"\s*:\s*")[^"]*(")', '${1}$(Version)${2}'))</StampedManifest>
+    </PropertyGroup>
+
+    <RemoveDir Directories="$(PackageStageDir)" />
+    <MakeDir Directories="$(PackageStageDir)" />
+    <Copy SourceFiles="$(TargetPath);$(ThunderstoreDir)icon.png;$(ThunderstoreDir)README.md"
+          DestinationFolder="$(PackageStageDir)" />
+    <WriteLinesToFile File="$(PackageStageDir)manifest.json"
+                      Lines="$(StampedManifest)"
+                      Overwrite="true" />
+    <MakeDir Directories="$(RepoRoot)artifacts" />
+    <ZipDirectory SourceDirectory="$(PackageStageDir)"
+                  DestinationFile="$(PackageZipPath)"
+                  Overwrite="true" />
+    <Message Importance="high" Text="Packaged $(PackageZipPath)" />
+  </Target>
+
+</Project>
