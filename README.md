@@ -60,6 +60,14 @@ has to reach to look held. `BicicretaGeometry` records both offsets, measured of
 screenshots against the bicycle's own known dimensions, and derives the attach point from
 where the seat is rather than the other way round.
 
+The wheels roll as the bicycle travels. That needs no networking: `Character.GetVelocity`
+reads the rigidbody on the peer that owns the bicycle and the velocity that owner
+publishes to its ZDO on every other peer, so each client works the rotation out for
+itself from something the game already sends. The borrowed meshes sit well off to one
+side of their own pivots, though — the wheel's is 0.61 m out — so each one hangs inside
+an empty at its axle and that is what turns; rotating the mesh itself would swing it
+around the bicycle instead of spinning it where it stands.
+
 The handlebar is not the plain T it looks like it should be. The rider's hands come to
 rest above their knees, well behind the front of the frame, so a post directly under the
 bar would have to rise out of the middle of the frame; instead the post stands on the

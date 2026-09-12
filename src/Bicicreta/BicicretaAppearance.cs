@@ -89,13 +89,13 @@ namespace Bicicreta
 
             var wheelScale = Vector3.one * (BicicretaGeometry.WheelRadius / DonorWheelRadius);
 
+            var frontHub = Hub(visual.transform, "FrontWheel", BicicretaGeometry.FrontWheel);
+            var rearHub = Hub(visual.transform, "RearWheel", BicicretaGeometry.RearWheel);
+
             var parts = 0;
-            parts += Fit(CartSource, WheelPath, visual.transform, "FrontWheel",
-                new Vector3(0f, BicicretaGeometry.WheelRadius, BicicretaGeometry.FrontWheel),
-                wheelScale);
-            parts += Fit(CartSource, WheelPath, visual.transform, "RearWheel",
-                new Vector3(0f, BicicretaGeometry.WheelRadius, BicicretaGeometry.RearWheel),
-                wheelScale);
+            parts += Fit(CartSource, WheelPath, frontHub, "FrontWheel", Vector3.zero, wheelScale);
+            parts += Fit(CartSource, WheelPath, rearHub, "RearWheel", Vector3.zero, wheelScale);
+
             var frameLengthways = BicicretaGeometry.FrameLength / DonorFrameLength;
             parts += Fit(CartSource, FramePath, visual.transform, "Frame",
                 new Vector3(0f, BicicretaGeometry.FrameHeight, BicicretaGeometry.FrameMiddle),
@@ -112,8 +112,28 @@ namespace Bicicreta
 
             parts += Handlebar(visual.transform);
 
+            var wheels = prefab.AddComponent<BicicretaWheels>();
+            wheels.FrontHub = frontHub;
+            wheels.RearHub = rearHub;
+
             BicicretaPlugin.Log.LogInfo(
                 $"Hid {hidden} lox renderer(s) and built a bicycle from {parts} borrowed part(s).");
+        }
+
+        /// <summary>
+        /// An empty at a wheel's axle, for the wheel itself to hang inside. Turning a
+        /// wheel means turning one of these rather than the mesh: the borrowed meshes sit
+        /// off to one side of their own pivots, so a wheel rotated about its own origin
+        /// would swing around the bicycle instead of spinning where it stands.
+        /// </summary>
+        private static Transform Hub(Transform parent, string name, float offset)
+        {
+            var hub = new GameObject(name + "Hub");
+            hub.transform.SetParent(parent, worldPositionStays: false);
+            hub.transform.localPosition =
+                new Vector3(0f, BicicretaGeometry.WheelRadius, offset);
+            hub.transform.localRotation = Quaternion.identity;
+            return hub.transform;
         }
 
         /// <summary>
