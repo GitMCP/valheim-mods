@@ -22,7 +22,7 @@
   <!-- `dotnet build -t:Deploy` drops the plugin straight into a local BepInEx install. -->
   <Target Name="Deploy" DependsOnTargets="Build">
     <Error Condition="'$(ModDeployPath)' == ''"
-           Text="Set ModDeployPath in Environment.props to deploy." />
+           Text="Nowhere to deploy to. A Valheim install in Steam's default location with BepInEx already installed is found automatically; otherwise pass -p:ModDeployPath=&lt;path to BepInEx/plugins&gt; or set ModDeployPath in Environment.props." />
     <Copy SourceFiles="$(TargetPath);$(TargetDir)$(AssemblyName).pdb"
           DestinationFolder="$(ModDeployPath)"
           SkipUnchangedFiles="true"

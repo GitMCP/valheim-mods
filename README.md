@@ -37,8 +37,15 @@ skeleton and animator untouched because those are what drives movement.
 ## Getting started
 
 ```bash
-tools/fetch-game-libs.sh   # populates lib/valheim (~33 MB of reference assemblies)
 dotnet build               # builds every mod plus the API explorer
+```
+
+That is the whole setup if Valheim is installed in Steam's default location, which the
+build finds on its own. On a machine without the game — CI, or a container like the one
+this repo was written in — fetch the reference assemblies first:
+
+```bash
+tools/fetch-game-libs.sh   # populates lib/valheim (~33 MB of reference assemblies)
 ```
 
 ### Where the game assemblies come from
@@ -132,13 +139,59 @@ local player, input, or UI, has to be tested in the real client.
 
 ### In the real client
 
-1. Install [BepInExPack_Valheim](https://thunderstore.io/c/valheim/p/denikson/BepInExPack_Valheim/)
-   (use the Thunderstore pack, not a BepInEx release — it is preconfigured for Valheim).
-2. Set `ModDeployPath` in `Environment.props` and run `dotnet build -t:Deploy`.
-3. Launch the game and read `BepInEx/LogOutput.log`.
+**1. Install the loader and Jötunn.** The easy route is
+[r2modman](https://thunderstore.io/c/valheim/p/ebkr/r2modman/): pick Valheim, make a
+profile, install [Jötunn](https://thunderstore.io/c/valheim/p/ValheimModding/Jotunn/),
+and BepInEx comes along as a dependency. By hand instead, unzip
+[BepInExPack_Valheim](https://thunderstore.io/c/valheim/p/denikson/BepInExPack_Valheim/)
+into the folder holding `valheim.exe` and unzip Jötunn into `BepInEx/plugins`. Use the
+Thunderstore pack rather than a BepInEx release; only the pack is preconfigured for
+Valheim.
 
-Deploy on purpose copies only the plugin assembly. Never copy a whole `bin/Debug`
+**2. Build and deploy.**
+
+```bash
+dotnet build src/Bicicreta -t:Deploy
+```
+
+A Valheim install in Steam's default location is found automatically, so usually there
+is nothing to configure and nothing to fetch. Otherwise, or to deploy into an r2modman
+profile instead of the game folder, name the target explicitly:
+
+```bash
+dotnet build src/Bicicreta -t:Deploy -p:ModDeployPath="$HOME/.config/r2modmanPlus-local/Valheim/profiles/Default/BepInEx/plugins"
+```
+
+Deploy copies only the plugin assembly, on purpose. Never copy a whole `bin/Debug`
 folder into `plugins`; BepInEx tries to load everything it finds there.
+
+**3. Launch and confirm it loaded.** Start the game (through r2modman's *Start modded*,
+if that is how it was installed) and read `BepInEx/LogOutput.log` for the same
+registration lines the headless test prints. `devcommands` is the fastest way in, and it
+works in singleplayer and in a world hosted from the client, but not on a dedicated
+server.
+
+**4. Get a bicycle.** Turn on the developer console in Settings → Gameplay, which since
+patch 0.221.4 replaced the `-console` launch option, then press F5:
+
+```
+devcommands
+spawn Hammer
+debugmode
+```
+
+`debugmode` makes building free and drops the workbench requirement, which is enough to
+see whether the piece and the mount work. Equip the hammer, find **Bicicreta** in the
+**Misc** category, and place it. To check the recipe itself rather than just the mount,
+skip `debugmode` and buy it for real — `spawn Wood 20`, `spawn Bronze 8`,
+`spawn LeatherScraps 8`, then build a workbench and stand next to it.
+
+**5. Ride it.** Walk up and press the use key. The hover text reads *Ride*, and from
+there steering, stamina, and dismounting are the game's own saddled-lox controls.
+
+Two things will look wrong and are known: it wears the cart's wheels because there is no
+bicycle mesh yet, and being a lox underneath, it still moves with lox animation and
+sound.
 
 ## After a Valheim update
 

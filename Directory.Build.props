@@ -9,17 +9,41 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
-  <!--
-    Where the game's managed assemblies live. Resolution order:
-      1. ValheimManagedDir, set explicitly in Environment.props
-      2. VALHEIM_INSTALL (a real game install, e.g. a Steam library path)
-      3. lib/valheim, populated by tools/fetch-game-libs.sh
-  -->
+  <!-- An explicitly configured install wins over everything, including fetched references. -->
   <PropertyGroup>
     <ValheimInstall Condition="'$(ValheimInstall)' == '' and '$(VALHEIM_INSTALL)' != ''">$(VALHEIM_INSTALL)</ValheimInstall>
     <ValheimManagedDir Condition="'$(ValheimManagedDir)' == '' and '$(ValheimInstall)' != ''">$(ValheimInstall)/valheim_Data/Managed</ValheimManagedDir>
+  </PropertyGroup>
+
+  <!--
+    Otherwise look for Steam's default install locations, so that on a machine with the
+    game the build needs no configuration at all. This runs even when the references
+    come from lib/valheim, because -t:Deploy needs to know where the game is either way.
+    A candidate counts only if the assembly is really there; a Steam library on another
+    drive still needs Environment.props.
+  -->
+  <PropertyGroup Condition="'$(ValheimInstall)' == ''">
+    <_SteamCommon Condition="'$(OS)' == 'Windows_NT'">C:/Program Files (x86)/Steam/steamapps/common</_SteamCommon>
+    <_SteamCommon Condition="'$(_SteamCommon)' == '' and Exists('$(HOME)/.steam/steam/steamapps/common')">$(HOME)/.steam/steam/steamapps/common</_SteamCommon>
+    <_SteamCommon Condition="'$(_SteamCommon)' == ''">$(HOME)/.local/share/Steam/steamapps/common</_SteamCommon>
+
+    <ValheimInstall Condition="Exists('$(_SteamCommon)/Valheim/valheim_Data/Managed/assembly_valheim.dll')">$(_SteamCommon)/Valheim</ValheimInstall>
+  </PropertyGroup>
+
+  <!--
+    Which assemblies to compile against. Fetched references are preferred over a
+    detected install, so that a machine set up by tools/fetch-game-libs.sh keeps
+    building against a known game version.
+  -->
+  <PropertyGroup>
+    <ValheimManagedDir Condition="'$(ValheimManagedDir)' == '' and Exists('$(RepoRoot)lib/valheim/assembly_valheim.dll')">$(RepoRoot)lib/valheim</ValheimManagedDir>
+    <ValheimManagedDir Condition="'$(ValheimManagedDir)' == '' and '$(ValheimInstall)' != ''">$(ValheimInstall)/valheim_Data/Managed</ValheimManagedDir>
     <ValheimManagedDir Condition="'$(ValheimManagedDir)' == ''">$(RepoRoot)lib/valheim</ValheimManagedDir>
     <ValheimManagedDir>$([MSBuild]::EnsureTrailingSlash('$(ValheimManagedDir)'))</ValheimManagedDir>
+
+    <!-- Deploying into a plain game install needs no configuration either. Mod manager
+         profiles live elsewhere, so those still set ModDeployPath. -->
+    <ModDeployPath Condition="'$(ModDeployPath)' == '' and '$(ValheimInstall)' != '' and Exists('$(ValheimInstall)/BepInEx/core/BepInEx.Preloader.dll')">$(ValheimInstall)/BepInEx/plugins</ModDeployPath>
   </PropertyGroup>
 
 </Project>
