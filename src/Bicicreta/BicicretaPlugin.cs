@@ -1,6 +1,8 @@
+using System.Linq;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
+using HarmonyLib;
 using Jotunn.Managers;
 using Jotunn.Utils;
 
@@ -13,8 +15,9 @@ namespace Bicicreta
     /// and riding is implemented entirely for tamed creatures by <see cref="Sadle"/>,
     /// which drives a <see cref="Character"/> through its <see cref="MonsterAI"/>. So the
     /// bicycle is a creature that happens to be a bicycle - cloned from the lox, born
-    /// tamed and permanently saddled, with its wandering and aggression removed. Riding,
-    /// stamina, and the multiplayer handover of control then all come from the game.
+    /// tamed and permanently saddled, with its wandering, aggression, bulk, and voice
+    /// removed, and with petting replaced by mounting. Riding, stamina, and the
+    /// multiplayer handover of control then all come from the game.
     ///
     /// Because it adds content, it must be installed on the server and on every client,
     /// which is what <see cref="NetworkCompatibilityAttribute"/> enforces.
@@ -26,7 +29,10 @@ namespace Bicicreta
     {
         public const string PluginGuid = "com.gitmcp.bicicreta";
         public const string PluginName = "Bicicreta";
-        public const string PluginVersion = "0.1.0";
+
+        // Generated from the project file's Version, so the plugin, the assembly, and
+        // the Thunderstore manifest cannot disagree about which build this is.
+        public const string PluginVersion = MyPluginInfo.PLUGIN_VERSION;
 
         internal static ManualLogSource Log;
 
@@ -34,10 +40,17 @@ namespace Bicicreta
         internal static ConfigEntry<float> StaminaDrain;
         internal static ConfigEntry<bool> UseCartModel;
 
+        private Harmony _harmony;
+
         private void Awake()
         {
             Log = Logger;
             BindConfig();
+
+            // Riding, and not petting, is a change to how the game treats a tamed
+            // creature, so it needs patches rather than prefab edits.
+            _harmony = new Harmony(PluginGuid);
+            _harmony.PatchAll(typeof(BicicretaPlugin).Assembly);
 
             // Cloning vanilla prefabs is only possible once the game has loaded its own,
             // which happens long after plugin Awake.
@@ -95,13 +108,21 @@ namespace Bicicreta
 
             BicicretaStand.Register();
 
-            Log.LogInfo($"{PluginName} {PluginVersion} registered its content.");
+            // A patch whose target signature no longer matches the current game build
+            // silently contributes nothing, so report the count rather than assuming.
+            var patched = _harmony.GetPatchedMethods().Count();
+            Log.LogInfo($"{PluginName} {PluginVersion} registered its content, {patched} method(s) patched.");
         }
 
         private void RegisterDrops()
         {
             ItemManager.OnItemsRegistered -= RegisterDrops;
             BicicretaMount.RegisterDrops();
+        }
+
+        private void OnDestroy()
+        {
+            _harmony?.UnpatchSelf();
         }
     }
 }

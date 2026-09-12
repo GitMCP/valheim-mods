@@ -24,9 +24,26 @@ than from this mod.
 A hammer piece, cloned from the cart, is how a player gets one: it gives the build
 preview and resource cost for free, then replaces itself with the mount.
 
+Three things about a lox do have to be argued with, because a bicycle is not an animal:
+
+- **Riding is not where you would look for it.** `Tameable.Interact` pets, orders, and
+  renames, and has no riding branch at all. Riding is a second interactable, `Sadle`,
+  on a child object that the player has to aim at directly — fine when that child is a
+  visible saddle, useless on a bicycle. `Tameable` also hides that child unless its ZDO
+  already says a saddle is fitted. So the mod keeps the saddle fitted and forwards the
+  whole bicycle's interaction to it, which also removes petting and renaming.
+- **A lox is enormous**: 7.6 m long, and it seats its rider 3.4 m up on a bone inside
+  its armature. A bicycle-sized model on an untouched lox leaves the rider floating in
+  the air and the player colliding with an animal that is not drawn. `BicicretaGeometry`
+  holds the dimensions that the model, the collider, and the seat all work from.
+- **A lox is loud.** Its noises are separate effect prefabs spawned from `EffectList`
+  fields, not components, so they are dropped by discarding every effect that carries an
+  `AudioSource` and keeping the silent ones.
+
 It has no bicycle model yet. That needs a Unity AssetBundle, so for now the lox's
-renderers are switched off and the cart's wheels are shown in their place, leaving the
-skeleton and animator untouched because those are what drives movement.
+renderers are switched off and a bicycle is assembled from two of the cart's wheels with
+the cart's body shrunk between them. The skeleton and animator are left untouched,
+because those are what drives movement.
 
 ## Requirements
 
@@ -122,8 +139,9 @@ Watch for each mod's own lines:
 
 ```
 [Info   :HelloValheim] HelloValheim 0.1.0 loaded, 1 method(s) patched.
-[Info   :Bicicreta] Hid 3 renderer(s) and fitted the 'Cart' model.
-[Info   :Bicicreta] Bicicreta 0.1.0 registered its content.
+[Info   :Bicicreta] Hid 3 lox renderer(s) and built a bicycle from 3 'Cart' part(s).
+[Info   :Bicicreta] Silenced 13 lox sound source(s).
+[Info   :Bicicreta] Bicicreta 0.1.0 registered its content, 6 method(s) patched.
 [Info   :Bicicreta] Bicicreta refunds 3 material type(s) when broken.
 [Info   :Jotunn.Managers.CreatureManager] Adding 1 custom creatures
 [Info   :Jotunn.Managers.PieceManager] Adding 1 custom pieces to the PieceTables

@@ -30,7 +30,9 @@ namespace Bicicreta
                 return false;
             }
 
+            BicicretaBody.Apply(prefab);
             BicicretaAppearance.Apply(prefab);
+            BicicretaSilence.Apply(prefab);
 
             var config = new CreatureConfig
             {
@@ -71,7 +73,11 @@ namespace Bicicreta
             // since the lox saddle recipe is not part of this mod.
             tameable.m_dropSaddleOnDeath = false;
 
-            prefab.AddComponent<AlwaysSaddled>();
+            // Petting is blocked outright, so the hearts would never be earned.
+            tameable.m_petEffect = new EffectList();
+
+            // Marks it as ours for the patches that replace petting with riding.
+            prefab.AddComponent<BicicretaTag>();
             return true;
         }
 
