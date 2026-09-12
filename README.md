@@ -132,6 +132,10 @@ Thunderstore manifest on the way into the archive, so the two cannot drift apart
 archive gets the plugin, the manifest, and the `icon.png` and `README.md` beside it in
 `thunderstore/`, plus a `CHANGELOG.md` if the mod keeps one.
 
+Tags and GitHub releases belong to the whole repo rather than to one mod, so a release
+is named for the mod it ships: `bicicreta-v0.7.0`, not `v0.7.0`. Two mods reaching their
+own 0.7.0 is otherwise a collision waiting to happen.
+
 The archive is only needed to publish, which is optional — a plain `.dll` in
 `BepInEx/plugins` is a complete install. Publishing does require a Thunderstore team,
 which is what supplies the namespace half of a package identifier; a team can have one
