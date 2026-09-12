@@ -108,6 +108,12 @@ done
 # assembly, rather than whatever else happens to be in the output directory.
 plugin_dir="$server_dir/BepInEx/plugins"
 mkdir -p "$plugin_dir"
+
+# A plugin left behind by an earlier run keeps loading, so a renamed or deleted mod
+# would appear to still work. Dependencies are installed into subdirectories, so only
+# the loose assemblies at the top level are ours to clear.
+find "$plugin_dir" -maxdepth 1 -type f \( -name '*.dll' -o -name '*.pdb' \) -delete
+
 for proj in "${projects[@]}"; do
   log "Building and deploying $(basename "$proj")"
   dotnet build "$proj" -t:Deploy -p:ModDeployPath="$plugin_dir" --nologo -v minimal
