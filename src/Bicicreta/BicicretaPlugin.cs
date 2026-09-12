@@ -4,7 +4,7 @@ using BepInEx.Logging;
 using Jotunn.Managers;
 using Jotunn.Utils;
 
-namespace Bicycle
+namespace Bicicreta
 {
     /// <summary>
     /// Adds a rideable bicycle.
@@ -22,10 +22,10 @@ namespace Bicycle
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     [BepInDependency(Jotunn.Main.ModGuid)]
     [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
-    public class BicyclePlugin : BaseUnityPlugin
+    public class BicicretaPlugin : BaseUnityPlugin
     {
-        public const string PluginGuid = "com.example.bicycle";
-        public const string PluginName = "Bicycle";
+        public const string PluginGuid = "com.gitmcp.bicicreta";
+        public const string PluginName = "Bicicreta";
         public const string PluginVersion = "0.1.0";
 
         internal static ManualLogSource Log;
@@ -50,7 +50,7 @@ namespace Bicycle
             // IsAdminOnly makes the server's value authoritative and syncs it to clients,
             // so riders cannot set their own speed on someone else's server.
             RideSpeed = Config.Bind(
-                "Bicycle",
+                "Bicicreta",
                 "RideSpeed",
                 1.6f,
                 new ConfigDescription(
@@ -59,7 +59,7 @@ namespace Bicycle
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
 
             StaminaDrain = Config.Bind(
-                "Bicycle",
+                "Bicicreta",
                 "StaminaDrain",
                 0.5f,
                 new ConfigDescription(
@@ -68,7 +68,7 @@ namespace Bicycle
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
 
             UseCartModel = Config.Bind(
-                "Bicycle",
+                "Bicicreta",
                 "UseCartModel",
                 true,
                 new ConfigDescription(
@@ -85,15 +85,15 @@ namespace Bicycle
             PrefabManager.OnVanillaPrefabsAvailable -= RegisterContent;
 
             Localizations.Register();
-            BicycleAssets.Load();
+            BicicretaAssets.Load();
 
-            if (!BicycleMount.Register())
+            if (!BicicretaMount.Register())
             {
-                Log.LogError("Bicycle mount was not registered; not adding the build piece.");
+                Log.LogError("Bicicreta mount was not registered; not adding the build piece.");
                 return;
             }
 
-            BicycleStand.Register();
+            BicicretaStand.Register();
 
             Log.LogInfo($"{PluginName} {PluginVersion} registered its content.");
         }
@@ -101,7 +101,7 @@ namespace Bicycle
         private void RegisterDrops()
         {
             ItemManager.OnItemsRegistered -= RegisterDrops;
-            BicycleMount.RegisterDrops();
+            BicicretaMount.RegisterDrops();
         }
     }
 }

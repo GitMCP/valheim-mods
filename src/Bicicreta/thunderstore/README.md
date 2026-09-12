@@ -1,4 +1,4 @@
-# Bicycle
+# Bicicreta
 
 Adds a bicycle you can build and ride.
 
@@ -11,7 +11,7 @@ client whose version does not match the server's is refused with a clear message
 
 ## Installation
 
-Install with a mod manager, or drop `Bicycle.dll` into `BepInEx/plugins`.
+Drop `Bicicreta.dll` into `BepInEx/plugins`, or install the zip with a mod manager.
 Requires [Jötunn](https://thunderstore.io/c/valheim/p/ValheimModding/Jotunn/).
 
 ## Building one
@@ -24,14 +24,14 @@ Breaking a bicycle returns half its materials.
 
 ## Configuration
 
-`BepInEx/config/com.example.bicycle.cfg` is written on first launch. The server's values
+`BepInEx/config/com.gitmcp.bicicreta.cfg` is written on first launch. The server's values
 are authoritative and are synced to clients.
 
 | Setting | Default | Description |
 | --- | --- | --- |
-| `Bicycle / RideSpeed` | `1.6` | Speed multiplier relative to a saddled lox. |
-| `Bicycle / StaminaDrain` | `0.5` | Stamina cost multiplier relative to a saddled lox. |
-| `Bicycle / UseCartModel` | `true` | Show the cart's wheels instead of the lox. |
+| `Bicicreta / RideSpeed` | `1.6` | Speed multiplier relative to a saddled lox. |
+| `Bicicreta / StaminaDrain` | `0.5` | Stamina cost multiplier relative to a saddled lox. |
+| `Bicicreta / UseCartModel` | `true` | Show the cart's wheels instead of the lox. |
 
 ## Known limitation
 

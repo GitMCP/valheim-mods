@@ -6,7 +6,7 @@ macOS, and Windows and needs no Visual Studio and no local copy of the game.
 
 | Project | What it is |
 | --- | --- |
-| `src/Bicycle` | Adds a buildable, rideable bicycle. |
+| `src/Bicicreta` | Adds a buildable, rideable bicycle. |
 | `src/HelloValheim` | A minimal plugin kept as the template for mods that only patch existing behavior. |
 
 Both are verified to load into a running game.
@@ -108,9 +108,9 @@ Watch for each mod's own lines:
 
 ```
 [Info   :HelloValheim] HelloValheim 0.1.0 loaded, 1 method(s) patched.
-[Info   :Bicycle] Hid 3 renderer(s) and fitted the 'Cart' model.
-[Info   :Bicycle] Bicycle 0.1.0 registered its content.
-[Info   :Bicycle] Bicycle refunds 3 material type(s) when broken.
+[Info   :Bicicreta] Hid 3 renderer(s) and fitted the 'Cart' model.
+[Info   :Bicicreta] Bicicreta 0.1.0 registered its content.
+[Info   :Bicicreta] Bicicreta refunds 3 material type(s) when broken.
 [Info   :Jotunn.Managers.CreatureManager] Adding 1 custom creatures
 [Info   :Jotunn.Managers.PieceManager] Adding 1 custom pieces to the PieceTables
 ```
@@ -146,11 +146,11 @@ Content mods need art, and the two kinds cost very differently:
 
 - **Icons, textures, and other images** load from a PNG at runtime. Drop the file in the
   mod's `Assets/` folder, where it is embedded into the dll automatically, and load it
-  with `AssetUtils.LoadImage`. Nothing else to install. `src/Bicycle` does this for its
+  with `AssetUtils.LoadImage`. Nothing else to install. `src/Bicicreta` does this for its
   build-menu icon.
 - **Meshes, materials, prefabs, and shaders** have to be built into a Unity AssetBundle,
   which means installing a Unity editor matching the game's engine, currently
-  **Unity 6000.0.75f1**. Build the bundle, put it in `Assets/`, and `BicycleAssets` picks
+  **Unity 6000.0.75f1**. Build the bundle, put it in `Assets/`, and `BicicretaAssets` picks
   it up; until then the mod borrows vanilla models.
 
 Cloning is worth taking seriously rather than treating as a stopgap: a weapon cloned from

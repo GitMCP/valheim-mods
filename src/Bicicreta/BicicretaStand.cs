@@ -3,16 +3,16 @@ using Jotunn.Entities;
 using Jotunn.Managers;
 using UnityEngine;
 
-namespace Bicycle
+namespace Bicicreta
 {
     /// <summary>
     /// How a player gets a bicycle: a hammer piece, so placement, the build preview, and
     /// the resource cost all come from the game. The piece is only a way to put a bicycle
     /// somewhere, so it hands over to the mount and removes itself.
     /// </summary>
-    internal static class BicycleStand
+    internal static class BicicretaStand
     {
-        internal const string PrefabName = "bicycle_stand";
+        internal const string PrefabName = "bicicreta_stand";
 
         /// <summary>What it costs to build, and so what half of it is worth breaking one for.</summary>
         internal static readonly RequirementConfig[] Resources =
@@ -33,7 +33,7 @@ namespace Bicycle
             var prefab = PrefabManager.Instance.CreateClonedPrefab(PrefabName, CloneSource);
             if (prefab == null)
             {
-                BicyclePlugin.Log.LogError($"Could not clone '{CloneSource}' for the build piece.");
+                BicicretaPlugin.Log.LogError($"Could not clone '{CloneSource}' for the build piece.");
                 return;
             }
 
@@ -45,7 +45,7 @@ namespace Bicycle
                 Object.Destroy(vagon);
             }
 
-            prefab.AddComponent<BicycleStandSpawner>();
+            prefab.AddComponent<BicicretaStandSpawner>();
 
             var config = new PieceConfig
             {
@@ -57,15 +57,15 @@ namespace Bicycle
                 Requirements = Resources,
             };
 
-            if (BicycleAssets.Icon != null)
+            if (BicicretaAssets.Icon != null)
             {
-                config.Icon = BicycleAssets.Icon;
+                config.Icon = BicicretaAssets.Icon;
             }
 
             var piece = new CustomPiece(prefab, fixReference: false, config);
             if (!PieceManager.Instance.AddPiece(piece))
             {
-                BicyclePlugin.Log.LogError($"Failed to register piece '{PrefabName}'.");
+                BicicretaPlugin.Log.LogError($"Failed to register piece '{PrefabName}'.");
             }
         }
     }
@@ -73,7 +73,7 @@ namespace Bicycle
     /// <summary>
     /// Replaces the placed piece with a rideable bicycle.
     /// </summary>
-    internal class BicycleStandSpawner : MonoBehaviour
+    internal class BicicretaStandSpawner : MonoBehaviour
     {
         private void Awake()
         {
@@ -98,12 +98,12 @@ namespace Bicycle
                 return;
             }
 
-            var prefab = ZNetScene.instance?.GetPrefab(BicycleMount.PrefabName);
+            var prefab = ZNetScene.instance?.GetPrefab(BicicretaMount.PrefabName);
             if (prefab == null)
             {
                 // Leaving the piece standing is better than silently eating the materials.
-                BicyclePlugin.Log.LogError(
-                    $"'{BicycleMount.PrefabName}' is not registered; leaving the piece in place.");
+                BicicretaPlugin.Log.LogError(
+                    $"'{BicicretaMount.PrefabName}' is not registered; leaving the piece in place.");
                 return;
             }
 

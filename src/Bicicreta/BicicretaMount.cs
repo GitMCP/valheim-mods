@@ -3,16 +3,16 @@ using Jotunn.Entities;
 using Jotunn.Managers;
 using UnityEngine;
 
-namespace Bicycle
+namespace Bicicreta
 {
     /// <summary>
     /// Builds the rideable bicycle out of a lox. Everything that makes riding work -
     /// mounting, control handover between players, stamina, dismounting - already lives
     /// on the lox prefab; what this does is take away the parts that make it an animal.
     /// </summary>
-    internal static class BicycleMount
+    internal static class BicicretaMount
     {
-        internal const string PrefabName = "bicycle_mount";
+        internal const string PrefabName = "bicicreta_mount";
 
         private const string CloneSource = "Lox";
 
@@ -21,7 +21,7 @@ namespace Bicycle
             var prefab = PrefabManager.Instance.CreateClonedPrefab(PrefabName, CloneSource);
             if (prefab == null)
             {
-                BicyclePlugin.Log.LogError($"Could not clone '{CloneSource}'; has the game changed it?");
+                BicicretaPlugin.Log.LogError($"Could not clone '{CloneSource}'; has the game changed it?");
                 return false;
             }
 
@@ -30,7 +30,7 @@ namespace Bicycle
                 return false;
             }
 
-            BicycleAppearance.Apply(prefab);
+            BicicretaAppearance.Apply(prefab);
 
             var config = new CreatureConfig
             {
@@ -44,7 +44,7 @@ namespace Bicycle
             var creature = new CustomCreature(prefab, fixReference: false, config);
             if (!CreatureManager.Instance.AddCreature(creature))
             {
-                BicyclePlugin.Log.LogError($"Failed to register creature '{PrefabName}'.");
+                BicicretaPlugin.Log.LogError($"Failed to register creature '{PrefabName}'.");
                 return false;
             }
 
@@ -60,7 +60,7 @@ namespace Bicycle
             var tameable = prefab.GetComponent<Tameable>();
             if (tameable == null)
             {
-                BicyclePlugin.Log.LogError($"'{CloneSource}' has no Tameable component.");
+                BicicretaPlugin.Log.LogError($"'{CloneSource}' has no Tameable component.");
                 return false;
             }
 
@@ -83,7 +83,7 @@ namespace Bicycle
             var ai = prefab.GetComponent<MonsterAI>();
             if (ai == null)
             {
-                BicyclePlugin.Log.LogError($"'{CloneSource}' has no MonsterAI component.");
+                BicicretaPlugin.Log.LogError($"'{CloneSource}' has no MonsterAI component.");
                 return false;
             }
 
@@ -110,6 +110,34 @@ namespace Bicycle
             return true;
         }
 
+        private static bool TuneRiding(GameObject prefab)
+        {
+            var saddle = prefab.GetComponentInChildren<Sadle>(includeInactive: true);
+            if (saddle == null)
+            {
+                BicicretaPlugin.Log.LogError($"'{CloneSource}' has no Sadle component to ride.");
+                return false;
+            }
+
+            saddle.m_hoverText = $"${PrefabName}_ride";
+
+            var drain = BicicretaPlugin.StaminaDrain.Value;
+            saddle.m_runStaminaDrain *= drain;
+            saddle.m_swimStaminaDrain *= drain;
+
+            var character = prefab.GetComponent<Character>();
+            if (character != null)
+            {
+                var speed = BicicretaPlugin.RideSpeed.Value;
+                character.m_speed *= speed;
+                character.m_runSpeed *= speed;
+                character.m_turnSpeed *= speed;
+                character.m_runTurnSpeed *= speed;
+            }
+
+            return true;
+        }
+
         /// <summary>
         /// Makes a broken bicycle refund half of what it cost. Runs separately from
         /// <see cref="Register"/> because drops are item prefabs, and ObjectDB cannot
@@ -121,17 +149,17 @@ namespace Bicycle
             var drops = prefab?.GetComponent<CharacterDrop>();
             if (drops == null)
             {
-                BicyclePlugin.Log.LogWarning("No CharacterDrop on the bicycle; it will refund nothing.");
+                BicicretaPlugin.Log.LogWarning("No CharacterDrop on the bicycle; it will refund nothing.");
                 return;
             }
 
             drops.m_drops.Clear();
-            foreach (var resource in BicycleStand.Resources)
+            foreach (var resource in BicicretaStand.Resources)
             {
                 var item = ObjectDB.instance?.GetItemPrefab(resource.Item);
                 if (item == null)
                 {
-                    BicyclePlugin.Log.LogWarning($"Could not resolve '{resource.Item}' to refund.");
+                    BicicretaPlugin.Log.LogWarning($"Could not resolve '{resource.Item}' to refund.");
                     continue;
                 }
 
@@ -145,35 +173,7 @@ namespace Bicycle
                 });
             }
 
-            BicyclePlugin.Log.LogInfo($"Bicycle refunds {drops.m_drops.Count} material type(s) when broken.");
-        }
-
-        private static bool TuneRiding(GameObject prefab)
-        {
-            var saddle = prefab.GetComponentInChildren<Sadle>(includeInactive: true);
-            if (saddle == null)
-            {
-                BicyclePlugin.Log.LogError($"'{CloneSource}' has no Sadle component to ride.");
-                return false;
-            }
-
-            saddle.m_hoverText = $"${PrefabName}_ride";
-
-            var drain = BicyclePlugin.StaminaDrain.Value;
-            saddle.m_runStaminaDrain *= drain;
-            saddle.m_swimStaminaDrain *= drain;
-
-            var character = prefab.GetComponent<Character>();
-            if (character != null)
-            {
-                var speed = BicyclePlugin.RideSpeed.Value;
-                character.m_speed *= speed;
-                character.m_runSpeed *= speed;
-                character.m_turnSpeed *= speed;
-                character.m_runTurnSpeed *= speed;
-            }
-
-            return true;
+            BicicretaPlugin.Log.LogInfo($"Bicicreta refunds {drops.m_drops.Count} material type(s) when broken.");
         }
     }
 }

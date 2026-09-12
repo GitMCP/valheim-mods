@@ -4,7 +4,7 @@ using System.Reflection;
 using Jotunn.Utils;
 using UnityEngine;
 
-namespace Bicycle
+namespace Bicicreta
 {
     /// <summary>
     /// Loads the mod's own art. Two sources are supported, because they have very
@@ -17,10 +17,10 @@ namespace Bicycle
     ///
     /// Both are embedded in the plugin dll, so the mod stays a single file to install.
     /// </summary>
-    internal static class BicycleAssets
+    internal static class BicicretaAssets
     {
-        private const string BundleResourceName = "bicycle";
-        private const string IconResourceName = "Bicycle.Assets.bicycle_icon.png";
+        private const string BundleResourceName = "bicicreta";
+        private const string IconResourceName = "Bicicreta.Assets.bicicreta_icon.png";
 
         internal static AssetBundle Bundle { get; private set; }
 
@@ -35,7 +35,7 @@ namespace Bicycle
             if (HasEmbeddedResource(assembly, BundleResourceName))
             {
                 Bundle = AssetUtils.LoadAssetBundleFromResources(BundleResourceName, assembly);
-                BicyclePlugin.Log.LogInfo($"Loaded asset bundle '{BundleResourceName}'.");
+                BicicretaPlugin.Log.LogInfo($"Loaded asset bundle '{BundleResourceName}'.");
             }
 
             Icon = LoadEmbeddedSprite(assembly, IconResourceName);
@@ -60,7 +60,7 @@ namespace Bicycle
             {
                 if (stream == null)
                 {
-                    BicyclePlugin.Log.LogWarning(
+                    BicicretaPlugin.Log.LogWarning(
                         $"Embedded sprite '{resourceName}' missing; the piece will use its clone source's icon.");
                     return null;
                 }
@@ -73,7 +73,7 @@ namespace Bicycle
                     var texture = new Texture2D(2, 2);
                     if (!AssetUtils.LoadImage(texture, buffer.ToArray()))
                     {
-                        BicyclePlugin.Log.LogWarning($"Could not decode '{resourceName}'.");
+                        BicicretaPlugin.Log.LogWarning($"Could not decode '{resourceName}'.");
                         return null;
                     }
 

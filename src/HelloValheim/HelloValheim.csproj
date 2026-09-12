@@ -4,7 +4,7 @@
     <AssemblyName>HelloValheim</AssemblyName>
     <RootNamespace>HelloValheim</RootNamespace>
     <Version>0.1.0</Version>
-    <Authors>your-name</Authors>
+    <Authors>GitMCP</Authors>
     <Description>Minimal Valheim BepInEx plugin scaffold.</Description>
   </PropertyGroup>
 

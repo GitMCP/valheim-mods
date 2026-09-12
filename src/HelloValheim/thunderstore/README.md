@@ -10,7 +10,7 @@ Install with a mod manager, or drop `HelloValheim.dll` into `BepInEx/plugins`.
 
 ## Configuration
 
-`BepInEx/config/com.example.hellovalheim.cfg` is written on first launch.
+`BepInEx/config/com.gitmcp.hellovalheim.cfg` is written on first launch.
 
 | Setting | Default | Description |
 | --- | --- | --- |

@@ -1,7 +1,7 @@
 using Jotunn.Managers;
 using UnityEngine;
 
-namespace Bicycle
+namespace Bicicreta
 {
     /// <summary>
     /// Stands in for a bicycle model until there is a real one.
@@ -11,25 +11,25 @@ namespace Bicycle
     /// wheeled thing the game ships, and it at least reads as a vehicle rather than an
     /// animal. The lox's skeleton and animator are left completely alone, because they
     /// are what <see cref="Character"/> movement drives; only the renderers are switched
-    /// off. Once <see cref="BicycleAssets.Bundle"/> carries a real model this goes away.
+    /// off. Once <see cref="BicicretaAssets.Bundle"/> carries a real model this goes away.
     /// </summary>
-    internal static class BicycleAppearance
+    internal static class BicicretaAppearance
     {
         private const string ModelSource = "Cart";
         private const float ModelScale = 0.55f;
 
         internal static void Apply(GameObject prefab)
         {
-            if (!BicyclePlugin.UseCartModel.Value)
+            if (!BicicretaPlugin.UseCartModel.Value)
             {
-                BicyclePlugin.Log.LogInfo("UseCartModel is off; leaving the clone's own model in place.");
+                BicicretaPlugin.Log.LogInfo("UseCartModel is off; leaving the clone's own model in place.");
                 return;
             }
 
             var donor = PrefabManager.Instance.GetPrefab(ModelSource);
             if (donor == null)
             {
-                BicyclePlugin.Log.LogWarning(
+                BicicretaPlugin.Log.LogWarning(
                     $"No '{ModelSource}' prefab to borrow a model from; the bicycle will look like a lox.");
                 return;
             }
@@ -37,7 +37,7 @@ namespace Bicycle
             var donorVisual = FindVisual(donor);
             if (donorVisual == null)
             {
-                BicyclePlugin.Log.LogWarning(
+                BicicretaPlugin.Log.LogWarning(
                     $"Found no renderers under '{ModelSource}'; the bicycle will look like a lox.");
                 return;
             }
@@ -50,7 +50,7 @@ namespace Bicycle
             }
 
             var visual = Object.Instantiate(donorVisual, prefab.transform);
-            visual.name = "BicycleVisual";
+            visual.name = "BicicretaVisual";
             visual.transform.localPosition = Vector3.zero;
             visual.transform.localRotation = Quaternion.identity;
             visual.transform.localScale = Vector3.one * ModelScale;
@@ -58,7 +58,7 @@ namespace Bicycle
             // The donor's physics would fight the mount's own collider and rigidbody.
             StripPhysics(visual);
 
-            BicyclePlugin.Log.LogInfo(
+            BicicretaPlugin.Log.LogInfo(
                 $"Hid {hidden} renderer(s) and fitted the '{ModelSource}' model.");
         }
 

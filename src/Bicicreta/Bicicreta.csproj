@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <AssemblyName>Bicycle</AssemblyName>
-    <RootNamespace>Bicycle</RootNamespace>
+    <AssemblyName>Bicicreta</AssemblyName>
+    <RootNamespace>Bicicreta</RootNamespace>
     <Version>0.1.0</Version>
-    <Authors>your-name</Authors>
+    <Authors>GitMCP</Authors>
     <Description>Adds a buildable, rideable bicycle to Valheim.</Description>
   </PropertyGroup>
 

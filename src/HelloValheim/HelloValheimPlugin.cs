@@ -13,7 +13,7 @@ namespace HelloValheim
     [BepInProcess("valheim_server.x86_64")]
     public class HelloValheimPlugin : BaseUnityPlugin
     {
-        public const string PluginGuid = "com.example.hellovalheim";
+        public const string PluginGuid = "com.gitmcp.hellovalheim";
         public const string PluginName = "HelloValheim";
         public const string PluginVersion = "0.1.0";
 

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Bicycle
+namespace Bicicreta
 {
     /// <summary>
     /// Keeps the bicycle rideable.

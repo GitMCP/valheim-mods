@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Jotunn.Managers;
 
-namespace Bicycle
+namespace Bicicreta
 {
     /// <summary>
     /// Names and descriptions are registered as tokens rather than literal strings, so
@@ -19,13 +19,13 @@ namespace Bicycle
                 "English",
                 new Dictionary<string, string>
                 {
-                    { $"{BicycleStand.PrefabName}_name", "Bicycle" },
+                    { $"{BicicretaStand.PrefabName}_name", "Bicicreta" },
                     {
-                        $"{BicycleStand.PrefabName}_description",
+                        $"{BicicretaStand.PrefabName}_description",
                         "A two-wheeled contraption. Build it, then ride it."
                     },
-                    { $"{BicycleMount.PrefabName}_name", "Bicycle" },
-                    { $"{BicycleMount.PrefabName}_ride", "Ride" },
+                    { $"{BicicretaMount.PrefabName}_name", "Bicicreta" },
+                    { $"{BicicretaMount.PrefabName}_ride", "Ride" },
                 });
         }
     }
