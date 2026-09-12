@@ -47,8 +47,14 @@
 
     <RemoveDir Directories="$(PackageStageDir)" />
     <MakeDir Directories="$(PackageStageDir)" />
-    <Copy SourceFiles="$(TargetPath);$(ThunderstoreDir)icon.png;$(ThunderstoreDir)README.md"
-          DestinationFolder="$(PackageStageDir)" />
+    <!-- Thunderstore reads a CHANGELOG.md if there is one and ignores its absence, so
+         it is copied only when the mod keeps one. -->
+    <ItemGroup>
+      <PackageFile Include="$(TargetPath);$(ThunderstoreDir)icon.png;$(ThunderstoreDir)README.md" />
+      <PackageFile Include="$(ThunderstoreDir)CHANGELOG.md" Condition="Exists('$(ThunderstoreDir)CHANGELOG.md')" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(PackageFile)" DestinationFolder="$(PackageStageDir)" />
     <WriteLinesToFile File="$(PackageStageDir)manifest.json"
                       Lines="$(StampedManifest)"
                       Overwrite="true" />

@@ -128,7 +128,9 @@ the runtime allows the access.
 | `dotnet build src/HelloValheim -t:Package` | Build `artifacts/HelloValheim-<version>.zip`, ready to upload to Thunderstore |
 
 A mod's version is declared once, in its `.csproj`. `-t:Package` stamps it into the
-Thunderstore manifest on the way into the archive, so the two cannot drift apart.
+Thunderstore manifest on the way into the archive, so the two cannot drift apart. The
+archive gets the plugin, the manifest, and the `icon.png` and `README.md` beside it in
+`thunderstore/`, plus a `CHANGELOG.md` if the mod keeps one.
 
 The archive is only needed to publish, which is optional — a plain `.dll` in
 `BepInEx/plugins` is a complete install. Publishing does require a Thunderstore team,
