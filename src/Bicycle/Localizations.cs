@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using Jotunn.Managers;
 
-namespace ContentTemplate
+namespace Bicycle
 {
     /// <summary>
     /// Names and descriptions are registered as tokens rather than literal strings, so
-    /// the same content can be translated without touching the item definitions. Configs
+    /// the mod can be translated without touching the prefab definitions. Configs
     /// reference a token by prefixing it with '$'.
     /// </summary>
     internal static class Localizations
@@ -19,10 +19,13 @@ namespace ContentTemplate
                 "English",
                 new Dictionary<string, string>
                 {
-                    { $"{ExampleItems.BladePrefab}_name", "Example Blade" },
-                    { $"{ExampleItems.BladePrefab}_description", "A bronze sword, reforged as a worked example." },
-                    { $"{ExamplePieces.LanternPrefab}_name", "Example Lantern" },
-                    { $"{ExamplePieces.LanternPrefab}_description", "A standing lamp that burns with a worked example." },
+                    { $"{BicycleStand.PrefabName}_name", "Bicycle" },
+                    {
+                        $"{BicycleStand.PrefabName}_description",
+                        "A two-wheeled contraption. Build it, then ride it."
+                    },
+                    { $"{BicycleMount.PrefabName}_name", "Bicycle" },
+                    { $"{BicycleMount.PrefabName}_ride", "Ride" },
                 });
         }
     }

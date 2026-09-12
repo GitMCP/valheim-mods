@@ -1,8 +1,8 @@
 {
-  "name": "ContentTemplate",
+  "name": "Bicycle",
   "version_number": "0.1.0",
   "website_url": "",
-  "description": "Starting point for Valheim mods that add items, pieces, and recipes.",
+  "description": "Adds a buildable, rideable bicycle.",
   "dependencies": [
     "denikson-BepInExPack_Valheim-5.4.2350",
     "ValheimModding-Jotunn-2.30.0"

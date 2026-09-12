@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <AssemblyName>ContentTemplate</AssemblyName>
-    <RootNamespace>ContentTemplate</RootNamespace>
+    <AssemblyName>Bicycle</AssemblyName>
+    <RootNamespace>Bicycle</RootNamespace>
     <Version>0.1.0</Version>
     <Authors>your-name</Authors>
-    <Description>Starting point for Valheim mods that add items, pieces, and recipes.</Description>
+    <Description>Adds a buildable, rideable bicycle to Valheim.</Description>
   </PropertyGroup>
 
   <ItemGroup>

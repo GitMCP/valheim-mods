@@ -4,12 +4,29 @@ Valheim mods built on [BepInEx](https://docs.bepinex.dev/) 5 and
 [HarmonyX](https://github.com/BepInEx/HarmonyX), with a build that works on Linux,
 macOS, and Windows and needs no Visual Studio and no local copy of the game.
 
-Two templates, both verified to load into a running game:
-
-| Project | Use it for |
+| Project | What it is |
 | --- | --- |
-| `src/HelloValheim` | Changing how existing things behave. Plain Harmony patching, no other dependency. |
-| `src/ContentTemplate` | Adding items, building pieces, and recipes. Uses [Jötunn](https://valheim-modding.github.io/Jotunn/) and must be installed on the server and every client. |
+| `src/Bicycle` | Adds a buildable, rideable bicycle. |
+| `src/HelloValheim` | A minimal plugin kept as the template for mods that only patch existing behavior. |
+
+Both are verified to load into a running game.
+
+## How the bicycle works
+
+Valheim has no land vehicle to build on. The only vehicle in the game is the ship, and
+riding is implemented entirely for tamed creatures by `Sadle`, which steers a `Character`
+through its `MonsterAI`. So the bicycle is a creature that happens to be a bicycle:
+cloned from the lox, born tamed and permanently saddled, with its wandering, aggression,
+appetite, and meat drops taken away. Mounting, steering, stamina, dismounting, and the
+handover of control between players in multiplayer then all come from the game rather
+than from this mod.
+
+A hammer piece, cloned from the cart, is how a player gets one: it gives the build
+preview and resource cost for free, then replaces itself with the mount.
+
+It has no bicycle model yet. That needs a Unity AssetBundle, so for now the lox's
+renderers are switched off and the cart's wheels are shown in their place, leaving the
+skeleton and animator untouched because those are what drives movement.
 
 ## Requirements
 
@@ -91,18 +108,20 @@ Watch for each mod's own lines:
 
 ```
 [Info   :HelloValheim] HelloValheim 0.1.0 loaded, 1 method(s) patched.
-[Info   :ContentTemplate] ContentTemplate 0.1.0 registered its content.
-[Info   :Jotunn.Managers.ItemManager] Adding 1 custom items to the ObjectDB
-[Info   :Jotunn.Managers.ItemManager] Adding 1 custom recipes to the ObjectDB
+[Info   :Bicycle] Hid 3 renderer(s) and fitted the 'Cart' model.
+[Info   :Bicycle] Bicycle 0.1.0 registered its content.
+[Info   :Bicycle] Bicycle refunds 3 material type(s) when broken.
+[Info   :Jotunn.Managers.CreatureManager] Adding 1 custom creatures
 [Info   :Jotunn.Managers.PieceManager] Adding 1 custom pieces to the PieceTables
 ```
 
 A patch that no longer matches its target contributes nothing and logs no error, which
 is why `HelloValheim` reports its patch count instead of just "loaded". Jötunn's counts
-serve the same purpose for content.
+serve the same purpose for content, and the bicycle reports what it managed to borrow
+from vanilla prefabs for the same reason.
 
-This only exercises code that runs headlessly. Anything touching the local player,
-input, or UI still has to be tested in the real client.
+This only exercises code that runs headlessly. Riding, and anything else touching the
+local player, input, or UI, has to be tested in the real client.
 
 ### In the real client
 
@@ -127,16 +146,16 @@ Content mods need art, and the two kinds cost very differently:
 
 - **Icons, textures, and other images** load from a PNG at runtime. Drop the file in the
   mod's `Assets/` folder, where it is embedded into the dll automatically, and load it
-  with `AssetUtils.LoadImage`. Nothing else to install. `ContentTemplate` does this for
-  its item icon.
+  with `AssetUtils.LoadImage`. Nothing else to install. `src/Bicycle` does this for its
+  build-menu icon.
 - **Meshes, materials, prefabs, and shaders** have to be built into a Unity AssetBundle,
   which means installing a Unity editor matching the game's engine, currently
-  **Unity 6000.0.75f1**. Build the bundle, put it in `Assets/`, and `ExampleAssets` picks
-  it up; until then the templates clone vanilla prefabs instead.
+  **Unity 6000.0.75f1**. Build the bundle, put it in `Assets/`, and `BicycleAssets` picks
+  it up; until then the mod borrows vanilla models.
 
-Cloning is worth taking seriously as a first step: a weapon cloned from `SwordBronze`
-inherits its mesh, animations, and attack data, so a new item with its own name, icon,
-recipe, and stats needs no Unity at all.
+Cloning is worth taking seriously rather than treating as a stopgap: a weapon cloned from
+`SwordBronze` inherits its mesh, animations, and attack data, so a new item with its own
+name, icon, recipe, and stats needs no Unity at all.
 
 ## Adding a mod
 
