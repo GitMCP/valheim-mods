@@ -7,9 +7,9 @@ is `cursor/valheim-mod-scaffold-020c`, where `artifacts/` stays git-ignored.
 | File | Use |
 | --- | --- |
 | `Bicicreta.dll` | Manual install: drop it in `BepInEx/plugins`. |
-| `Bicicreta-0.5.0.zip` | Thunderstore layout, for importing into a mod manager. |
+| `Bicicreta-0.6.0.zip` | Thunderstore layout, for importing into a mod manager. |
 
-Built in Release configuration from commit `be97634` of
+Built in Release configuration from commit `14cceee` of
 `cursor/valheim-mod-scaffold-020c`. These exact bytes were then loaded into the Valheim
 dedicated server under BepInEx, which registered the creature and the hammer piece and
 applied all six patches with no exceptions.
@@ -18,12 +18,31 @@ The commit is recorded inside the assembly too: the .NET SDK embeds the source r
 in `AssemblyInformationalVersion`, so a build can always be traced back to its source,
 and rebuilding at a different commit changes the file even when no code changed.
 
-## What changed in 0.5.0
+## What changed in 0.6.0
 
-The rider sits in the seat. The seat was `piece_chair`, which despite the name is the
+The rider sits on the seat rather than above it, and has something to hold.
+
+The frame was as wide as the cart it is borrowed from, which is far wider than anything
+a rider sits astride, so it has been taken in across without changing its length. The
+seat and the wheels keep the widths they had, so the seat now overhangs the frame the way
+a saddle does.
+
+The rider was left hanging 0.14 m above the chair. The riding pose turns out to carry
+their weight a shade *above* their root rather than below it, which 0.5.0 had the wrong
+way round, so the attach point now sits just under the seat pan.
+
+The handlebar is three boxes of wood: a post standing on the front of the frame, a short
+neck reaching back from the top of it, and the bar itself across the rider's hands. A
+plain T would not do, because the rider's hands come to rest above their knees, well
+behind the front of the frame, so a post directly under the bar would have to rise out of
+the middle of the frame.
+
+## What changed before that
+
+0.5.0 sat the rider in the seat. The seat was `piece_chair`, which despite the name is the
 stool, and it was built at the attach point, which is not where the rider appears to be:
 the game puts their root exactly on it, and a character's root is at their feet, so the
-riding pose carries their weight back and down and the stool ended up in front of them
+riding pose carries their weight backwards and the stool ended up in front of them
 like a set of handlebars. It is now the actual chair, `piece_chair02`, taken in and
 placed by its own seat pan so the pan lands under the rider.
 
@@ -65,8 +84,8 @@ not doing it for you.
 ## Checking what you downloaded
 
 ```
-SHA-256  Bicicreta.dll         d6f3a720a57985d7c067a8ae7c9694e0fba0676e97b80bb83b112736363df4a8
-SHA-256  Bicicreta-0.5.0.zip   8c7e71305ea35622f8582ef338b4c0d8daa55c37a94d8d2336dcca5a4601c172
+SHA-256  Bicicreta.dll         694155e25b39e1917f05c2602b04e143971dc55b700f3e9c553e304d310daa21
+SHA-256  Bicicreta-0.6.0.zip   6d62d1055f20916eaadfdb469ab2cbdcb3690333a84de6a96a4e0b2907e97e42
 ```
 
 See the repo README for how to build one of these yourself, and for the in-game steps to
