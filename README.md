@@ -41,9 +41,10 @@ Three things about a lox do have to be argued with, because a bicycle is not an 
   `AudioSource` and keeping the silent ones.
 
 It has no bicycle model yet. That needs a Unity AssetBundle, so for now the lox's
-renderers are switched off and a bicycle is assembled from two of the cart's wheels with
-the cart's body shrunk between them. The skeleton and animator are left untouched,
-because those are what drives movement.
+renderers are switched off and a bicycle is assembled out of meshes the game already
+ships: two of the cart's wheels, the cart's body shrunk between them for a frame, and a
+wooden chair for the seat. The skeleton and animator are left untouched, because those
+are what drives movement.
 
 ## Requirements
 
@@ -207,9 +208,9 @@ skip `debugmode` and buy it for real — `spawn Wood 20`, `spawn Bronze 8`,
 **5. Ride it.** Walk up and press the use key. The hover text reads *Ride*, and from
 there steering, stamina, and dismounting are the game's own saddled-lox controls.
 
-Two things will look wrong and are known: it wears the cart's wheels because there is no
-bicycle mesh yet, and being a lox underneath, it still moves with lox animation and
-sound.
+One thing will look wrong and is known: the bicycle is a kit of borrowed vanilla meshes
+rather than a real bicycle mesh, and being a lox underneath, it still moves with lox
+walking animation.
 
 ## After a Valheim update
 

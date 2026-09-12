@@ -35,11 +35,12 @@ are authoritative and are synced to clients.
 | --- | --- | --- |
 | `Bicicreta / RideSpeed` | `1.6` | Speed multiplier relative to a saddled lox. |
 | `Bicicreta / StaminaDrain` | `0.5` | Stamina cost multiplier relative to a saddled lox. |
-| `Bicicreta / UseCartModel` | `true` | Show the cart's wheels instead of the lox. |
+| `Bicicreta / UseStandInModel` | `true` | Show the borrowed bicycle instead of the lox. |
 
 ## Known limitation
 
 It does not yet have a bicycle model. A real one needs a Unity AssetBundle, so for now
-the lox is hidden and a bicycle is assembled from two of the cart's wheels with the
-cart's body shrunk between them for a frame. It also still moves with the lox's walking
-animation, which is what carries it along.
+the lox is hidden and a bicycle is assembled out of parts the game already ships: two of
+the cart's wheels, the cart's body shrunk down for a frame, and a wooden chair for the
+seat. It also still moves with the lox's walking animation, which is what carries it
+along.

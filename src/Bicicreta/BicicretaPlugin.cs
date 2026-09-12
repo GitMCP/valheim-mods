@@ -38,7 +38,7 @@ namespace Bicicreta
 
         internal static ConfigEntry<float> RideSpeed;
         internal static ConfigEntry<float> StaminaDrain;
-        internal static ConfigEntry<bool> UseCartModel;
+        internal static ConfigEntry<bool> UseStandInModel;
 
         private Harmony _harmony;
 
@@ -80,13 +80,14 @@ namespace Bicicreta
                     new AcceptableValueRange<float>(0f, 2f),
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
 
-            UseCartModel = Config.Bind(
+            UseStandInModel = Config.Bind(
                 "Bicicreta",
-                "UseCartModel",
+                "UseStandInModel",
                 true,
                 new ConfigDescription(
-                    "Hide the lox and show the cart's wheels in its place. Turn this off to " +
-                    "see the unmodified clone, which is useful when diagnosing the model.",
+                    "Hide the lox and build a bicycle out of borrowed vanilla parts. Turn " +
+                    "this off to see the unmodified clone, which is useful when diagnosing " +
+                    "the model.",
                     null,
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
         }
