@@ -24,7 +24,7 @@ than from this mod.
 A hammer piece, cloned from the cart, is how a player gets one: it gives the build
 preview and resource cost for free, then replaces itself with the mount.
 
-Three things about a lox do have to be argued with, because a bicycle is not an animal:
+Four things about a lox do have to be argued with, because a bicycle is not an animal:
 
 - **Riding is not where you would look for it.** `Tameable.Interact` pets, orders, and
   renames, and has no riding branch at all. Riding is a second interactable, `Sadle`,
@@ -39,6 +39,12 @@ Three things about a lox do have to be argued with, because a bicycle is not an 
 - **A lox is loud.** Its noises are separate effect prefabs spawned from `EffectList`
   fields, not components, so they are dropped by discarding every effect that carries an
   `AudioSource` and keeping the silent ones.
+- **A lox breaks things.** It carries a `RunHitDamager`, an `Aoe` that hits whatever it
+  runs into, and its `lox_stomp` does 100 chop and 100 pickaxe damage — enough to fell
+  trees, break ore and flatten a building. The weapons go, since a bicycle has no reason
+  to bite or stomp. Running into things stays, because that is a bicycle behaviour, but
+  the damager is told not to hit props or terrain and its 4 m reach is cut to the length
+  of the bicycle.
 
 It has no bicycle model yet. That needs a Unity AssetBundle, so for now the lox's
 renderers are switched off and a bicycle is assembled out of meshes the game already

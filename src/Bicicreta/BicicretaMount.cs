@@ -30,6 +30,7 @@ namespace Bicicreta
                 return false;
             }
 
+            BicicretaHarmless.Apply(prefab);
             BicicretaBody.Apply(prefab);
             BicicretaAppearance.Apply(prefab);
             BicicretaSilence.Apply(prefab);
