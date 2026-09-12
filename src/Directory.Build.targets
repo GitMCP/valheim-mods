@@ -1,0 +1,17 @@
+<Project>
+
+  <!--
+    Referencing netstandard2.0 packages (BepInEx, HarmonyX) makes the SDK copy ~95
+    netstandard facade shims next to the built plugin. Valheim's Mono runtime already
+    ships those, and BepInEx tries to load everything in the plugins folder, so anyone
+    who copies the whole output directory into plugins gets a broken install. Keep the
+    facades as compile-time references and drop them from the output.
+  -->
+  <Target Name="ExcludeNETStandardFacadesFromOutput"
+          AfterTargets="ImplicitlyExpandNETStandardFacades">
+    <ItemGroup>
+      <ReferenceCopyLocalPaths Remove="@(_NETStandardLibraryNETFrameworkLib)" />
+    </ItemGroup>
+  </Target>
+
+</Project>
