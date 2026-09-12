@@ -9,7 +9,7 @@ is `cursor/valheim-mod-scaffold-020c`, where `artifacts/` stays git-ignored.
 | `Bicicreta.dll` | Manual install: drop it in `BepInEx/plugins`. |
 | `Bicicreta-0.7.0.zip` | Thunderstore layout, for importing into a mod manager. |
 
-Built in Release configuration from commit `5ccf629` of
+Built in Release configuration from commit `2ea9200` of
 `cursor/valheim-mod-scaffold-020c`. These exact bytes were then loaded into the Valheim
 dedicated server under BepInEx, which registered the creature and the hammer piece,
 assembled all seven parts of the bicycle, and applied all six patches with no exceptions.
@@ -27,6 +27,11 @@ Nothing extra is sent over the network for this. The game already publishes a cr
 velocity to everyone through its ZDO, so every client works the rotation out for itself
 from something it can already see. The bicycle still walks along with a lox's animation
 underneath, which no amount of wheel spinning will fix.
+
+The zip now also carries a `CHANGELOG.md`, which Thunderstore shows on a package's page.
+The plugin is unchanged by that, but its bytes are not: the commit is embedded in the
+assembly, so the hashes below have moved on from the first 0.7.0 build. Either build
+plays the same.
 
 ## What changed before that
 
@@ -92,8 +97,8 @@ not doing it for you.
 ## Checking what you downloaded
 
 ```
-SHA-256  Bicicreta.dll         0e328a10c13b8dbcbcaf7a8506c4fe2e32f333f8d79ad235121bf13e061137b2
-SHA-256  Bicicreta-0.7.0.zip   544c0968634b8a54e8c0cd7b410118fa568c79162eb2374db1327b645b4c1396
+SHA-256  Bicicreta.dll         df10f37d95fdf5dbc1e63a52832ac5098ce6e2a8942ad9db1d09c76f1cfe9597
+SHA-256  Bicicreta-0.7.0.zip   928060840578fc172457fa437847e76c299cc3bd07df643c7859a3795fa8f8c1
 ```
 
 See the repo README for how to build one of these yourself, and for the in-game steps to
