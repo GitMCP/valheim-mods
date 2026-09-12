@@ -38,6 +38,18 @@ namespace Bicicreta
         /// <summary>The cart body mesh is this long, nose to tail.</summary>
         private const float DonorFrameLength = 3.27f;
 
+        /// <summary>And this wide.</summary>
+        private const float DonorFrameWidth = 1.546f;
+
+        /// <summary>
+        /// Every wooden building piece is the same unit cube under a different scale, so
+        /// the pole and the beam a handlebar would be built from in game are the same
+        /// mesh, and any box of wood can be had by asking for one of them at a size.
+        /// </summary>
+        private const string WoodSource = "wood_pole";
+
+        private const string WoodPath = "New";
+
         /// <summary>
         /// The chair's own seat pan, in its mesh's coordinates. Found by counting the
         /// mesh's vertices in horizontal slices: they cluster into a base, a flat
@@ -84,9 +96,13 @@ namespace Bicicreta
             parts += Fit(CartSource, WheelPath, visual.transform, "RearWheel",
                 new Vector3(0f, BicicretaGeometry.WheelRadius, BicicretaGeometry.RearWheel),
                 wheelScale);
+            var frameLengthways = BicicretaGeometry.FrameLength / DonorFrameLength;
             parts += Fit(CartSource, FramePath, visual.transform, "Frame",
                 new Vector3(0f, BicicretaGeometry.FrameHeight, BicicretaGeometry.FrameMiddle),
-                Vector3.one * (BicicretaGeometry.FrameLength / DonorFrameLength));
+                new Vector3(
+                    BicicretaGeometry.FrameWidth / DonorFrameWidth,
+                    frameLengthways,
+                    frameLengthways));
 
             // Placed by its own seat pan rather than by the middle of its mesh, so that
             // the pan is what lands under the rider.
@@ -94,8 +110,56 @@ namespace Bicicreta
                 new Vector3(0f, BicicretaGeometry.SeatPanHeight, BicicretaGeometry.SeatPanOffset),
                 ChairScale, ChairPan);
 
+            parts += Handlebar(visual.transform);
+
             BicicretaPlugin.Log.LogInfo(
                 $"Hid {hidden} lox renderer(s) and built a bicycle from {parts} borrowed part(s).");
+        }
+
+        /// <summary>
+        /// Builds the handlebar: a post standing on the front of the frame, a short neck
+        /// reaching back from the top of it, and the bar itself across the rider's hands.
+        ///
+        /// A bare T would not do. The rider's hands come to rest above their knees, well
+        /// behind the front of the frame, so a post under the bar would either rise out
+        /// of the middle of the frame or leave the bar out of reach; the neck lets the
+        /// post stand where the user asked for it and the bar sit where it is held.
+        ///
+        /// The neck is thinner than the two it joins so that it ends inside them. Boxes
+        /// that share a face fight over which of them is drawn there.
+        /// </summary>
+        private static int Handlebar(Transform parent)
+        {
+            var thick = BicicretaGeometry.BarThickness;
+            var neck = thick * 0.7f;
+
+            // Down to the middle of the frame rather than the top of it, so that the
+            // post is planted in the body instead of balanced on it.
+            var stem = BicicretaGeometry.HandlebarHeight - BicicretaGeometry.FrameHeight;
+
+            var parts = Fit(WoodSource, WoodPath, parent, "HandlebarStem",
+                new Vector3(
+                    0f,
+                    BicicretaGeometry.HandlebarHeight - stem / 2f,
+                    BicicretaGeometry.StemOffset),
+                new Vector3(thick, stem, thick));
+
+            parts += Fit(WoodSource, WoodPath, parent, "HandlebarNeck",
+                new Vector3(
+                    0f,
+                    BicicretaGeometry.HandlebarHeight,
+                    (BicicretaGeometry.StemOffset + BicicretaGeometry.HandlebarOffset) / 2f),
+                new Vector3(
+                    neck,
+                    neck,
+                    BicicretaGeometry.StemOffset - BicicretaGeometry.HandlebarOffset));
+
+            parts += Fit(WoodSource, WoodPath, parent, "HandlebarBar",
+                new Vector3(
+                    0f, BicicretaGeometry.HandlebarHeight, BicicretaGeometry.HandlebarOffset),
+                new Vector3(BicicretaGeometry.HandlebarWidth, thick, thick));
+
+            return parts;
         }
 
         /// <summary>
@@ -137,6 +201,14 @@ namespace Bicicreta
             foreach (var lod in part.GetComponentsInChildren<LODGroup>(includeInactive: true))
             {
                 Object.DestroyImmediate(lod);
+            }
+
+            // These parts are scenery. Anything the bicycle is meant to collide with is
+            // the one capsule BicicretaBody leaves it, so a donor that brings a collider
+            // of its own along would only be in the way.
+            foreach (var collider in part.GetComponentsInChildren<Collider>(includeInactive: true))
+            {
+                Object.DestroyImmediate(collider);
             }
 
             foreach (var renderer in part.GetComponentsInChildren<Renderer>(includeInactive: true))

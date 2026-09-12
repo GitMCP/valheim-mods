@@ -45,7 +45,7 @@ are authoritative and are synced to clients.
 
 It does not yet have a bicycle model. A real one needs a Unity AssetBundle, so for now
 the lox is hidden and a bicycle is assembled out of parts the game already ships: two of
-the cart's wheels, the cart's body shrunk down for a frame, and a wooden chair for the
-seat. That makes for a long bicycle, because the wheels have to stand clear of both the
-frame and the chair. It also still moves with the lox's walking animation, which is what
-carries it along.
+the cart's wheels, the cart's body narrowed down for a frame, a wooden chair for the seat,
+and three boxes of wood for a handlebar. That makes for a long bicycle, because the wheels
+have to stand clear of both the frame and the chair. It also still moves with the lox's
+walking animation, which is what carries it along.

@@ -48,16 +48,25 @@ Four things about a lox do have to be argued with, because a bicycle is not an a
 
 It has no bicycle model yet. That needs a Unity AssetBundle, so for now the lox's
 renderers are switched off and a bicycle is assembled out of meshes the game already
-ships: two of the cart's wheels, the cart's body shrunk between them for a frame, and a
-wooden chair for the seat. The skeleton and animator are left untouched, because those
-are what drives movement.
+ships: two of the cart's wheels, the cart's body narrowed and shrunk between them for a
+frame, a wooden chair for the seat, and three boxes of wood for a handlebar. The skeleton
+and animator are left untouched, because those are what drives movement.
 
-Fitting the seat needs one measurement that is not in the game's data. `Player.AttachStart`
+Fitting the rider needs measurements that are not in the game's data. `Player.AttachStart`
 puts the rider's root exactly on the attach point, and a character's root is at their
-feet, so the riding pose leaves their weight well behind and a little below it: build the
-seat at the attach point and the rider sits in front of it. `BicicretaGeometry` records
-that offset, measured off a screenshot against the bicycle's own known dimensions, and
-derives the attach point from where the seat is rather than the other way round.
+feet, so the riding pose leaves their weight well behind it: build the seat at the attach
+point and the rider sits in front of it. The same goes for the hands, which the handlebar
+has to reach to look held. `BicicretaGeometry` records both offsets, measured off
+screenshots against the bicycle's own known dimensions, and derives the attach point from
+where the seat is rather than the other way round.
+
+The handlebar is not the plain T it looks like it should be. The rider's hands come to
+rest above their knees, well behind the front of the frame, so a post directly under the
+bar would have to rise out of the middle of the frame; instead the post stands on the
+front of the frame's body and a short neck carries the bar back to the hands. Every
+wooden building piece in the game turns out to be the same unit cube under a different
+scale, which is why a pole and a beam are the same mesh here and any box of wood can be
+had by asking for one of them at a size.
 
 ## Requirements
 
