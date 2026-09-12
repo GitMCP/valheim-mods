@@ -7,20 +7,30 @@ is `cursor/valheim-mod-scaffold-020c`, where `artifacts/` stays git-ignored.
 | File | Use |
 | --- | --- |
 | `Bicicreta.dll` | Manual install: drop it in `BepInEx/plugins`. |
-| `Bicicreta-0.6.0.zip` | Thunderstore layout, for importing into a mod manager. |
+| `Bicicreta-0.7.0.zip` | Thunderstore layout, for importing into a mod manager. |
 
-Built in Release configuration from commit `525095b` of
+Built in Release configuration from commit `5ccf629` of
 `cursor/valheim-mod-scaffold-020c`. These exact bytes were then loaded into the Valheim
-dedicated server under BepInEx, which registered the creature and the hammer piece and
-applied all six patches with no exceptions.
+dedicated server under BepInEx, which registered the creature and the hammer piece,
+assembled all seven parts of the bicycle, and applied all six patches with no exceptions.
 
 The commit is recorded inside the assembly too: the .NET SDK embeds the source revision
 in `AssemblyInformationalVersion`, so a build can always be traced back to its source,
 and rebuilding at a different commit changes the file even when no code changed.
 
-## What changed in 0.6.0
+## What changed in 0.7.0
 
-The rider sits on the seat rather than above it, and has something to hold.
+The wheels roll as you ride, at the speed the bicycle is actually travelling, and they
+roll backwards when it goes backwards.
+
+Nothing extra is sent over the network for this. The game already publishes a creature's
+velocity to everyone through its ZDO, so every client works the rotation out for itself
+from something it can already see. The bicycle still walks along with a lox's animation
+underneath, which no amount of wheel spinning will fix.
+
+## What changed before that
+
+0.6.0 sat the rider on the seat rather than above it, and gave them something to hold.
 
 The frame was as wide as the cart it is borrowed from, which is far wider than anything
 a rider sits astride, so it has been taken in across without changing its length. The
@@ -36,8 +46,6 @@ neck reaching back from the top of it, and the bar itself across the rider's han
 plain T would not do, because the rider's hands come to rest above their knees, well
 behind the front of the frame, so a post directly under the bar would have to rise out of
 the middle of the frame.
-
-## What changed before that
 
 0.5.0 sat the rider in the seat. The seat was `piece_chair`, which despite the name is the
 stool, and it was built at the attach point, which is not where the rider appears to be:
@@ -84,8 +92,8 @@ not doing it for you.
 ## Checking what you downloaded
 
 ```
-SHA-256  Bicicreta.dll         b95ce01ff996ee0dd1f9eddd690e320c7fe8656cf917362fd88b33c261149fe7
-SHA-256  Bicicreta-0.6.0.zip   08ade49314aaa43180d3c86defb396614b158f4854fe518a18d1d6ef14a4c2a3
+SHA-256  Bicicreta.dll         0e328a10c13b8dbcbcaf7a8506c4fe2e32f333f8d79ad235121bf13e061137b2
+SHA-256  Bicicreta-0.7.0.zip   544c0968634b8a54e8c0cd7b410118fa568c79162eb2374db1327b645b4c1396
 ```
 
 See the repo README for how to build one of these yourself, and for the in-game steps to
