@@ -46,7 +46,7 @@ namespace Bicicreta
             var eyes = prefab.transform.Find("EyePos");
             if (eyes != null)
             {
-                eyes.localPosition = new Vector3(0f, BicicretaGeometry.SeatHeight, 0f);
+                eyes.localPosition = new Vector3(0f, BicicretaGeometry.SeatPanHeight, 0f);
             }
         }
 
@@ -67,7 +67,10 @@ namespace Bicicreta
                 return;
             }
 
-            var seat = new Vector3(0f, BicicretaGeometry.SeatHeight, BicicretaGeometry.SeatOffset);
+            // This is where the rider's root goes, not where they appear to sit: the
+            // pose carries them back and down from it onto the seat.
+            var seat = new Vector3(
+                0f, BicicretaGeometry.AttachHeight, BicicretaGeometry.AttachOffset);
 
             saddle.m_attachPoint.SetParent(prefab.transform, worldPositionStays: false);
             saddle.m_attachPoint.localPosition = seat;

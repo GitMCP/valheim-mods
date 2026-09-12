@@ -52,6 +52,13 @@ ships: two of the cart's wheels, the cart's body shrunk between them for a frame
 wooden chair for the seat. The skeleton and animator are left untouched, because those
 are what drives movement.
 
+Fitting the seat needs one measurement that is not in the game's data. `Player.AttachStart`
+puts the rider's root exactly on the attach point, and a character's root is at their
+feet, so the riding pose leaves their weight well behind and a little below it: build the
+seat at the attach point and the rider sits in front of it. `BicicretaGeometry` records
+that offset, measured off a screenshot against the bicycle's own known dimensions, and
+derives the attach point from where the seat is rather than the other way round.
+
 ## Requirements
 
 - .NET SDK 8 or newer (the mods themselves target .NET Framework 4.6.2, which the
