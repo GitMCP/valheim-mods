@@ -4,7 +4,12 @@ Valheim mods built on [BepInEx](https://docs.bepinex.dev/) 5 and
 [HarmonyX](https://github.com/BepInEx/HarmonyX), with a build that works on Linux,
 macOS, and Windows and needs no Visual Studio and no local copy of the game.
 
-`src/HelloValheim` is a minimal working plugin kept as the template for new mods.
+Two templates, both verified to load into a running game:
+
+| Project | Use it for |
+| --- | --- |
+| `src/HelloValheim` | Changing how existing things behave. Plain Harmony patching, no other dependency. |
+| `src/ContentTemplate` | Adding items, building pieces, and recipes. Uses [Jötunn](https://valheim-modding.github.io/Jotunn/) and must be installed on the server and every client. |
 
 ## Requirements
 
@@ -77,18 +82,24 @@ public Void OnSpawned(Boolean spawnValkyrie);
 tools/run-test-server.sh
 ```
 
-This installs BepInEx into the dedicated server, deploys every mod, and starts the
-server. It catches the two failures a successful build cannot: BepInEx refusing to load
-the plugin, and a Harmony patch whose target signature no longer matches the shipped
-game build. Watch for the plugin's own line:
+This installs BepInEx into the dedicated server, installs each mod's Thunderstore
+dependencies (read from its manifest, so Jötunn and friends come along), deploys every
+mod, and starts the server. It catches the failures a successful build cannot: BepInEx
+refusing to load the plugin, a Harmony patch whose target signature no longer matches
+the shipped game build, and a clone source or recipe ingredient that no longer exists.
+Watch for each mod's own lines:
 
 ```
-[Info   :   BepInEx] Loading [HelloValheim 0.1.0]
 [Info   :HelloValheim] HelloValheim 0.1.0 loaded, 1 method(s) patched.
+[Info   :ContentTemplate] ContentTemplate 0.1.0 registered its content.
+[Info   :Jotunn.Managers.ItemManager] Adding 1 custom items to the ObjectDB
+[Info   :Jotunn.Managers.ItemManager] Adding 1 custom recipes to the ObjectDB
+[Info   :Jotunn.Managers.PieceManager] Adding 1 custom pieces to the PieceTables
 ```
 
 A patch that no longer matches its target contributes nothing and logs no error, which
-is why the plugin reports its patch count instead of just "loaded".
+is why `HelloValheim` reports its patch count instead of just "loaded". Jötunn's counts
+serve the same purpose for content.
 
 This only exercises code that runs headlessly. Anything touching the local player,
 input, or UI still has to be tested in the real client.
@@ -110,16 +121,27 @@ Re-run `tools/fetch-game-libs.sh` to refresh `lib/valheim`, rebuild, and fix wha
 longer compiles. `lib/valheim/SOURCE.txt` records which game build the current
 references came from.
 
+## Adding custom art
+
+Content mods need art, and the two kinds cost very differently:
+
+- **Icons, textures, and other images** load from a PNG at runtime. Drop the file in the
+  mod's `Assets/` folder, where it is embedded into the dll automatically, and load it
+  with `AssetUtils.LoadImage`. Nothing else to install. `ContentTemplate` does this for
+  its item icon.
+- **Meshes, materials, prefabs, and shaders** have to be built into a Unity AssetBundle,
+  which means installing a Unity editor matching the game's engine, currently
+  **Unity 6000.0.75f1**. Build the bundle, put it in `Assets/`, and `ExampleAssets` picks
+  it up; until then the templates clone vanilla prefabs instead.
+
+Cloning is worth taking seriously as a first step: a weapon cloned from `SwordBronze`
+inherits its mesh, animations, and attack data, so a new item with its own name, icon,
+recipe, and stats needs no Unity at all.
+
 ## Adding a mod
 
-Copy `src/HelloValheim`, then in the new `.csproj` set `AssemblyName`, `RootNamespace`,
-and `Version`; update the plugin GUID, name, and version constants in the plugin class;
-update `thunderstore/manifest.json`; and run `dotnet sln add`.
-
-### Jötunn
-
-Mods that add custom items, pieces, prefabs, or localisation usually want
-[Jötunn](https://valheim-modding.github.io/Jotunn/), which wraps the registration
-boilerplate. Add it with `dotnet add package JotunnLib`, and add
-`ValheimModding-Jotunn-2.30.0` to the mod's Thunderstore dependencies. It is not used by
-`HelloValheim`, which only needs plain Harmony patching.
+Copy the closer of the two templates, then in the new `.csproj` set `AssemblyName`,
+`RootNamespace`, and `Version`; update the plugin GUID, name, and version constants in
+the plugin class; update `thunderstore/manifest.json`; and run `dotnet sln add`. Shared
+build logic lives in `src/Directory.Build.props` and `src/Directory.Build.targets`, so a
+mod's own project file stays a few lines long.

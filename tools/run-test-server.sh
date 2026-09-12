@@ -53,6 +53,57 @@ if [[ ${#projects[@]} -eq 0 ]]; then
   exit 1
 fi
 
+# A mod that depends on a library mod (Jotunn and the like) will not load without it.
+# Those are already declared in each mod's Thunderstore manifest, so install from there
+# rather than keeping a second list in sync.
+install_dependency() {
+  local full_name="$1"
+  local namespace="${full_name%%-*}"
+  local rest="${full_name#*-}"
+  local version="${rest##*-}"
+  local name="${rest%-*}"
+
+  if [[ "$namespace" == "denikson" ]]; then
+    return 0 # BepInEx itself, installed above.
+  fi
+
+  local archive="$cache_dir/${namespace}-${name}-${version}.zip"
+  [[ -f "$archive" ]] || {
+    log "Fetching dependency $full_name"
+    curl -sSL -o "$archive" "https://thunderstore.io/package/download/${namespace}/${name}/${version}/"
+  }
+
+  local staging
+  staging="$(mktemp -d)"
+  unzip -oq "$archive" -d "$staging"
+
+  # Thunderstore packages either mirror the game folder or ship a plugins/ directory.
+  if [[ -d "$staging/BepInEx" ]]; then
+    cp -r "$staging/BepInEx" "$server_dir/"
+  elif [[ -d "$staging/plugins" ]]; then
+    mkdir -p "$server_dir/BepInEx/plugins/$name"
+    cp -r "$staging/plugins/." "$server_dir/BepInEx/plugins/$name/"
+  else
+    mkdir -p "$server_dir/BepInEx/plugins/$name"
+    find "$staging" -maxdepth 1 -name '*.dll' -exec cp {} "$server_dir/BepInEx/plugins/$name/" \;
+  fi
+
+  rm -rf "$staging"
+}
+
+mkdir -p "$cache_dir"
+for proj in "${projects[@]}"; do
+  manifest="$(dirname "$proj")/thunderstore/manifest.json"
+  [[ -f "$manifest" ]] || continue
+  while IFS= read -r dep; do
+    [[ -n "$dep" ]] && install_dependency "$dep"
+  done < <(python3 -c "
+import json, sys
+with open(sys.argv[1]) as f:
+    print('\n'.join(json.load(f).get('dependencies', [])))
+" "$manifest")
+done
+
 # Deploying through each project's own Deploy target copies exactly the plugin
 # assembly, rather than whatever else happens to be in the output directory.
 plugin_dir="$server_dir/BepInEx/plugins"
