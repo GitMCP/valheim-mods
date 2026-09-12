@@ -29,7 +29,10 @@ namespace Bicicreta
     {
         public const string PluginGuid = "com.gitmcp.bicicreta";
         public const string PluginName = "Bicicreta";
-        public const string PluginVersion = "0.1.0";
+
+        // Generated from the project file's Version, so the plugin, the assembly, and
+        // the Thunderstore manifest cannot disagree about which build this is.
+        public const string PluginVersion = MyPluginInfo.PLUGIN_VERSION;
 
         internal static ManualLogSource Log;
 
