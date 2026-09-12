@@ -11,6 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{FBBD03C1
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiExplorer", "tools\ApiExplorer\ApiExplorer.csproj", "{DE2E2F72-30FC-4B1D-94E0-2204F1811301}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContentTemplate", "src\ContentTemplate\ContentTemplate.csproj", "{68CBED4D-9472-4477-A8E3-1D459CB9C61D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,9 +30,14 @@ Global
 		{DE2E2F72-30FC-4B1D-94E0-2204F1811301}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DE2E2F72-30FC-4B1D-94E0-2204F1811301}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE2E2F72-30FC-4B1D-94E0-2204F1811301}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68CBED4D-9472-4477-A8E3-1D459CB9C61D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68CBED4D-9472-4477-A8E3-1D459CB9C61D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68CBED4D-9472-4477-A8E3-1D459CB9C61D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68CBED4D-9472-4477-A8E3-1D459CB9C61D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{E8D90E81-4FE4-4EDE-9A97-81D5147E8680} = {DA73C669-8361-490F-81FE-C364985C3A57}
 		{DE2E2F72-30FC-4B1D-94E0-2204F1811301} = {FBBD03C1-BC79-4778-9501-2CC3C4D72938}
+		{68CBED4D-9472-4477-A8E3-1D459CB9C61D} = {DA73C669-8361-490F-81FE-C364985C3A57}
 	EndGlobalSection
 EndGlobal
