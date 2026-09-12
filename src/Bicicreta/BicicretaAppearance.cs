@@ -123,7 +123,7 @@ namespace Bicicreta
         /// A bare T would not do. The rider's hands come to rest above their knees, well
         /// behind the front of the frame, so a post under the bar would either rise out
         /// of the middle of the frame or leave the bar out of reach; the neck lets the
-        /// post stand where the user asked for it and the bar sit where it is held.
+        /// post stand at the front and the bar sit where it is held.
         ///
         /// The neck is thinner than the two it joins so that it ends inside them. Boxes
         /// that share a face fight over which of them is drawn there.

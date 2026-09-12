@@ -42,12 +42,6 @@ namespace Bicicreta
         internal const float FrameHeight = 0.6f;
 
         /// <summary>
-        /// The top of the frame: what the seat and the handlebar stand on. The cart body
-        /// is 0.35 m deep once it has been taken in to this length.
-        /// </summary>
-        internal const float FrameTop = FrameHeight + 0.175f;
-
-        /// <summary>
         /// Where the frame's body ends and its two pull handles carry on forward towards
         /// <see cref="FrameFront"/>. The cart is one mesh, and not one this build of the
         /// game will let anything read, so this was measured off a screenshot.
