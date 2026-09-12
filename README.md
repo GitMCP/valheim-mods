@@ -75,6 +75,13 @@ the runtime allows the access.
 A mod's version is declared once, in its `.csproj`. `-t:Package` stamps it into the
 Thunderstore manifest on the way into the archive, so the two cannot drift apart.
 
+The archive is only needed to publish, which is optional — a plain `.dll` in
+`BepInEx/plugins` is a complete install. Publishing does require a Thunderstore team,
+which is what supplies the namespace half of a package identifier; a team can have one
+member. Nothing in the repo depends on the team name, since Thunderstore takes it at
+upload time, but it is the prefix others would use to depend on the mod:
+`<Team>-Bicicreta-<version>`.
+
 ## Finding something to patch
 
 Valheim ships no API documentation, so writing a patch starts with finding the exact
