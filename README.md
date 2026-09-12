@@ -69,15 +69,39 @@ private Int32 m_baseValue;
 public Void OnSpawned(Boolean spawnValkyrie);
 ```
 
-## Testing a mod in game
+## Testing a mod
 
-The build and the reference assemblies work anywhere, but actually running a mod needs
-Valheim, which means a machine with the game:
+### Headless smoke test, no game needed
+
+```bash
+tools/run-test-server.sh
+```
+
+This installs BepInEx into the dedicated server, deploys every mod, and starts the
+server. It catches the two failures a successful build cannot: BepInEx refusing to load
+the plugin, and a Harmony patch whose target signature no longer matches the shipped
+game build. Watch for the plugin's own line:
+
+```
+[Info   :   BepInEx] Loading [HelloValheim 0.1.0]
+[Info   :HelloValheim] HelloValheim 0.1.0 loaded, 1 method(s) patched.
+```
+
+A patch that no longer matches its target contributes nothing and logs no error, which
+is why the plugin reports its patch count instead of just "loaded".
+
+This only exercises code that runs headlessly. Anything touching the local player,
+input, or UI still has to be tested in the real client.
+
+### In the real client
 
 1. Install [BepInExPack_Valheim](https://thunderstore.io/c/valheim/p/denikson/BepInExPack_Valheim/)
    (use the Thunderstore pack, not a BepInEx release — it is preconfigured for Valheim).
 2. Set `ModDeployPath` in `Environment.props` and run `dotnet build -t:Deploy`.
 3. Launch the game and read `BepInEx/LogOutput.log`.
+
+Deploy on purpose copies only the plugin assembly. Never copy a whole `bin/Debug`
+folder into `plugins`; BepInEx tries to load everything it finds there.
 
 ## After a Valheim update
 
