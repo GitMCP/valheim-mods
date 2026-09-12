@@ -1,3 +1,4 @@
+using System.Linq;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
@@ -34,7 +35,10 @@ namespace HelloValheim
             _harmony = new Harmony(PluginGuid);
             _harmony.PatchAll(typeof(HelloValheimPlugin).Assembly);
 
-            Log.LogInfo($"{PluginName} {PluginVersion} loaded.");
+            // A patch whose target signature no longer matches the current game build
+            // silently contributes nothing, so report the count rather than assuming.
+            var patched = _harmony.GetPatchedMethods().Count();
+            Log.LogInfo($"{PluginName} {PluginVersion} loaded, {patched} method(s) patched.");
         }
 
         private void OnDestroy()
