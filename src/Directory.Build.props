@@ -17,4 +17,46 @@
     <NoWarn>$(NoWarn);MSB3277;CS0436</NoWarn>
   </PropertyGroup>
 
+  <!-- Every mod needs the loader, the patching library, and net462 reference assemblies
+       (so the build works without a Mono or .NET Framework install). -->
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Core" Version="5.4.21" PrivateAssets="all" />
+    <PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" PrivateAssets="all" />
+    <PackageReference Include="HarmonyX" Version="2.10.2" PrivateAssets="all" />
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!--
+    Game assemblies. ValheimManagedDir is resolved in the repo-root Directory.Build.props.
+    assembly_* are publicized so private game members are reachable from patches; nothing
+    here is copied to the output, since the game already loads all of it.
+  -->
+  <ItemGroup>
+    <PublicizedGameRef Include="$(ValheimManagedDir)assembly_*.dll" />
+    <PublicizedGameRef Include="$(ValheimManagedDir)Assembly-CSharp.dll" />
+    <PublicizedGameRef Include="$(ValheimManagedDir)gui_framework.dll" />
+    <PublicizedGameRef Include="$(ValheimManagedDir)SoftReferenceableAssets.dll" />
+    <PublicizedGameRef Include="$(ValheimManagedDir)Splatform.dll" />
+
+    <GameRef Include="$(ValheimManagedDir)UnityEngine*.dll" />
+    <GameRef Include="$(ValheimManagedDir)Unity.*.dll" />
+    <GameRef Include="$(ValheimManagedDir)com.rlabrecque.steamworks.net.dll" />
+    <GameRef Include="$(ValheimManagedDir)Newtonsoft.Json.dll" />
+
+    <!-- HintPath is rebuilt from each item's own name, since an item transform cannot
+         carry the source path into the new item's metadata. -->
+    <Reference Include="@(PublicizedGameRef->'%(Filename)')" Publicize="true" Private="false">
+      <HintPath>$(ValheimManagedDir)%(Identity).dll</HintPath>
+    </Reference>
+    <Reference Include="@(GameRef->'%(Filename)')" Private="false">
+      <HintPath>$(ValheimManagedDir)%(Identity).dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <!-- Mods ship as a single dll, so art and data files travel inside the assembly. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Assets/**/*" />
+  </ItemGroup>
+
 </Project>
