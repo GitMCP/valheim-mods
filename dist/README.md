@@ -9,8 +9,13 @@ is `cursor/valheim-mod-scaffold-020c`, where `artifacts/` stays git-ignored.
 | `Bicicreta.dll` | Manual install: drop it in `BepInEx/plugins`. |
 | `Bicicreta-0.1.0.zip` | Thunderstore layout, for importing into a mod manager. |
 
-Built from this branch's source in Release configuration, and verified to load into the
-Valheim dedicated server under BepInEx with its creature and hammer piece registered.
+Built in Release configuration from commit `657e67c` of
+`cursor/valheim-mod-scaffold-020c`. These exact bytes were then loaded into the Valheim
+dedicated server under BepInEx, which registered the creature and the hammer piece.
+
+The commit is recorded inside the assembly too: the .NET SDK embeds the source revision
+in `AssemblyInformationalVersion`, so a build can always be traced back to its source,
+and rebuilding at a different commit changes the file even when no code changed.
 
 ## Before it will load
 
