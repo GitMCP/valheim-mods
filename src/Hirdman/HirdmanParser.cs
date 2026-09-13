@@ -62,7 +62,7 @@ namespace Hirdman
                     // is next to whoever is talking to it. That makes "chop wood here"
                     // and "chop wood" the same order, which is what a player means.
                     Anchor = retainer.transform.position,
-                    Master = Identify(speaker),
+                    Master = HirdmanOrder.Identify(speaker),
                 };
 
                 reply = order.Acknowledgement();
@@ -71,12 +71,6 @@ namespace Hirdman
 
             reply = "I don't follow.";
             return false;
-        }
-
-        private static ZDOID Identify(Player speaker)
-        {
-            var nview = speaker == null ? null : speaker.GetComponent<ZNetView>();
-            return nview != null && nview.IsValid() ? nview.GetZDO().m_uid : ZDOID.None;
         }
 
         private struct Rule

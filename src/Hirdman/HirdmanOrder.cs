@@ -50,6 +50,18 @@ namespace Hirdman
         /// <summary>Whose order it is, and who <see cref="HirdmanJob.Follow"/> follows.</summary>
         internal ZDOID Master;
 
+        /// <summary>
+        /// Names a player in a way that survives being written down. A character's ZDOID
+        /// is what every other reference in the game uses, and unlike a
+        /// <see cref="GameObject"/> it still means something on a peer where that player
+        /// is not loaded.
+        /// </summary>
+        internal static ZDOID Identify(Player speaker)
+        {
+            var nview = speaker == null ? null : speaker.GetComponent<ZNetView>();
+            return nview != null && nview.IsValid() ? nview.GetZDO().m_uid : ZDOID.None;
+        }
+
         internal static HirdmanOrder Read(ZDO zdo)
         {
             return new HirdmanOrder

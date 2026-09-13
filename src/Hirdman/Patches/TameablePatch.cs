@@ -33,7 +33,7 @@ namespace Hirdman.Patches
             order.Anchor = retainer.transform.position;
             if (!following && player != null)
             {
-                order.Master = player.GetComponent<ZNetView>().GetZDO().m_uid;
+                order.Master = HirdmanOrder.Identify(player);
             }
 
             if (HirdmanBrain.Give(retainer, order))

@@ -40,23 +40,27 @@ namespace Hirdman
             }
 
             var sentence = string.Join(" ", args);
-            HirdmanOrder order;
-            string reply;
-            if (!HirdmanParser.TryParse(sentence, player, retainer, out order, out reply))
+
+            // The answer may arrive some seconds from now, by way of a model, so what
+            // happens next is written as what to do when it does.
+            HirdmanInterpreter.Interpret(sentence, player, retainer, (understood, order, reply) =>
             {
                 HirdmanSpeech.Say(retainer, reply);
-                Console.instance?.Print($"The retainer did not understand '{sentence}'.");
-                return;
-            }
 
-            if (!HirdmanBrain.Give(retainer, order))
-            {
-                Console.instance?.Print("That retainer cannot be given orders right now.");
-                return;
-            }
+                if (!understood)
+                {
+                    Console.instance?.Print($"The retainer did not understand '{sentence}'.");
+                    return;
+                }
 
-            HirdmanSpeech.Say(retainer, reply);
-            Console.instance?.Print($"Retainer: {order.Job}.");
+                if (!HirdmanBrain.Give(retainer, order))
+                {
+                    Console.instance?.Print("That retainer cannot be given orders right now.");
+                    return;
+                }
+
+                Console.instance?.Print($"Retainer: {order.Job}.");
+            });
         }
     }
 }

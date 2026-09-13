@@ -1,5 +1,6 @@
 using System.Linq;
 using BepInEx;
+using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
 using Jotunn.Managers;
@@ -36,11 +37,27 @@ namespace Hirdman
 
         internal static ManualLogSource Log;
 
+        /// <summary>
+        /// The plugin doubles as the mod's coroutine host, because asking a model a
+        /// question is the one thing here that takes longer than a frame and a
+        /// <see cref="BaseUnityPlugin"/> is already a <see cref="MonoBehaviour"/> that
+        /// outlives everything else.
+        /// </summary>
+        internal static HirdmanPlugin Instance { get; private set; }
+
+        internal static ConfigEntry<bool> ModelEnabled;
+        internal static ConfigEntry<string> ModelEndpoint;
+        internal static ConfigEntry<string> ModelName;
+        internal static ConfigEntry<int> ModelTimeout;
+        internal static ConfigEntry<string> ModelKeepAlive;
+
         private Harmony _harmony;
 
         private void Awake()
         {
             Log = Logger;
+            Instance = this;
+            BindConfig();
 
             // Taking frames from the game's AI, and replacing petting with orders, are
             // changes to how the game treats a tamed creature, so they need patches
@@ -52,6 +69,55 @@ namespace Hirdman
             // which happens long after plugin Awake.
             PrefabManager.OnVanillaPrefabsAvailable += RegisterContent;
             ItemManager.OnItemsRegistered += RegisterKit;
+        }
+
+        /// <summary>
+        /// None of this is admin-only or synced, unlike the settings of a mod that
+        /// changes the rules of a world. A model describes the machine a player is
+        /// sitting at: whether they have one, what it is called, and how long they are
+        /// willing to wait for it. One player running a model and three others not is a
+        /// normal way to play, and nothing about it needs the server's agreement, because
+        /// what reaches the server is an order and not a sentence.
+        /// </summary>
+        private void BindConfig()
+        {
+            ModelEnabled = Config.Bind(
+                "Model",
+                "Enabled",
+                false,
+                "Ask a local language model about orders that keywords could not place. " +
+                "Off by default: without this the mod works entirely on keywords.");
+
+            ModelEndpoint = Config.Bind(
+                "Model",
+                "Endpoint",
+                "http://127.0.0.1:11434/api/chat",
+                "Where the model is listening. The default is Ollama's. A server that " +
+                "answers in the OpenAI shape is also understood.");
+
+            ModelName = Config.Bind(
+                "Model",
+                "Name",
+                "qwen3:4b",
+                "Which model to ask. Choosing between four orders is a small job, so a " +
+                "small model does it well and answers quickly.");
+
+            ModelTimeout = Config.Bind(
+                "Model",
+                "TimeoutSeconds",
+                8,
+                new ConfigDescription(
+                    "How long to wait before giving up and admitting the order was not " +
+                    "understood.",
+                    new AcceptableValueRange<int>(1, 60)));
+
+            ModelKeepAlive = Config.Bind(
+                "Model",
+                "KeepAlive",
+                "5m",
+                "How long the model should stay in memory between orders, in Ollama's " +
+                "notation. Valheim wants the graphics card too, so '0' unloads it after " +
+                "every order and '-1' keeps it resident.");
         }
 
         private void RegisterContent()
