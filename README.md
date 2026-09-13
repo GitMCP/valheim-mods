@@ -7,9 +7,10 @@ macOS, and Windows and needs no Visual Studio and no local copy of the game.
 | Project | What it is |
 | --- | --- |
 | `src/Bicicreta` | Adds a buildable, rideable bicycle. |
+| `src/Hirdman` | Adds NPC retainers you order about in plain language. |
 | `src/HelloValheim` | A minimal plugin kept as the template for mods that only patch existing behavior. |
 
-Both are verified to load into a running game.
+All three are verified to load into a running game.
 
 ## How the bicycle works
 
@@ -75,6 +76,43 @@ front of the frame's body and a short neck carries the bar back to the hands. Ev
 wooden building piece in the game turns out to be the same unit cube under a different
 scale, which is why a pole and a beam are the same mesh here and any box of wood can be
 had by asking for one of them at a size.
+
+## How the retainers work
+
+A frame is 16 ms and understanding a sentence is not, so language can never sit in the
+loop that drives a character. Everything about `src/Hirdman` follows from that. A
+retainer only ever does one of four things — wait, follow, guard, or chop wood — and each
+is hand-written behaviour that runs deterministically on whichever peer owns it.
+Understanding happens once, when somebody speaks, and its entire output is one of those
+four values plus a position and a player.
+
+That makes the order small enough to live in the ZDO, which is what gives it everything
+else for free: it survives a logout, it is already on every peer, and a retainer that
+changes hands mid-task picks up an order it never saw given. Prose would have none of
+those properties, which is the reason prose is never what gets stored.
+
+Keywords are tried first and a model is only asked what they could not place. "Follow
+me" and "go get wood" are most of what anyone types, and answering them instantly beats
+answering them cleverly two seconds later; the model earns its place on "the camp needs
+looking after while I'm gone". Its reply is constrained by a JSON schema rather than
+trusted, so a 4B model physically cannot answer with anything but one of four words. It
+is also entirely optional, and its settings are deliberately not synced: a model
+describes the machine a player is sitting at, and what reaches the server is an order and
+not a sentence.
+
+The retainer itself is a dvergr. Of the 157 humanoids in the game it is the only one that
+arrives with everything a working companion needs already attached — bipedal and clothed,
+a `VisEquipment` so the gear in its hands is the gear you gave it, an `NpcTalk`, and the
+humanoid path agent, so it walks and swims where a person would. The player rig would
+look more human, but it is a `Player` (input, skills, food, respawn) with no AI at all.
+
+Work is the only thing written from scratch, because the game has no idea of a creature
+with a job. Following is left to `MonsterAI`, which has a tamed wolf's worth of
+experience at walking behind someone, and a fight is left to it the moment it has a
+target; the brain is asked first each frame and claims only the frames it needs. Felling
+a tree uses the damage of the axe actually in the retainer's hands, so the game's own
+tool tiers and drop tables decide what happens — a stone axe will not bring down a birch
+for a retainer either.
 
 ## Requirements
 
