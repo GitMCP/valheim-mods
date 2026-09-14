@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>Hirdman</AssemblyName>
     <RootNamespace>Hirdman</RootNamespace>
-    <Version>0.3.4</Version>
+    <Version>0.3.5</Version>
     <Authors>GitMCP</Authors>
     <Description>Adds NPC retainers you command in plain language.</Description>
   </PropertyGroup>
@@ -11,6 +11,7 @@
   <ItemGroup>
     <!-- See the Bicicreta project file for why Jotunn's build assets are excluded. -->
     <PackageReference Include="JotunnLib" Version="2.30.0" ExcludeAssets="build" />
+    <Reference Include="System.IO.Compression.FileSystem" />
   </ItemGroup>
 
 </Project>

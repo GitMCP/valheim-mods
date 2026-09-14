@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.5
+
+The language model now starts with the game. The first launch fetches a small CPU
+model into the config folder; later launches just start it. No Ollama install, and
+no endpoint to paste in. Dedicated servers skip it. Keywords still come first, and
+still work if the ear is off or not ready yet.
+
 ## 0.3.4
 
 A job is a standing assignment, not a one-off. Told to chop wood they keep chopping:

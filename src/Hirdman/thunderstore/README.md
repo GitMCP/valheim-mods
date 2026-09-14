@@ -101,36 +101,35 @@ does instead is circle out to the edge of what the game keeps alive and back, so
 anywhere with one in tow reveals a band of map several times wider than walking alone.
 What it finds goes on your map only, because exploration is saved with your character.
 
-## Using a local language model
+## Understanding leftover orders
 
-Optional, and off by default. Common phrasings are recognised instantly with no model
-installed at all; with a model on, anything the keywords could not place is handed to one
-running on your own machine, which picks one of the same twelve orders. Nothing is sent
-over the internet, and nothing is sent to the server: your machine turns the sentence into
-an order, and only the order travels.
+Common phrasings are recognised instantly with no model involved. Anything the keywords
+could not place is handed to a small language model that starts with Valheim, on the
+processor, and picks one of the same twelve orders. Nothing is sent over the internet
+after the first launch, and nothing is sent to the server: your machine turns the
+sentence into an order, and only the order travels.
 
-Install [Ollama](https://ollama.com/) and pull a small model:
+The first time you open the game with the mod, it fetches about 470 MB into
+`BepInEx/config/Hirdman/ear/` (the runtime and the weights). That folder survives
+mod updates, so later launches just start the ear. Dedicated servers skip it: they
+have nobody speaking.
 
-```
-ollama pull qwen3:4b
-```
-
-Then set `Model / Enabled` to `true` in `BepInEx/config/com.gitmcp.hirdman.cfg`.
+If you already generated a config from an older build, set `Model / Enabled` to `true`
+and leave `Model / Source` as `Bundled`.
 
 | Setting | Default | Description |
 | --- | --- | --- |
-| `Model / Enabled` | `false` | Ask a model about orders keywords could not place. |
-| `Model / Endpoint` | `http://127.0.0.1:11434/api/chat` | Where the model is listening. An OpenAI-shaped server is also understood. |
-| `Model / Name` | `qwen3:4b` | Which model to ask. |
-| `Model / TimeoutSeconds` | `8` | How long to wait before giving up on it. |
-| `Model / KeepAlive` | `5m` | How long the model stays in memory between orders. |
+| `Model / Enabled` | `true` | Ask a model about orders keywords could not place. |
+| `Model / Source` | `Bundled` | `Bundled` starts the shipped model with the game. `External` talks to a server you run. |
+| `Model / Endpoint` | `http://127.0.0.1:11434/api/chat` | Where an external model is listening. Ignored when Source is Bundled. |
+| `Model / Name` | `qwen3:4b` | Which model to ask of an external server. Ignored when Source is Bundled. |
+| `Model / TimeoutSeconds` | `15` | How long to wait before giving up on it. |
+| `Model / KeepAlive` | `5m` | How long an external Ollama model stays in memory. Ignored when Source is Bundled. |
 
-Choosing between twelve orders is a small job, so a small model does it well: Qwen3 4B at
-Q4 is about 2.5 GB and answers in a second or two. Valheim wants your graphics card too,
-though, so if the game starts stuttering, either set `KeepAlive` to `0` so the model is
-unloaded after each order, or run a smaller model on the processor instead and leave the
-card to the game. Only the player typing needs a model; friends without one can still
-give keyword orders.
+Choosing between twelve orders is a small job, so the bundled model is small on
+purpose: Qwen2.5 0.5B at Q4, running on the CPU so Valheim keeps the graphics card.
+Friends without the ear still give keyword orders. To use a model you already run
+(Ollama or otherwise), set `Source` to `External` and fill in Endpoint and Name.
 
 ## Server settings
 

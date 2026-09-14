@@ -59,6 +59,7 @@ namespace Hirdman
         internal static ConfigEntry<KeyboardShortcut> TalkKey;
 
         internal static ConfigEntry<bool> ModelEnabled;
+        internal static ConfigEntry<string> ModelSource;
         internal static ConfigEntry<string> ModelEndpoint;
         internal static ConfigEntry<string> ModelName;
         internal static ConfigEntry<int> ModelTimeout;
@@ -73,6 +74,7 @@ namespace Hirdman
             BindHousehold();
             BindTalking();
             BindModel();
+            HirdmanEar.Begin();
 
             // Taking frames from the game's AI, replacing petting with orders, and
             // opening the routing layer for the bell are changes to how the game behaves
@@ -158,38 +160,48 @@ namespace Hirdman
 
         /// <summary>
         /// None of this is admin-only or synced either. A model describes the machine a
-        /// player is sitting at: whether they have one, what it is called, and how long
-        /// they are willing to wait for it. One player running a model and three others
-        /// not is a normal way to play, and nothing about it needs the server's
-        /// agreement, because what reaches the server is an order and not a sentence.
+        /// player is sitting at: whether they have one, and whether it is the one that
+        /// starts with the game or a server they already run. One player with the ear
+        /// running and three others using keywords is a normal way to play, and nothing
+        /// about it needs the server's agreement, because what reaches the server is an
+        /// order and not a sentence.
         /// </summary>
         private void BindModel()
         {
             ModelEnabled = Config.Bind(
                 "Model",
                 "Enabled",
-                false,
-                "Ask a local language model about orders that keywords could not place. " +
-                "Off by default: without this the mod works entirely on keywords.");
+                true,
+                "Ask a language model about orders that keywords could not place. On by " +
+                "default: the first launch fetches a small model and starts it with the " +
+                "game. Keywords still work if this is off, or if the model is not ready.");
+
+            ModelSource = Config.Bind(
+                "Model",
+                "Source",
+                "Bundled",
+                "Bundled starts a small model with the game. External talks to a server " +
+                "you already run (Ollama, llama.cpp, anything that answers in the OpenAI " +
+                "or Ollama shape).");
 
             ModelEndpoint = Config.Bind(
                 "Model",
                 "Endpoint",
                 "http://127.0.0.1:11434/api/chat",
-                "Where the model is listening. The default is Ollama's. A server that " +
-                "answers in the OpenAI shape is also understood.");
+                "Where an external model is listening. Ignored when Source is Bundled. " +
+                "The default is Ollama's. A server that answers in the OpenAI shape is " +
+                "also understood.");
 
             ModelName = Config.Bind(
                 "Model",
                 "Name",
                 "qwen3:4b",
-                "Which model to ask. Choosing between a dozen orders is a small job, so a " +
-                "small model does it well and answers quickly.");
+                "Which model to ask of an external server. Ignored when Source is Bundled.");
 
             ModelTimeout = Config.Bind(
                 "Model",
                 "TimeoutSeconds",
-                8,
+                15,
                 new ConfigDescription(
                     "How long to wait before giving up and admitting the order was not " +
                     "understood.",
@@ -199,9 +211,9 @@ namespace Hirdman
                 "Model",
                 "KeepAlive",
                 "5m",
-                "How long the model should stay in memory between orders, in Ollama's " +
-                "notation. Valheim wants the graphics card too, so '0' unloads it after " +
-                "every order and '-1' keeps it resident.");
+                "How long an external Ollama model should stay in memory between orders. " +
+                "Ignored when Source is Bundled. '0' unloads it after every order and " +
+                "'-1' keeps it resident.");
         }
 
         private void RegisterContent()
@@ -236,6 +248,7 @@ namespace Hirdman
 
         private void OnDestroy()
         {
+            HirdmanEar.Stop();
             _harmony?.UnpatchSelf();
         }
     }

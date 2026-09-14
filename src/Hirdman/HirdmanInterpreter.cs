@@ -23,7 +23,8 @@ namespace Hirdman
     /// The reply is constrained to a JSON schema rather than trusted. Both llama.cpp and
     /// Ollama enforce a schema in the sampler, so a model physically cannot answer with
     /// anything but one of the job names, and unparseable output stops being a case to
-    /// handle. Choosing from a menu of eleven is still a small enough job for a 4B model.
+    /// handle. Choosing from a menu of twelve is a small enough job for the half-billion
+    /// parameter model that starts with the game.
     ///
     /// The menu is generated from <see cref="HirdmanJobs"/> rather than written out, so
     /// adding a job cannot leave the prompt describing a mod that no longer exists.
@@ -37,8 +38,8 @@ namespace Hirdman
     {
         /// <summary>
         /// What each job is, in the words a model should be choosing between. Written
-        /// for a reader who has never played the game, because that is what a 4B model
-        /// is.
+        /// for a reader who has never played the game, because that is what a small
+        /// model is.
         /// </summary>
         private static string Describe(HirdmanJob job)
         {
@@ -72,7 +73,8 @@ namespace Hirdman
             }
 
             menu.Append("subject is one or two words naming what to look for - a plant, an ore, an ");
-            menu.Append("animal - or an empty string when the order names nothing in particular.");
+            menu.Append("animal - or an empty string when the order names nothing in particular. ");
+            menu.Append("Answer with a JSON object only, no other text.");
             return menu.ToString();
         }
 
@@ -113,8 +115,27 @@ namespace Hirdman
             GameObject retainer,
             Action<bool, HirdmanOrder, string> done)
         {
-            var endpoint = HirdmanPlugin.ModelEndpoint.Value;
-            var request = UnityWebRequest.Post(endpoint, Body(sentence), "application/json");
+            if (HirdmanEar.Bundled)
+            {
+                var deadline = Time.realtimeSinceStartup + HirdmanPlugin.ModelTimeout.Value;
+                while (!HirdmanEar.Ready && !HirdmanEar.Failed && Time.realtimeSinceStartup < deadline)
+                {
+                    yield return null;
+                }
+
+                if (!HirdmanEar.Ready)
+                {
+                    HirdmanPlugin.Log.LogWarning(
+                        HirdmanEar.Failed
+                            ? "The ear did not start; using keywords only."
+                            : "The ear is still starting; using keywords only.");
+                    done(false, default(HirdmanOrder), "I don't follow.");
+                    yield break;
+                }
+            }
+
+            var endpoint = HirdmanEar.Bundled ? HirdmanEar.ChatUrl : HirdmanPlugin.ModelEndpoint.Value;
+            var request = UnityWebRequest.Post(endpoint, Body(sentence, OpenAi(endpoint)), "application/json");
             request.timeout = HirdmanPlugin.ModelTimeout.Value;
 
             yield return request.SendWebRequest();
@@ -163,7 +184,22 @@ namespace Hirdman
             done(true, order, order.Acknowledgement());
         }
 
-        private static string Body(string sentence)
+        private static bool OpenAi(string endpoint)
+        {
+            if (HirdmanEar.Bundled)
+            {
+                return true;
+            }
+
+            if (string.IsNullOrEmpty(endpoint))
+            {
+                return false;
+            }
+
+            return endpoint.IndexOf("/v1", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private static string Body(string sentence, bool openai)
         {
             var names = new JArray();
             foreach (var job in HirdmanJobs.All)
@@ -185,7 +221,33 @@ namespace Hirdman
                 ["required"] = new JArray("job", "subject"),
             };
 
-            var body = new JObject
+            var messages = new JArray
+            {
+                new JObject { ["role"] = "system", ["content"] = Instruction() },
+                new JObject { ["role"] = "user", ["content"] = sentence },
+            };
+
+            if (openai)
+            {
+                return new JObject
+                {
+                    ["model"] = HirdmanEar.Bundled ? HirdmanEar.ChatModel : HirdmanPlugin.ModelName.Value,
+                    ["stream"] = false,
+                    ["temperature"] = 0,
+                    ["messages"] = messages,
+                    ["response_format"] = new JObject
+                    {
+                        ["type"] = "json_schema",
+                        ["json_schema"] = new JObject
+                        {
+                            ["name"] = "order",
+                            ["schema"] = schema,
+                        },
+                    },
+                }.ToString(Newtonsoft.Json.Formatting.None);
+            }
+
+            return new JObject
             {
                 ["model"] = HirdmanPlugin.ModelName.Value,
                 ["stream"] = false,
@@ -195,14 +257,8 @@ namespace Hirdman
                 ["options"] = new JObject { ["temperature"] = 0 },
                 ["keep_alive"] = HirdmanPlugin.ModelKeepAlive.Value,
                 ["format"] = schema,
-                ["messages"] = new JArray
-                {
-                    new JObject { ["role"] = "system", ["content"] = Instruction() },
-                    new JObject { ["role"] = "user", ["content"] = sentence },
-                },
-            };
-
-            return body.ToString(Newtonsoft.Json.Formatting.None);
+                ["messages"] = messages,
+            }.ToString(Newtonsoft.Json.Formatting.None);
         }
 
         private static bool TryRead(string payload, out HirdmanJob job, out string subject)
