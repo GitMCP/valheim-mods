@@ -120,7 +120,7 @@ namespace Hirdman.Work
                 return;
             }
 
-            var fuel = arms.GetItem(station.m_fuelItem.gameObject.name, -1, true);
+            var fuel = HirdmanBody.Find(arms, station.m_fuelItem.gameObject.name);
             if (fuel == null)
             {
                 return;
@@ -176,7 +176,7 @@ namespace Hirdman.Work
         {
             return station.m_useFuel && station.m_fuelItem != null &&
                    station.GetFuel() < station.m_maxFuel - 1f &&
-                   contents.GetItem(station.m_fuelItem.gameObject.name, -1, true) != null;
+                   HirdmanBody.Find(contents, station.m_fuelItem.gameObject.name) != null;
         }
 
         private static bool Wanted(CookingStation station, ItemDrop.ItemData item, string subject)

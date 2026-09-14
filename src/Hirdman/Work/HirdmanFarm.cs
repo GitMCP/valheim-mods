@@ -136,7 +136,7 @@ namespace Hirdman.Work
                     continue;
                 }
 
-                if (arms.GetItem(crop.Value, -1, true) != null)
+                if (HirdmanBody.Find(arms, crop.Value) != null)
                 {
                     return crop.Key;
                 }
@@ -193,7 +193,7 @@ namespace Hirdman.Work
 
         private static void Plant(HirdmanBody body, Inventory arms, GameObject sapling, Vector3 spot)
         {
-            var seed = arms.GetItem(Crops()[sapling], -1, true);
+            var seed = HirdmanBody.Find(arms, Crops()[sapling]);
             if (seed == null)
             {
                 return;

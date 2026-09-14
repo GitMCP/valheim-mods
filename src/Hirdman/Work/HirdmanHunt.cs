@@ -157,6 +157,7 @@ namespace Hirdman.Work
                 m_dir = (_quarry.transform.position - body.Position).normalized,
                 m_damage = weapon.GetDamage(),
                 m_toolTier = (short)weapon.m_shared.m_toolTier,
+                m_itemWorldLevel = (byte)weapon.m_worldLevel,
             };
             hit.SetAttacker(body.Humanoid);
 
