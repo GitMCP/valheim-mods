@@ -117,8 +117,9 @@ namespace Hirdman
                 "WorkRadius",
                 24f,
                 new ConfigDescription(
-                    "How far from the spot it was set to work a retainer will range for " +
-                    "trees, ore, crops, chests and quarry.",
+                    "How far from where they stand a retainer looks for the next tree, " +
+                    "ore, crop or chest. A standing job then walks further, up to ScoutRange, " +
+                    "so a forest does not end after one circle.",
                     new AcceptableValueRange<float>(8f, 64f),
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
 

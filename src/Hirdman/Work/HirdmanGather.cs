@@ -20,22 +20,38 @@ namespace Hirdman.Work
         private Pickable _crop;
         private float _searchedAt;
         private float _pickedAt;
+        private readonly HirdmanShift _shift = new HirdmanShift();
 
         internal override bool Run(HirdmanBody body, HirdmanOrder order, float dt)
         {
+            if (_shift.Busy(body, order, dt, Skills.SkillType.None, canLeave: _crop == null || body.Burden() >= 0.9f))
+            {
+                return true;
+            }
+
             if (_crop == null && Time.time - _searchedAt > SearchInterval)
             {
                 _searchedAt = Time.time;
-                _crop = Closest<Pickable>(body, order.Anchor, HirdmanPlugin.WorkRadius.Value,
-                    p => p.CanBePicked() && HirdmanCatalog.Answers(order.Subject, p.gameObject));
+                _crop = Closest<Pickable>(body, body.Position, HirdmanPlugin.WorkRadius.Value,
+                    p => Ripe(p, order) && Vector3.Distance(p.transform.position, order.Anchor) <= Roam);
+                if (_crop == null)
+                {
+                    _crop = Closest<Pickable>(body, order.Anchor, Roam,
+                        p => Ripe(p, order));
+                }
             }
 
-            // Everything worth picking has been picked. Waiting is the right answer:
-            // most of it grows back, and the retainer is standing where it was sent.
             if (_crop == null)
             {
+                if (_shift.Busy(body, order, dt, Skills.SkillType.None, canLeave: true))
+                {
+                    return true;
+                }
+
                 return Hold(body, order.Anchor, dt);
             }
+
+            _shift.Mark(_crop.transform.position);
 
             if (!body.Approach(dt, _crop.transform.position, Reach))
             {
@@ -88,6 +104,12 @@ namespace Hirdman.Work
             }
 
             crop.Interact(body.Humanoid, false, false);
+        }
+
+        private static bool Ripe(Pickable pickable, HirdmanOrder order)
+        {
+            return pickable != null && pickable.CanBePicked() &&
+                   HirdmanCatalog.Answers(order.Subject, pickable.gameObject);
         }
     }
 }

@@ -231,13 +231,13 @@ namespace Hirdman
                 case HirdmanJob.Guard:
                     return "I'll hold this ground.";
                 case HirdmanJob.ChopWood:
-                    return "I'll see to the trees.";
+                    return "I'll keep at the trees until you say otherwise.";
                 case HirdmanJob.Explore:
                     return "I'll walk the land and remember it for you.";
                 case HirdmanJob.Gather:
-                    return about == null ? "I'll pick what grows here." : $"I'll look for {about}.";
+                    return about == null ? "I'll keep picking." : $"I'll keep looking for {about}.";
                 case HirdmanJob.Mine:
-                    return about == null ? "I'll break some rock." : $"I'll dig for {about}.";
+                    return about == null ? "I'll keep at the rock." : $"I'll keep digging for {about}.";
                 case HirdmanJob.Farm:
                     return "I'll tend the field.";
                 case HirdmanJob.Cook:

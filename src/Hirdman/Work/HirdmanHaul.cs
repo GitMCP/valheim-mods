@@ -171,7 +171,7 @@ namespace Hirdman.Work
                     continue;
                 }
 
-                var home = Home(chests, held);
+                var home = HirdmanStores.BestFor(chests, held);
                 if (home == null)
                 {
                     continue;
@@ -287,7 +287,7 @@ namespace Hirdman.Work
                     continue;
                 }
 
-                var home = Home(chests, item);
+                var home = HirdmanStores.BestFor(chests, item);
                 if (home == null)
                 {
                     continue;
@@ -369,40 +369,6 @@ namespace Hirdman.Work
             }
 
             return false;
-        }
-
-        /// <summary>
-        /// Where a thing belongs: whichever chest already holds the most of it, or any
-        /// chest with room if it is the first of its kind in the steading.
-        /// </summary>
-        private static Container Home(List<Container> chests, ItemDrop.ItemData item)
-        {
-            Container fullest = null;
-            Container spare = null;
-            var most = 0;
-
-            foreach (var chest in chests)
-            {
-                var contents = HirdmanStores.Contents(chest);
-                if (contents == null || !contents.CanAddItem(item))
-                {
-                    continue;
-                }
-
-                if (spare == null)
-                {
-                    spare = chest;
-                }
-
-                var held = contents.CountItems(item.m_shared.m_name, -1, false);
-                if (held > most)
-                {
-                    most = held;
-                    fullest = chest;
-                }
-            }
-
-            return fullest != null ? fullest : spare;
         }
 
         private static int Held(Container chest, ItemDrop.ItemData item)

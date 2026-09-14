@@ -26,9 +26,15 @@ namespace Hirdman.Work
         private Collider _face;
         private float _searchedAt;
         private float _swungAt;
+        private readonly HirdmanShift _shift = new HirdmanShift();
 
         internal override bool Run(HirdmanBody body, HirdmanOrder order, float dt)
         {
+            if (_shift.Busy(body, order, dt, Skills.SkillType.Pickaxes, canLeave: _rock == null || body.Burden() >= 0.9f))
+            {
+                return true;
+            }
+
             if (body.Need(Skills.SkillType.Pickaxes, "I have no pickaxe. I'll need one before I can mine.") == null)
             {
                 _rock = null;
@@ -40,16 +46,19 @@ namespace Hirdman.Work
                 _searchedAt = Time.time;
                 Find(body, order);
                 Scoop(body, HirdmanPlugin.HaulRadius, null);
-                if (_rock == null)
-                {
-                    body.Ask("Nothing here I can break with this pickaxe.");
-                }
             }
 
             if (_rock == null)
             {
+                if (_shift.Busy(body, order, dt, Skills.SkillType.Pickaxes, canLeave: true))
+                {
+                    return true;
+                }
+
                 return Hold(body, order.Anchor, dt);
             }
+
+            _shift.Mark(_rock.transform.position);
 
             var stand = StandBy(_rock, body.Position);
             if (body.Position.y < stand.y - 1.2f)
@@ -111,12 +120,28 @@ namespace Hirdman.Work
         {
             _rock = null;
             _face = null;
-            var shortest = float.MaxValue;
+            if (!Look(body, order, body.Position, HirdmanPlugin.WorkRadius.Value))
+            {
+                Look(body, order, order.Anchor, Roam);
+            }
+        }
 
-            foreach (var collider in Physics.OverlapSphere(order.Anchor, HirdmanPlugin.WorkRadius.Value))
+        private bool Look(HirdmanBody body, HirdmanOrder order, Vector3 centre, float radius)
+        {
+            var shortest = float.MaxValue;
+            var roam = Roam;
+            Component found = null;
+            Collider face = null;
+
+            foreach (var collider in Physics.OverlapSphere(centre, radius))
             {
                 var rock = Deposit(collider);
                 if (rock == null || !HirdmanCatalog.Answers(order.Subject, rock.gameObject))
+                {
+                    continue;
+                }
+
+                if (Vector3.Distance(rock.transform.position, order.Anchor) > roam)
                 {
                     continue;
                 }
@@ -133,9 +158,18 @@ namespace Hirdman.Work
                 }
 
                 shortest = distance;
-                _rock = rock;
-                _face = Terrain(collider) ? null : collider;
+                found = rock;
+                face = Terrain(collider) ? null : collider;
             }
+
+            if (found == null)
+            {
+                return false;
+            }
+
+            _rock = found;
+            _face = face;
+            return true;
         }
 
         /// <summary>

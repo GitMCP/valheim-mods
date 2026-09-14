@@ -108,6 +108,40 @@ namespace Hirdman.Work
             return null;
         }
 
+        /// <summary>
+        /// Where a thing belongs: whichever chest already holds the most of it, or any
+        /// chest with room if it is the first of its kind in the steading.
+        /// </summary>
+        internal static Container BestFor(List<Container> chests, ItemDrop.ItemData item)
+        {
+            Container fullest = null;
+            Container spare = null;
+            var most = 0;
+
+            foreach (var chest in chests)
+            {
+                var contents = Contents(chest);
+                if (contents == null || !contents.CanAddItem(item))
+                {
+                    continue;
+                }
+
+                if (spare == null)
+                {
+                    spare = chest;
+                }
+
+                var held = contents.CountItems(item.m_shared.m_name, -1, false);
+                if (held > most)
+                {
+                    most = held;
+                    fullest = chest;
+                }
+            }
+
+            return fullest != null ? fullest : spare;
+        }
+
         /// <summary>Puts something away.</summary>
         internal static bool Deposit(Container container, Inventory from, ItemDrop.ItemData item)
         {

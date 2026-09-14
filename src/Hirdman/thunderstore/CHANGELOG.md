@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.4
+
+A job is a standing assignment, not a one-off. Told to chop wood they keep chopping:
+walk further as the nearest trees go, take a full bag home to the chests, mend a worn
+axe at a workbench, and come back. Same loop for mining and gathering. They stop when
+you give them a different order.
+
 ## 0.3.3
 
 Chopping a tree now means the whole tree. They split the logs that fall, pick up the

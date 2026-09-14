@@ -6,11 +6,10 @@ namespace Hirdman.Work
     /// <summary>
     /// Felling trees and carrying the wood.
     ///
-    /// A tree is not done when it falls. The trunk becomes a log, the log splits, and
-    /// the wood sits on the ground; walking off to the next standing trunk in the
-    /// middle of that is how a clearing fills with logs nobody will ever pick up.
-    /// This job stays with one tree until the logs and the drops are gone, then
-    /// looks for another.
+    /// A tree is not done when it falls, and the job is not done when the nearest
+    /// stand is gone. They split the logs, pick up the wood, walk a little further,
+    /// and when the bag is full they take it home, empty it, mend the axe if it needs
+    /// it, and come back. The order stays until a different one arrives.
     /// </summary>
     internal class HirdmanChop : HirdmanWork
     {
@@ -54,9 +53,16 @@ namespace Hirdman.Work
         private float _searchedAt;
         private float _swungAt;
         private float _dropSince;
+        private readonly HirdmanShift _shift = new HirdmanShift();
 
         internal override bool Run(HirdmanBody body, HirdmanOrder order, float dt)
         {
+            if (_shift.Busy(body, order, dt, Skills.SkillType.Axes,
+                canLeave: !_clearing || body.Burden() >= 0.9f))
+            {
+                return true;
+            }
+
             if (body.Need(Skills.SkillType.Axes, "I have no axe. Give me one and I'll chop.") == null)
             {
                 Forget();
@@ -79,6 +85,7 @@ namespace Hirdman.Work
             if (_tree != null)
             {
                 Remember(_tree);
+                _shift.Mark(_tree.transform.position);
                 return Swing(body, dt);
             }
 
@@ -100,20 +107,20 @@ namespace Hirdman.Work
                 _searchedAt = 0f;
             }
 
+            if (_shift.Busy(body, order, dt, Skills.SkillType.Axes, canLeave: true))
+            {
+                return true;
+            }
+
             if (Time.time - _searchedAt > SearchInterval)
             {
                 _searchedAt = Time.time;
-                _tree = Closest<TreeLog>(body, order.Anchor, HirdmanPlugin.WorkRadius.Value,
-                    log => Splittable(body, log));
-                if (_tree == null)
-                {
-                    _tree = Closest<TreeBase>(body, order.Anchor, HirdmanPlugin.WorkRadius.Value,
-                        tree => Chopable(body, tree));
-                }
+                _tree = Next(body, order);
 
                 if (_tree != null)
                 {
                     Remember(_tree);
+                    _shift.Mark(_tree.transform.position);
                     return Swing(body, dt);
                 }
 
@@ -121,8 +128,6 @@ namespace Hirdman.Work
                 {
                     return true;
                 }
-
-                body.Ask("Nothing here I can cut with this axe.");
             }
 
             if (_drop != null)
@@ -131,6 +136,38 @@ namespace Hirdman.Work
             }
 
             return Hold(body, order.Anchor, dt);
+        }
+
+        /// <summary>
+        /// The next log or trunk, preferring whatever is nearest the retainer, then
+        /// whatever is still standing around the original order. The job does not end
+        /// when the first circle is empty.
+        /// </summary>
+        private static Component Next(HirdmanBody body, HirdmanOrder order)
+        {
+            var roam = Roam;
+            Component near = Closest<TreeLog>(body, body.Position, HirdmanPlugin.WorkRadius.Value,
+                log => Splittable(body, log) && Near(log, order.Anchor, roam));
+            if (near == null)
+            {
+                near = Closest<TreeBase>(body, body.Position, HirdmanPlugin.WorkRadius.Value,
+                    tree => Chopable(body, tree) && Near(tree, order.Anchor, roam));
+            }
+
+            if (near != null)
+            {
+                return near;
+            }
+
+            Component around = Closest<TreeLog>(body, order.Anchor, roam, log => Splittable(body, log));
+            return around != null
+                ? around
+                : Closest<TreeBase>(body, order.Anchor, roam, tree => Chopable(body, tree));
+        }
+
+        private static bool Near(Component thing, Vector3 leash, float roam)
+        {
+            return thing != null && Vector3.Distance(thing.transform.position, leash) <= roam;
         }
 
         private bool Swing(HirdmanBody body, float dt)

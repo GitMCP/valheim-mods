@@ -43,6 +43,16 @@ namespace Hirdman
 
         internal ZDO Zdo => _nview != null && _nview.IsValid() ? _nview.GetZDO() : null;
 
+        /// <summary>The outpost this retainer was hired at, or here if none is written.</summary>
+        internal Vector3 Home
+        {
+            get
+            {
+                var zdo = Zdo;
+                return zdo == null ? Position : HirdmanContract.Read(zdo).Home;
+            }
+        }
+
         internal Inventory Inventory => _humanoid == null ? null : _humanoid.GetInventory();
 
         internal bool Near(Vector3 point, float distance)
@@ -282,11 +292,26 @@ namespace Hirdman
 
             _ai.LookAt(point);
 
+            if (tool.m_shared.m_useDurability && tool.m_durability <= 0f)
+            {
+                return false;
+            }
+
             // A pickaxe swing on a player rig hits terrain by default and digs a hole
             // under their feet. The blow that matters is the one aimed at the rock.
+            // Axes still StartAttack so the clip plays; that path also wears the tool
+            // because a retainer is a Player rig. Pickaxes skip it, so they wear here.
             if (tool.m_shared.m_skillType != Skills.SkillType.Pickaxes)
             {
                 _humanoid.StartAttack(null, false);
+            }
+            else if (tool.m_shared.m_useDurability)
+            {
+                tool.m_durability -= tool.m_shared.m_useDurabilityDrain * Game.m_durabilityRate;
+                if (tool.m_durability < 0f)
+                {
+                    tool.m_durability = 0f;
+                }
             }
 
             var hit = new HitData
@@ -452,6 +477,11 @@ namespace Hirdman
             foreach (var item in inventory.GetAllItems())
             {
                 if (item?.m_shared == null || item.m_shared.m_skillType != skill)
+                {
+                    continue;
+                }
+
+                if (item.m_shared.m_useDurability && item.m_durability <= 0f)
                 {
                     continue;
                 }

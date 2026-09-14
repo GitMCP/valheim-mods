@@ -23,6 +23,19 @@ namespace Hirdman.Work
         /// </returns>
         internal abstract bool Run(HirdmanBody body, HirdmanOrder order, float dt);
 
+        /// <summary>
+        /// How far a standing job will walk to keep working. The work radius is one
+        /// search from where they stand; this is the leash from the original spot, so
+        /// a forest does not end after the first twenty-four metres.
+        /// </summary>
+        internal static float Roam
+        {
+            get
+            {
+                return Mathf.Max(HirdmanPlugin.WorkRadius.Value, HirdmanPlugin.ScoutRange.Value);
+            }
+        }
+
         internal static HirdmanWork For(HirdmanJob job)
         {
             switch (job)

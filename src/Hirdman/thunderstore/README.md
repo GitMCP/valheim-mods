@@ -65,10 +65,10 @@ nothing in particular and they take whatever the job applies to.
 | Wait | Drift around home, stand by the fire, get in your way. The default. |
 | Follow | Walk with you. |
 | Guard | Hold the ground and fight whatever comes. |
-| Chop wood | Fell a tree, split the logs, pick up what falls, then the next tree. |
+| Chop wood | Keep felling trees, take a full bag home, mend the axe, come back. |
 | Explore | Range around you and uncover ground on **your** map. |
-| Gather | Pick berries, mushrooms and herbs. |
-| Mine | Break ore deposits and carry the metal. |
+| Gather | Keep picking what grows, take it home when the bag is full. |
+| Mine | Keep breaking ore, take the metal home, mend the pickaxe, come back. |
 | Farm | Sow seeds from your chests, and lift what is ripe. |
 | Cook | Put raw food on the fires and take it off before it burns. |
 | Hunt | Kill things and collect what they drop. |
@@ -80,8 +80,11 @@ middle of a job. Hold **Alt + Use** on one of yours to look in their pack. **Cro
 Use** dismisses them: they drop their things and go.
 
 Work happens where the retainer is standing when you tell it, so "chop wood" and "chop
-wood here" are the same order. They range about 24 m from that spot, which is a server
-setting.
+wood here" are the same order. They keep at it until you say otherwise: as the nearest
+trees go they walk a little further (about as far as a scout ranges), and when the bag
+is full they take the wood home to your chests, mend a worn axe at a bench, and come
+back. Valheim only simulates the world near a player, so they cannot walk a continent
+alone — but they will not stop after the first stand of trees either.
 
 Hauling sorts by one rule: a thing belongs wherever most of that thing already is. You
 never have to declare that the third chest is the wood chest — it becomes the wood chest
@@ -138,8 +141,8 @@ pushed to everyone.
 | --- | --- | --- |
 | `Household / Price` | `100` | Coins to hire one. |
 | `Household / Limit` | `4` | How many one player may keep at once. |
-| `Household / WorkRadius` | `24` | How far from the work site they range. |
-| `Household / ScoutRange` | `48` | How far a scout circles from you. |
+| `Household / WorkRadius` | `24` | How far they look from where they stand. |
+| `Household / ScoutRange` | `48` | How far a scout circles, and how far a standing job will walk on from the original spot. |
 | `Household / ScoutSight` | `80` | How much map a scout uncovers around itself. |
 
 `Talking / Key` (default `G`) opens the chat window and is yours alone.
