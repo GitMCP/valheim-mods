@@ -25,16 +25,19 @@ namespace Hirdman
         private ZNetView _nview;
         private MonsterAI _ai;
         private HirdmanBody _body;
+        private HirdmanBag _bag;
 
         private HirdmanOrder _order;
         private HirdmanWork _work;
         private float _polledAt;
+        private bool _carrying;
 
         private void Awake()
         {
             _nview = GetComponent<ZNetView>();
             _ai = GetComponent<MonsterAI>();
             _body = new HirdmanBody(gameObject);
+            _bag = new HirdmanBag(gameObject);
 
             if (_nview != null && _nview.IsValid())
             {
@@ -42,6 +45,18 @@ namespace Hirdman
             }
 
             _work = HirdmanWork.For(_order.Job);
+        }
+
+        /// <summary>
+        /// A last chance to write down what the retainer is holding, for the ordinary
+        /// case where a player simply walks far enough away that the game unloads it.
+        /// </summary>
+        private void OnDestroy()
+        {
+            if (_bag != null)
+            {
+                _bag.Save();
+            }
         }
 
         /// <summary>
@@ -85,10 +100,31 @@ namespace Hirdman
         /// </returns>
         internal bool Think(float dt)
         {
-            if (_nview == null || !_nview.IsValid() || !_nview.IsOwner() || _ai == null)
+            if (_nview == null || !_nview.IsValid() || _ai == null)
             {
                 return false;
             }
+
+            if (!_nview.IsOwner())
+            {
+                // Someone else is running this retainer now, and is free to empty its
+                // arms without this peer hearing about it.
+                _carrying = false;
+                _bag.Forget();
+                return false;
+            }
+
+            // Done here rather than on waking because the game hands a creature its
+            // default items in its own start-up, which has not happened yet then, and
+            // because taking over a retainer mid-task is how it arrives from a peer that
+            // has been carrying things around on its behalf.
+            if (!_carrying)
+            {
+                _carrying = true;
+                _bag.Load();
+            }
+
+            _bag.Keep();
 
             PollOrder();
 
