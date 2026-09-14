@@ -49,8 +49,7 @@ namespace Hirdman.Work
                 {
                     _quarryHealth = _quarry.GetHealth();
                     _hurtAt = Time.time;
-                    body.Ai.SetTarget(_quarry);
-                    body.Ai.SetAlerted(true);
+                    Point(body, _quarry);
                 }
             }
 
@@ -66,14 +65,33 @@ namespace Hirdman.Work
             // range, out of sight - so it is pointed at it again rather than assumed.
             if (body.Ai.GetTargetCreature() != _quarry)
             {
-                body.Ai.SetTarget(_quarry);
-                body.Ai.SetAlerted(true);
+                Point(body, _quarry);
             }
 
             Assist(body);
 
             // Handing the frame back is what makes this a fight rather than a walk.
             return false;
+        }
+
+        /// <summary>
+        /// Points the game's own AI at one particular creature.
+        ///
+        /// Its <see cref="MonsterAI.SetTarget"/> cannot be used for this. That method
+        /// only fills an empty slot, and the AI refills the slot itself every couple of
+        /// seconds with whatever enemy is nearest - so an order to hunt the boar by the
+        /// treeline turns silently into a fight with the greyling underfoot, and every
+        /// attempt to correct it is ignored for as long as the greyling lives. Naming
+        /// the quarry outright is the only way to be heard, and it has to be done again
+        /// after each of those sweeps, which is what the caller above does.
+        /// </summary>
+        private static void Point(HirdmanBody body, Character quarry)
+        {
+            var ai = body.Ai;
+            ai.m_targetCreature = quarry;
+            ai.m_lastKnownTargetPos = quarry.transform.position;
+            ai.m_beenAtLastPos = false;
+            ai.SetAlerted(true);
         }
 
         private Character Find(HirdmanBody body, HirdmanOrder order)
