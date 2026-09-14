@@ -31,16 +31,21 @@ namespace Hirdman
         /// </summary>
         private static readonly Rule[] Rules =
         {
+            new Rule(HirdmanJob.Dismissed, "fired", "dismissed", "dismiss", "you're free",
+                "youre free", "leave my service", "get lost", "go away", "i release you",
+                "pack your things", "you're dismissed"),
             new Rule(HirdmanJob.Follow, "follow", "come with", "come along", "heel", "with me"),
             new Rule(HirdmanJob.Idle, "stop", "stay", "wait", "hold on", "stand down", "rest", "at ease"),
             new Rule(HirdmanJob.Guard, "guard", "defend", "protect", "watch over", "keep watch", "stand watch"),
+            new Rule(HirdmanJob.Haul, "put away", "put in", "put into", "store", "stash",
+                "in the chest", "from the chest", "into the chest"),
             new Rule(HirdmanJob.ChopWood, "chop", "timber", "lumber", "fell", "firewood", "wood", "tree"),
             new Rule(HirdmanJob.Mine, "mine", "mining", "ore", "dig", "quarry", "pickaxe", "rock"),
             new Rule(HirdmanJob.Farm, "farm", "sow", "plant", "seed", "field", "crop", "harvest", "garden"),
             new Rule(HirdmanJob.Cook, "cook", "kitchen", "roast", "meal", "supper", "oven", "food"),
             new Rule(HirdmanJob.Hunt, "hunt", "kill", "slay", "meat", "prey", "quarry"),
             new Rule(HirdmanJob.Explore, "explore", "scout", "survey", "map", "look around", "range", "wander"),
-            new Rule(HirdmanJob.Haul, "haul", "tidy", "sort", "organise", "organize", "put away", "chest", "store"),
+            new Rule(HirdmanJob.Haul, "haul", "tidy", "sort", "organise", "organize", "chest"),
             new Rule(HirdmanJob.Gather, "gather", "pick", "forage", "collect", "berr", "mushroom", "flower"),
         };
 
@@ -156,7 +161,9 @@ namespace Hirdman
                    || words.IndexOf("fetch", System.StringComparison.Ordinal) >= 0
                    || words.IndexOf("bring", System.StringComparison.Ordinal) >= 0
                    || words.IndexOf("from", System.StringComparison.Ordinal) >= 0
-                   || words.IndexOf("into", System.StringComparison.Ordinal) >= 0;
+                   || words.IndexOf("into", System.StringComparison.Ordinal) >= 0
+                   || words.IndexOf("store", System.StringComparison.Ordinal) >= 0
+                   || words.IndexOf("stash", System.StringComparison.Ordinal) >= 0;
         }
 
         /// <summary>

@@ -54,7 +54,8 @@ namespace Hirdman
                 case HirdmanJob.Cook: return "put raw food on the cooking fires and take it off when done";
                 case HirdmanJob.Hunt: return "kill animals or monsters nearby and collect what they drop";
                 case HirdmanJob.Haul: return "pick up loose items, put a named thing into a chest, or take a named thing out of a chest";
-                default: return "wait where you are and do nothing";
+                case HirdmanJob.Dismissed: return "leave service for good and disappear";
+                default: return "wait where you are, milling about, until told otherwise";
             }
         }
 

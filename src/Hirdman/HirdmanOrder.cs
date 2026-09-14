@@ -47,6 +47,9 @@ namespace Hirdman
 
         /// <summary>Put loose things away, and put like with like.</summary>
         Haul = 10,
+
+        /// <summary>Leave service and disappear.</summary>
+        Dismissed = 11,
     }
 
     /// <summary>
@@ -63,7 +66,7 @@ namespace Hirdman
         {
             HirdmanJob.Idle, HirdmanJob.Follow, HirdmanJob.Guard, HirdmanJob.ChopWood,
             HirdmanJob.Explore, HirdmanJob.Gather, HirdmanJob.Mine, HirdmanJob.Farm,
-            HirdmanJob.Cook, HirdmanJob.Hunt, HirdmanJob.Haul,
+            HirdmanJob.Cook, HirdmanJob.Hunt, HirdmanJob.Haul, HirdmanJob.Dismissed,
         };
 
         internal static string Name(HirdmanJob job)
@@ -80,6 +83,7 @@ namespace Hirdman
                 case HirdmanJob.Cook: return "cook";
                 case HirdmanJob.Hunt: return "hunt";
                 case HirdmanJob.Haul: return "haul";
+                case HirdmanJob.Dismissed: return "dismissed";
                 default: return "idle";
             }
         }
@@ -242,6 +246,8 @@ namespace Hirdman
                     return about == null ? "I'll go hunting." : $"I'll hunt {about}.";
                 case HirdmanJob.Haul:
                     return HaulReply();
+                case HirdmanJob.Dismissed:
+                    return "I'll be on my way.";
                 default:
                     return "I'll wait here.";
             }

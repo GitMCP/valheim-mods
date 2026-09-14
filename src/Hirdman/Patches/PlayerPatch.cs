@@ -200,6 +200,7 @@ namespace Hirdman.Patches
                 if (HirdmanContract.Of(__instance.gameObject).BelongsTo(Player.m_localPlayer))
                 {
                     text += "\n[<color=yellow><b>$KEY_AltPlace + $KEY_Use</b></color>] Look in their pack";
+                    text += "\n[<color=yellow><b>$KEY_Crouch + $KEY_Use</b></color>] Dismiss";
                 }
 
                 __result = Localization.instance.Localize(text);

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.2
+
+Pressing Use while they are working now actually stops them and puts them at your heel.
+Waiting is milling about, not standing to attention. Storing in chests can be asked
+again after it has already been done. Crouch and Use, or tell them they are dismissed,
+and they drop what they are carrying and leave. Pickaxes no longer dig a hole under
+their own feet.
+
 ## 0.3.1
 
 They walk on their feet, their pack opens like a chest, and they will put things in

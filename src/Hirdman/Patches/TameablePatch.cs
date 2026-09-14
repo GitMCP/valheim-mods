@@ -40,6 +40,14 @@ namespace Hirdman.Patches
                 return false;
             }
 
+            if (player != null && player.IsCrouching() &&
+                HirdmanContract.Of(retainer).BelongsTo(player))
+            {
+                HirdmanSpeech.Say(retainer, "I'll be on my way.");
+                __result = HirdmanBrain.Dismiss(retainer);
+                return false;
+            }
+
             var order = HirdmanOrder.Read(__instance.m_nview.GetZDO());
             var following = order.Job == HirdmanJob.Follow;
 

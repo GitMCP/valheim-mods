@@ -51,13 +51,26 @@ namespace Hirdman.Work
         }
 
         /// <summary>
-        /// Stand on the anchor. What guarding is, and what every other job falls back to
-        /// when it has run out of work: a clearing with nothing left standing in it is
-        /// not a failure, it is a retainer waiting where it was put.
+        /// Mill about the work site rather than standing on the exact spot. Used when a
+        /// job has run out of things to do. Guarding still stands; that is the point of
+        /// guarding.
         /// </summary>
         protected static bool Hold(HirdmanBody body, Vector3 anchor, float dt)
         {
-            body.Approach(dt, anchor, HirdmanBody.ArriveDistance);
+            var phase = Mathf.Floor(Time.time / 4f);
+            var angle = phase * 2.399f;
+            var reach = 2.5f + (phase % 4f);
+            var point = anchor + new Vector3(Mathf.Cos(angle) * reach, 0f, Mathf.Sin(angle) * reach);
+            if (ZoneSystem.instance != null)
+            {
+                float height;
+                if (ZoneSystem.instance.GetGroundHeight(point, out height))
+                {
+                    point.y = height;
+                }
+            }
+
+            body.Approach(dt, point, HirdmanBody.ArriveDistance);
             return true;
         }
 

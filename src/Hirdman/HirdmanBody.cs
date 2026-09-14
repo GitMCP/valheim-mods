@@ -69,6 +69,46 @@ namespace Hirdman
             _ai.StopMoving();
         }
 
+        /// <summary>
+        /// Drops a swing, a walk, and anything else a new order has to interrupt.
+        /// </summary>
+        internal void Abort()
+        {
+            Stop();
+            if (_humanoid == null)
+            {
+                return;
+            }
+
+            if (_humanoid.m_currentAttack != null)
+            {
+                _humanoid.m_currentAttack.Stop();
+                _humanoid.m_currentAttack = null;
+            }
+        }
+
+        /// <summary>
+        /// Empties the bag onto the ground. Used when they leave service, so an axe
+        /// handed to them is not deleted with them.
+        /// </summary>
+        internal void EmptyPockets()
+        {
+            var inventory = Inventory;
+            if (inventory == null || _humanoid == null)
+            {
+                return;
+            }
+
+            _humanoid.UnequipAllItems();
+            foreach (var item in inventory.GetAllItems().ToArray())
+            {
+                if (item != null)
+                {
+                    _humanoid.DropItem(inventory, item, item.m_stack);
+                }
+            }
+        }
+
         internal void Say(string line)
         {
             HirdmanSpeech.Say(Go, line);
@@ -238,11 +278,16 @@ namespace Hirdman
                 return false;
             }
 
-            var point = where != null
-                ? where.ClosestPoint(Position + Vector3.up)
-                : target.transform.position + Vector3.up;
+            var point = Aim(target, where);
 
-            _humanoid.StartAttack(null, false);
+            _ai.LookAt(point);
+
+            // A pickaxe swing on a player rig hits terrain by default and digs a hole
+            // under their feet. The blow that matters is the one aimed at the rock.
+            if (tool.m_shared.m_skillType != Skills.SkillType.Pickaxes)
+            {
+                _humanoid.StartAttack(null, false);
+            }
 
             var hit = new HitData
             {
@@ -251,12 +296,39 @@ namespace Hirdman
                 m_damage = tool.GetDamage(),
                 m_toolTier = (short)tool.m_shared.m_toolTier,
                 m_itemWorldLevel = (byte)tool.m_worldLevel,
-                m_hitCollider = where,
+                m_hitCollider = Face(target, where),
             };
             hit.SetAttacker(_humanoid);
 
             destructible.Damage(hit);
             return true;
+        }
+
+        private static Vector3 Aim(Component target, Collider where)
+        {
+            var face = Face(target, where);
+            if (face != null)
+            {
+                return face.bounds.center;
+            }
+
+            return target.transform.position + Vector3.up;
+        }
+
+        private static Collider Face(Component target, Collider where)
+        {
+            if (target == null)
+            {
+                return null;
+            }
+
+            if (where != null && where.transform.IsChildOf(target.transform) &&
+                where.GetComponent<Heightmap>() == null)
+            {
+                return where;
+            }
+
+            return target.GetComponentInChildren<Collider>();
         }
 
         /// <summary>

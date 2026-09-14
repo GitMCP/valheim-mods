@@ -29,6 +29,7 @@ namespace Hirdman.Work
         private ItemDrop _litter;
         private float _steppedAt;
         private float _askedAt;
+        private float _litterSince;
 
         internal override bool Run(HirdmanBody body, HirdmanOrder order, float dt)
         {
@@ -97,11 +98,8 @@ namespace Hirdman.Work
         /// <summary>Take a named thing out of the chests, and off the floor if it is there.</summary>
         private bool Fetch(HirdmanBody body, HirdmanOrder order, string item, float dt)
         {
-            if (_litter == null)
-            {
-                _litter = Closest<ItemDrop>(body, order.Anchor, HirdmanPlugin.WorkRadius.Value,
-                    d => d != null && HirdmanCatalog.Answers(item, d.gameObject));
-            }
+            Notice(ref _litter, Closest<ItemDrop>(body, order.Anchor, HirdmanPlugin.WorkRadius.Value,
+                d => d != null && HirdmanCatalog.Answers(item, d.gameObject)));
 
             if (_litter != null)
             {
@@ -144,11 +142,8 @@ namespace Hirdman.Work
         /// <summary>Put a named thing, or everything that is not kit, into the chests.</summary>
         private bool Stow(HirdmanBody body, HirdmanOrder order, string item, float dt)
         {
-            if (_litter == null)
-            {
-                _litter = Closest<ItemDrop>(body, order.Anchor, HirdmanPlugin.WorkRadius.Value,
-                    d => d != null && HirdmanCatalog.Answers(item, d.gameObject));
-            }
+            Notice(ref _litter, Closest<ItemDrop>(body, order.Anchor, HirdmanPlugin.WorkRadius.Value,
+                d => d != null && HirdmanCatalog.Answers(item, d.gameObject)));
 
             if (_litter != null)
             {
@@ -199,7 +194,7 @@ namespace Hirdman.Work
             // is dealt with before anything inside a chest.
             if (_litter == null)
             {
-                _litter = Closest<ItemDrop>(body, order.Anchor, HirdmanPlugin.WorkRadius.Value, null);
+                Notice(ref _litter, Closest<ItemDrop>(body, order.Anchor, HirdmanPlugin.WorkRadius.Value, null));
             }
 
             if (_litter != null)
@@ -236,6 +231,12 @@ namespace Hirdman.Work
                 return true;
             }
 
+            if (Time.time - _litterSince > 4f)
+            {
+                _litter = null;
+                return true;
+            }
+
             if (!body.Approach(dt, _litter.transform.position, Reach))
             {
                 return true;
@@ -257,6 +258,17 @@ namespace Hirdman.Work
             _litter = null;
             Scoop(body, Reach * 2f, null);
             return true;
+        }
+
+        private void Notice(ref ItemDrop litter, ItemDrop found)
+        {
+            if (litter != null || found == null)
+            {
+                return;
+            }
+
+            litter = found;
+            _litterSince = Time.time;
         }
 
         /// <summary>Empties the retainer's own arms into the right chests.</summary>

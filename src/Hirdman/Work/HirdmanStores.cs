@@ -52,9 +52,12 @@ namespace Hirdman.Work
                 return false;
             }
 
-            // Somebody has it open. Editing it underneath them loses whichever of the two
-            // edits is written second.
-            if (container.IsInUse())
+            // Somebody has it open in their inventory window. Editing it underneath them
+            // loses whichever of the two edits is written second. A chest that merely
+            // thinks it is in use after we last wrote it is still fair game; otherwise
+            // one successful store would lock the box forever.
+            var gui = InventoryGui.instance;
+            if (gui != null && gui.m_currentContainer == container)
             {
                 return false;
             }

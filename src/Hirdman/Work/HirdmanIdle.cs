@@ -152,7 +152,8 @@ namespace Hirdman.Work
     {
         internal override bool Run(HirdmanBody body, HirdmanOrder order, float dt)
         {
-            return Hold(body, order.Anchor, dt);
+            body.Approach(dt, order.Anchor, HirdmanBody.ArriveDistance);
+            return true;
         }
     }
 }

@@ -4,7 +4,7 @@ Hire NPC retainers and order them about in plain language.
 
 A *hirdman* was a member of a chieftain's retinue. Build an outpost, pay in coins, and
 somebody signs on and comes to stand by it. Tell them what you want in your own words and
-they will work out which of eleven jobs you meant.
+they will work out which of twelve jobs you meant.
 
 They work under the same rules you play by. They spawn with empty pockets, so an axe
 for chopping and a pickaxe for mining have to come from you; they will ask if you send
@@ -52,6 +52,7 @@ put wood in the chest
 get iron from the chest
 tidy the chests
 wait here
+you're dismissed
 ```
 
 Orders about a particular thing can name it — "gather raspberries", "mine copper", "hunt
@@ -72,9 +73,11 @@ nothing in particular and they take whatever the job applies to.
 | Cook | Put raw food on the fires and take it off before it burns. |
 | Hunt | Kill things and collect what they drop. |
 | Haul | Pick up what is on the floor, and sort the chests. Name a thing to put it in or take it out: "put wood in the chest", "get iron from the chest". |
+| Dismissed | Drop what they are carrying and leave your service. |
 
-Press **Use** on a retainer to tell them to follow or wait. Hold **Alt + Use** on one
-of yours to look in their pack.
+Press **Use** on a retainer to tell them to follow or wait — even if they are in the
+middle of a job. Hold **Alt + Use** on one of yours to look in their pack. **Crouch +
+Use** dismisses them: they drop their things and go.
 
 Work happens where the retainer is standing when you tell it, so "chop wood" and "chop
 wood here" are the same order. They range about 24 m from that spot, which is a server
@@ -99,7 +102,7 @@ What it finds goes on your map only, because exploration is saved with your char
 
 Optional, and off by default. Common phrasings are recognised instantly with no model
 installed at all; with a model on, anything the keywords could not place is handed to one
-running on your own machine, which picks one of the same eleven orders. Nothing is sent
+running on your own machine, which picks one of the same twelve orders. Nothing is sent
 over the internet, and nothing is sent to the server: your machine turns the sentence into
 an order, and only the order travels.
 
@@ -119,7 +122,7 @@ Then set `Model / Enabled` to `true` in `BepInEx/config/com.gitmcp.hirdman.cfg`.
 | `Model / TimeoutSeconds` | `8` | How long to wait before giving up on it. |
 | `Model / KeepAlive` | `5m` | How long the model stays in memory between orders. |
 
-Choosing between eleven orders is a small job, so a small model does it well: Qwen3 4B at
+Choosing between twelve orders is a small job, so a small model does it well: Qwen3 4B at
 Q4 is about 2.5 GB and answers in a second or two. Valheim wants your graphics card too,
 though, so if the game starts stuttering, either set `KeepAlive` to `0` so the model is
 unloaded after each order, or run a smaller model on the processor instead and leave the

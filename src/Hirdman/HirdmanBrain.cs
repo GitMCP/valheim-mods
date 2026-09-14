@@ -29,12 +29,14 @@ namespace Hirdman
         private HirdmanBag _bag;
 
         private const string OrderRpc = "Hirdman_Order";
+        private const string DismissRpc = "Hirdman_Dismiss";
 
         private HirdmanOrder _order;
         private HirdmanWork _work;
         private float _polledAt;
         private bool _carrying;
         private bool _rpc;
+        private bool _wandering;
 
         private void Awake()
         {
@@ -64,6 +66,7 @@ namespace Hirdman
             }
 
             _nview.Register<ZPackage>(OrderRpc, RPC_Order);
+            _nview.Register(DismissRpc, RPC_Dismiss);
             _rpc = true;
         }
 
@@ -77,6 +80,14 @@ namespace Hirdman
             var order = HirdmanOrder.Unpack(package);
             order.Write(_nview.GetZDO());
             Heard();
+        }
+
+        private void RPC_Dismiss(long sender)
+        {
+            if (_nview != null && _nview.IsValid() && _nview.IsOwner())
+            {
+                Leave();
+            }
         }
 
         /// <summary>
@@ -124,10 +135,21 @@ namespace Hirdman
             return true;
         }
 
-        /// <summary>The order changed; pick it up on the next think rather than waiting.</summary>
+        /// <summary>
+        /// The order changed; pick it up now rather than waiting for the next poll.
+        /// Pressing Use to follow has to interrupt a swing, not queue politely behind it.
+        /// Giving the same chest order again also has to start a fresh search, because a
+        /// haul that has already put everything away will otherwise decide there is
+        /// nothing to do.
+        /// </summary>
         internal void Heard()
         {
-            _polledAt = 0f;
+            if (_nview == null || !_nview.IsValid())
+            {
+                return;
+            }
+
+            Apply(HirdmanOrder.Read(_nview.GetZDO()), restart: true);
         }
 
         /// <summary>Writes the bag and puts on whatever armour is in it.</summary>
@@ -193,6 +215,12 @@ namespace Hirdman
 
             PollOrder();
 
+            if (_order.Job == HirdmanJob.Dismissed)
+            {
+                Leave();
+                return true;
+            }
+
             // Something dropped at their feet is for them, whether they are working or
             // walking with you. Jobs also scoop what they themselves just made; this is
             // the case of an employer handing over an axe.
@@ -206,12 +234,21 @@ namespace Hirdman
             // circling and weapon choice for free.
             if (_ai.GetTargetCreature() != null && _order.Job != HirdmanJob.Hunt)
             {
+                Wander(false);
                 return false;
             }
 
-            // Following is the game's own behaviour, driven by a field rather than by a
-            // job, so there is nothing to run and nothing to take the frame for.
-            return _order.Job != HirdmanJob.Follow && _work.Run(_body, _order, dt);
+            // Following and waiting are the game's own behaviour: a tamed creature that
+            // is not following mills about a patrol point. Taking those frames would
+            // leave them standing to attention, which is the opposite of waiting.
+            if (_order.Job == HirdmanJob.Follow || _order.Job == HirdmanJob.Idle)
+            {
+                Wander(_order.Job == HirdmanJob.Idle);
+                return false;
+            }
+
+            Wander(false);
+            return _work.Run(_body, _order, dt);
         }
 
         /// <summary>
@@ -226,27 +263,97 @@ namespace Hirdman
                 return;
             }
 
-            _polledAt = Time.time;
-
             var next = HirdmanOrder.Read(_nview.GetZDO());
             if (next.SameAs(_order))
             {
+                _polledAt = Time.time;
                 return;
             }
 
+            Apply(next, restart: false);
+        }
+
+        private void Apply(HirdmanOrder next, bool restart)
+        {
             var was = _order.Job;
             _order = next;
+            _polledAt = Time.time;
+            _wandering = false;
 
-            // A job remembers the tree it chose and how long it has been swinging at it.
-            // None of that survives being told to do something else.
-            if (was != next.Job)
+            if (restart || was != next.Job)
             {
                 _work = HirdmanWork.For(next.Job);
             }
 
-            // Vanilla following is driven by this one field, so the order is expressed by
-            // setting it and then staying out of the way.
+            _body.Abort();
             _ai.SetFollowTarget(next.Job == HirdmanJob.Follow ? Master() : null);
+        }
+
+        /// <summary>
+        /// Waiting is vanilla milling around the spot they were told to wait, not
+        /// standing on it. The dvergr AI already knows how to pick a reachable point;
+        /// our own idle walks used to pick ones with no path and then treat that as
+        /// having arrived, which looks like standing still.
+        /// </summary>
+        private void Wander(bool idle)
+        {
+            if (idle)
+            {
+                _ai.m_randomMoveRange = 8f;
+                _ai.m_randomMoveInterval = 2.5f;
+                if (!_wandering)
+                {
+                    _wandering = true;
+                    _ai.SetPatrolPoint(_order.Anchor);
+                }
+
+                return;
+            }
+
+            if (_wandering)
+            {
+                _wandering = false;
+                _ai.m_randomMoveRange = 0f;
+                _ai.m_randomMoveInterval = 0f;
+                _ai.ResetPatrolPoint();
+            }
+        }
+
+        /// <summary>Sends a retainer out of service, from any peer.</summary>
+        internal static bool Dismiss(GameObject retainer)
+        {
+            var nview = retainer == null ? null : retainer.GetComponent<ZNetView>();
+            if (nview == null || !nview.IsValid())
+            {
+                return false;
+            }
+
+            if (nview.IsOwner())
+            {
+                var brain = retainer.GetComponent<HirdmanBrain>();
+                if (brain != null)
+                {
+                    brain.Leave();
+                }
+
+                return true;
+            }
+
+            nview.InvokeRPC(DismissRpc);
+            return true;
+        }
+
+        /// <summary>
+        /// Drops what they were carrying so an axe is not deleted with them, then
+        /// removes the creature. Only the owner may destroy the ZDO.
+        /// </summary>
+        private void Leave()
+        {
+            _body.EmptyPockets();
+            if (ZNetScene.instance != null)
+            {
+                ZNetScene.instance.Destroy(gameObject);
+            }
         }
 
         private GameObject Master()

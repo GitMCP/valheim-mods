@@ -51,7 +51,15 @@ namespace Hirdman.Work
                 return Hold(body, order.Anchor, dt);
             }
 
-            if (!body.Approach(dt, _rock.transform.position, Reach))
+            var stand = StandBy(_rock, body.Position);
+            if (body.Position.y < stand.y - 1.2f)
+            {
+                // In a hole under the deposit. Climb out; do not swing down.
+                body.Approach(dt, stand, HirdmanBody.ArriveDistance);
+                return true;
+            }
+
+            if (!body.Approach(dt, stand, Reach))
             {
                 return true;
             }
@@ -68,6 +76,35 @@ namespace Hirdman.Work
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// A point on the ground beside the rock, not its centre, which for a boulder is
+        /// often inside the mesh and for a deposit on a slope is above the dirt. Standing
+        /// under it is how a retainer starts mining the floor.
+        /// </summary>
+        private static Vector3 StandBy(Component rock, Vector3 from)
+        {
+            var pos = rock.transform.position;
+            var dir = from - pos;
+            dir.y = 0f;
+            if (dir.sqrMagnitude < 0.01f)
+            {
+                dir = Vector3.forward;
+            }
+
+            dir.Normalize();
+            var stand = pos + dir * 1.8f;
+            if (ZoneSystem.instance != null)
+            {
+                float height;
+                if (ZoneSystem.instance.GetGroundHeight(stand, out height))
+                {
+                    stand.y = height;
+                }
+            }
+
+            return stand;
         }
 
         private void Find(HirdmanBody body, HirdmanOrder order)
@@ -97,7 +134,7 @@ namespace Hirdman.Work
 
                 shortest = distance;
                 _rock = rock;
-                _face = collider;
+                _face = Terrain(collider) ? null : collider;
             }
         }
 
@@ -128,6 +165,12 @@ namespace Hirdman.Work
 
             var breakable = collider.GetComponentInParent<Destructible>();
             return breakable != null && Shell(breakable) ? breakable : null;
+        }
+
+        private static bool Terrain(Collider collider)
+        {
+            return collider == null || collider.GetComponent<Heightmap>() != null ||
+                   collider.gameObject.layer == LayerMask.NameToLayer("terrain");
         }
 
         /// <summary>
