@@ -95,8 +95,8 @@ namespace Hirdman.Work
 
         /// <summary>
         /// Is this a thing to mine? Rock that breaks into pieces, rock that breaks all at
-        /// once, and the thin shells the game puts around silver and gold to hide them
-        /// until the first blow - but never anything a player put there.
+        /// once, and the thin shell the game puts over a deposit to hide it until the
+        /// first blow - but never anything a player put there.
         /// </summary>
         private static Component Deposit(Collider collider)
         {
@@ -119,7 +119,40 @@ namespace Hirdman.Work
             }
 
             var breakable = collider.GetComponentInParent<Destructible>();
-            return breakable != null && breakable.m_minToolTier > 0 ? breakable : null;
+            return breakable != null && Shell(breakable) ? breakable : null;
+        }
+
+        /// <summary>
+        /// Is this breakable thing a deposit rather than scenery?
+        ///
+        /// Most ore is not what it appears to be. A copper boulder is a shell with one
+        /// point of health and no ore in it at all; the first blow destroys it and leaves
+        /// behind the rock that can actually be mined. Judging those shells by the tool
+        /// they demand does not work, because copper, tin and the muddy scrap piles
+        /// demand nothing - so the obvious rule quietly skips exactly the ores a player
+        /// is most likely to ask for, and a retainer told to mine copper stands in a
+        /// field of it reporting that there is none.
+        ///
+        /// What a deposit does have is something to leave behind: either loot of its own,
+        /// or the mineable rock underneath. Trees and berry bushes are somebody else's
+        /// work, so they are turned away even when they would otherwise qualify.
+        /// </summary>
+        private static bool Shell(Destructible breakable)
+        {
+            if (breakable.GetDestructibleType() == DestructibleType.Tree ||
+                breakable.GetComponent<Pickable>() != null)
+            {
+                return false;
+            }
+
+            if (breakable.m_minToolTier > 0 || breakable.GetComponent<DropOnDestroyed>() != null)
+            {
+                return true;
+            }
+
+            var leaves = breakable.m_spawnWhenDestroyed;
+            return leaves != null &&
+                   (leaves.GetComponent<MineRock5>() != null || leaves.GetComponent<MineRock>() != null);
         }
     }
 }
