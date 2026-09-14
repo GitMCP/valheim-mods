@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.0
+
+Retainers are people now, and they no longer arrive already armed.
+
+They use the player model — random face, hair, beard, skin — and the player's own
+animations for axes, pickaxes, swords and bows. Armour they are given is worn, shown,
+and counted: a bronze plate on a retainer stops as much as it does on you.
+
+They spawn with empty pockets. An axe for chopping and a pickaxe for mining have to be
+handed to them, and they will say so if you send them to work without one. They pick up
+what they drop the way you do, into a proper inventory, and they will not stand at a
+birch with a stone axe forever: anything too hard for the tool they have is skipped.
+
 ## 0.2.0
 
 Retainers are hired rather than built, and there can be several of them.

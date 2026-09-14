@@ -1,6 +1,6 @@
 {
   "name": "Hirdman",
-  "version_number": "0.1.0",
+  "version_number": "0.3.0",
   "website_url": "https://github.com/GitMCP/valheim-mods",
   "description": "Hire NPC retainers and order them about in plain language.",
   "dependencies": [

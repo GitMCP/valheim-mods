@@ -35,11 +35,21 @@ namespace Hirdman.Work
 
         internal override bool Run(HirdmanBody body, HirdmanOrder order, float dt)
         {
+            if (body.Need(Skills.SkillType.Axes, "I have no axe. Give me one and I'll chop.") == null)
+            {
+                _tree = null;
+                return Hold(body, order.Anchor, dt);
+            }
+
             if (_tree == null && Time.time - _searchedAt > SearchInterval)
             {
                 _searchedAt = Time.time;
                 _tree = Find(body, order.Anchor);
                 Scoop(body, HirdmanPlugin.HaulRadius, IsTimber);
+                if (_tree == null)
+                {
+                    body.Ask("Nothing here I can cut with this axe.");
+                }
             }
 
             if (_tree == null)
@@ -53,17 +63,16 @@ namespace Hirdman.Work
                 return true;
             }
 
+            var axe = body.Wield(Skills.SkillType.Axes);
+            if (axe == null)
+            {
+                _tree = null;
+                return Hold(body, order.Anchor, dt);
+            }
+
             if (Time.time - _swungAt > SwingInterval)
             {
                 _swungAt = Time.time;
-
-                var axe = body.Wield(HirdmanRetainer.Axe);
-                if (axe == null)
-                {
-                    HirdmanPlugin.Log.LogWarning("A retainer has no axe in hand and cannot chop.");
-                    _tree = null;
-                    return true;
-                }
 
                 if (!body.Strike(_tree, axe))
                 {
@@ -76,10 +85,22 @@ namespace Hirdman.Work
 
         private static Component Find(HirdmanBody body, Vector3 anchor)
         {
-            // A standing tree first, and a felled trunk if there is nothing left
-            // standing, because a log still needs cutting up before it is wood.
-            Component tree = Closest<TreeBase>(body, anchor, HirdmanPlugin.WorkRadius.Value, null);
-            return tree != null ? tree : Closest<TreeLog>(body, anchor, HirdmanPlugin.WorkRadius.Value, null);
+            // A stone axe will not bring down a birch. The game says so with a floating
+            // "Too hard" and no damage, and a retainer that does not read that will stand
+            // at the nearest trunk forever. Skip anything the axe in the bag cannot cut,
+            // and take a log if nothing is still standing.
+            bool Chopable(TreeBase tree)
+            {
+                return body.CanBreak(tree.m_minToolTier, Skills.SkillType.Axes);
+            }
+
+            bool Splittable(TreeLog log)
+            {
+                return body.CanBreak(log.m_minToolTier, Skills.SkillType.Axes);
+            }
+
+            Component tree = Closest<TreeBase>(body, anchor, HirdmanPlugin.WorkRadius.Value, Chopable);
+            return tree != null ? tree : Closest<TreeLog>(body, anchor, HirdmanPlugin.WorkRadius.Value, Splittable);
         }
 
         private static bool IsTimber(GameObject drop)

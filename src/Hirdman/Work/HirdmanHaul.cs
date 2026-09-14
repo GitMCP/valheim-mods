@@ -31,8 +31,7 @@ namespace Hirdman.Work
             // is dealt with before anything inside a chest.
             if (_litter == null)
             {
-                _litter = Closest<ItemDrop>(body, order.Anchor, HirdmanPlugin.WorkRadius.Value,
-                    d => d.CanPickup(false));
+                _litter = Closest<ItemDrop>(body, order.Anchor, HirdmanPlugin.WorkRadius.Value, null);
             }
 
             if (_litter != null)
@@ -81,7 +80,7 @@ namespace Hirdman.Work
 
             foreach (var item in arms.GetAllItems().ToArray())
             {
-                if (item == null || HirdmanRetainer.IsKit(item))
+                if (item == null || HirdmanRetainer.Keep(item))
                 {
                     continue;
                 }

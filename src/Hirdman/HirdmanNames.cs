@@ -36,7 +36,16 @@ namespace Hirdman
                 nview.ClaimOwnership();
             }
 
-            nview.GetZDO().Set(NameKey, Roll[Random.Range(0, Roll.Length)]);
+            var name = Roll[Random.Range(0, Roll.Length)];
+            nview.GetZDO().Set(NameKey, name);
+            nview.GetZDO().Set(ZDOVars.s_playerName, name);
+            nview.GetZDO().Set(ZDOVars.s_tamedName, name);
+
+            var player = retainer.GetComponent<Player>();
+            if (player != null)
+            {
+                player.SetPlayerID(nview.GetZDO().m_uid.ID, name);
+            }
         }
 
         internal static string Of(GameObject retainer)

@@ -122,6 +122,8 @@ namespace Hirdman
             {
                 _carrying = true;
                 _bag.Load();
+                HirdmanLooks.Dress(gameObject);
+                _body.Wear();
             }
 
             _bag.Keep();

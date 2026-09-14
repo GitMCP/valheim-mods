@@ -205,6 +205,7 @@ namespace Hirdman
             var retainer = Object.Instantiate(prefab, spot, transform.rotation);
 
             HirdmanNames.Christen(retainer);
+            HirdmanLooks.Dress(retainer);
 
             HirdmanContract.Sign(retainer, new HirdmanContract
             {

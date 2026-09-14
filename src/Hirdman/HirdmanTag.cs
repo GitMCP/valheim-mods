@@ -12,5 +12,26 @@ namespace Hirdman
     /// </summary>
     internal class HirdmanTag : MonoBehaviour
     {
+        /// <summary>
+        /// Is this one of ours? Used by patches that sit on <see cref="Player"/>, because
+        /// a retainer is now a player rig and those methods run for every player in the
+        /// scene. The prefab name covers the moment of cloning, when this component has
+        /// not been added yet and <see cref="Player.Awake"/> has already run.
+        /// </summary>
+        internal static bool On(Component thing)
+        {
+            if (thing == null)
+            {
+                return false;
+            }
+
+            if (thing.GetComponent<HirdmanTag>() != null)
+            {
+                return true;
+            }
+
+            var name = thing.name;
+            return name.StartsWith(HirdmanRetainer.PrefabName, System.StringComparison.Ordinal);
+        }
     }
 }

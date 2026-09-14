@@ -29,11 +29,21 @@ namespace Hirdman.Work
 
         internal override bool Run(HirdmanBody body, HirdmanOrder order, float dt)
         {
+            if (body.Need(Skills.SkillType.Pickaxes, "I have no pickaxe. I'll need one before I can mine.") == null)
+            {
+                _rock = null;
+                return Hold(body, order.Anchor, dt);
+            }
+
             if (_rock == null && Time.time - _searchedAt > SearchInterval)
             {
                 _searchedAt = Time.time;
                 Find(body, order);
                 Scoop(body, HirdmanPlugin.HaulRadius, null);
+                if (_rock == null)
+                {
+                    body.Ask("Nothing here I can break with this pickaxe.");
+                }
             }
 
             if (_rock == null)
@@ -50,15 +60,8 @@ namespace Hirdman.Work
             {
                 _swungAt = Time.time;
 
-                var pick = body.Wield(HirdmanRetainer.Pickaxe);
-                if (pick == null)
-                {
-                    HirdmanPlugin.Log.LogWarning("A retainer has no pickaxe and cannot mine.");
-                    _rock = null;
-                    return true;
-                }
-
-                if (!body.Strike(_rock, pick, _face))
+                var pick = body.Wield(Skills.SkillType.Pickaxes);
+                if (pick == null || !body.Strike(_rock, pick, _face))
                 {
                     _rock = null;
                 }
@@ -77,6 +80,11 @@ namespace Hirdman.Work
             {
                 var rock = Deposit(collider);
                 if (rock == null || !HirdmanCatalog.Answers(order.Subject, rock.gameObject))
+                {
+                    continue;
+                }
+
+                if (!body.CanBreak(MinTier(rock), Skills.SkillType.Pickaxes))
                 {
                     continue;
                 }
@@ -153,6 +161,21 @@ namespace Hirdman.Work
             var leaves = breakable.m_spawnWhenDestroyed;
             return leaves != null &&
                    (leaves.GetComponent<MineRock5>() != null || leaves.GetComponent<MineRock>() != null);
+        }
+
+        private static int MinTier(Component rock)
+        {
+            switch (rock)
+            {
+                case MineRock5 broken:
+                    return broken.m_minToolTier;
+                case MineRock legacy:
+                    return legacy.m_minToolTier;
+                case Destructible shell:
+                    return shell.m_minToolTier;
+                default:
+                    return 0;
+            }
         }
     }
 }

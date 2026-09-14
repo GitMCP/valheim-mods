@@ -49,6 +49,8 @@ namespace Hirdman.Work
                 {
                     _quarryHealth = _quarry.GetHealth();
                     _hurtAt = Time.time;
+                    body.WieldCombat();
+                    body.Wear();
                     Point(body, _quarry);
                 }
             }

@@ -6,9 +6,12 @@ A *hirdman* was a member of a chieftain's retinue. Build an outpost, pay in coin
 somebody signs on and comes to stand by it. Tell them what you want in your own words and
 they will work out which of eleven jobs you meant.
 
-They work under the same rules you play by: a real axe out of their own inventory, and a
-stone one will not bring down a birch for them either. They fight what attacks them, they
-will not swing at your buildings, and they put what they gather in your chests.
+They work under the same rules you play by. They spawn with empty pockets, so an axe
+for chopping and a pickaxe for mining have to come from you; they will ask if you send
+them to work without one. A stone axe will not bring down a birch for them either, and
+they will walk past it to a tree they can actually cut. Armour they are given is worn
+and counted, and they look like people because they use the player model and the
+player's own animations.
 
 ## Installation
 
@@ -129,8 +132,6 @@ pushed to everyone.
 | `Household / WorkRadius` | `24` | How far from the work site they range. |
 | `Household / ScoutRange` | `48` | How far a scout circles from you. |
 | `Household / ScoutSight` | `80` | How much map a scout uncovers around itself. |
-| `Household / Axe` | `AxeStone` | The axe they carry, by prefab name. |
-| `Household / Pickaxe` | `PickaxeAntler` | The pickaxe they carry, by prefab name. |
 
 `Talking / Key` (default `G`) opens the chat window and is yours alone.
 

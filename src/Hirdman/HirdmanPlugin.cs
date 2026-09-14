@@ -55,8 +55,6 @@ namespace Hirdman
         internal static ConfigEntry<float> WorkRadius;
         internal static ConfigEntry<float> ScoutRange;
         internal static ConfigEntry<float> ScoutSight;
-        internal static ConfigEntry<string> AxeItem;
-        internal static ConfigEntry<string> PickaxeItem;
 
         internal static ConfigEntry<KeyboardShortcut> TalkKey;
 
@@ -85,7 +83,6 @@ namespace Hirdman
             // Cloning vanilla prefabs is only possible once the game has loaded its own,
             // which happens long after plugin Awake.
             PrefabManager.OnVanillaPrefabsAvailable += RegisterContent;
-            ItemManager.OnItemsRegistered += RegisterKit;
         }
 
         /// <summary>
@@ -143,26 +140,6 @@ namespace Hirdman
                 new ConfigDescription(
                     "How much map a scout uncovers around itself, in metres.",
                     new AcceptableValueRange<float>(20f, 200f),
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-
-            AxeItem = Config.Bind(
-                "Household",
-                "Axe",
-                "AxeStone",
-                new ConfigDescription(
-                    "The axe every retainer carries, by prefab name. Its tool tier decides " +
-                    "which trees they can fell. Takes effect on restart.",
-                    null,
-                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
-
-            PickaxeItem = Config.Bind(
-                "Household",
-                "Pickaxe",
-                "PickaxeAntler",
-                new ConfigDescription(
-                    "The pickaxe every retainer carries, by prefab name. Its tool tier " +
-                    "decides which ore they can break. Takes effect on restart.",
-                    null,
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
         }
 
@@ -249,12 +226,6 @@ namespace Hirdman
             // silently contributes nothing, so report the count rather than assuming.
             var patched = _harmony.GetPatchedMethods().Count();
             Log.LogInfo($"{PluginName} {PluginVersion} registered its content, {patched} method(s) patched.");
-        }
-
-        private void RegisterKit()
-        {
-            ItemManager.OnItemsRegistered -= RegisterKit;
-            HirdmanRetainer.RegisterKit();
         }
 
         private void Update()

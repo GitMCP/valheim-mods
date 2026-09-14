@@ -1,3 +1,4 @@
+using System.Reflection;
 using Jotunn.Configs;
 using Jotunn.Entities;
 using Jotunn.Managers;
@@ -6,36 +7,27 @@ using UnityEngine;
 namespace Hirdman
 {
     /// <summary>
-    /// Builds a retainer out of a dvergr.
+    /// Builds a retainer out of a player.
     ///
-    /// Of the 157 humanoids in the game, the dvergr is the only one that arrives with
-    /// everything a working companion needs already attached: it is bipedal and clothed,
-    /// it carries a <see cref="VisEquipment"/> so the gear in its hands is the gear you
-    /// gave it, it has an <see cref="NpcTalk"/> for speech, and its
-    /// <see cref="BaseAI.m_pathAgentType"/> is the humanoid one, so it walks and swims
-    /// where a person would.
+    /// The dvergr was a working companion with the wrong face and the wrong animator:
+    /// <c>swing_axe</c> is a player clip, and a dvergr has no such state, so a swing
+    /// returned true and hit nothing. Armour numbers lived on <see cref="Player"/> too,
+    /// applied only when <see cref="Character.IsPlayer"/> was true. There is no way to
+    /// keep the look, the clips and the armour math without keeping the component,
+    /// because <see cref="Player"/> is the <see cref="Humanoid"/>.
     ///
-    /// The player rig would look more human, but it is a <see cref="Player"/> - input,
-    /// skills, food, respawn - with no AI at all, and swapping that out for a
-    /// <see cref="Humanoid"/> is a different and much larger job. The dvergr is what
-    /// makes a working retainer possible now.
+    /// What is added is the AI a player does not have. What is taken away is everything
+    /// the component then does because it believes it is the person at the keyboard -
+    /// that work is in <c>PlayerPatch</c>. What is not given is tools: a retainer who
+    /// arrives with an axe will never need one handed to them, and the whole point of
+    /// an inventory is that the player decides what goes in it.
     /// </summary>
     internal static class HirdmanRetainer
     {
         internal const string PrefabName = "hirdman_retainer";
 
-        private const string CloneSource = "Dverger";
-
-        /// <summary>
-        /// What a retainer carries. Felling a tree or breaking rock with your hands is
-        /// not a thing the game lets anyone do, and the tier of what is in its hands is
-        /// what decides how much of the world it can touch - a stone axe will not bring
-        /// down a birch and an antler pick will not scratch iron, for a retainer exactly
-        /// as for a player.
-        /// </summary>
-        internal static string Axe => HirdmanPlugin.AxeItem.Value;
-
-        internal static string Pickaxe => HirdmanPlugin.PickaxeItem.Value;
+        private const string CloneSource = "Player";
+        private const string AiDonor = "Dverger";
 
         internal static bool Register()
         {
@@ -51,22 +43,12 @@ namespace Hirdman
                 return false;
             }
 
-            // No dvergr loot from something that was never a dvergr.
-            var drops = prefab.GetComponent<CharacterDrop>();
-            if (drops != null)
-            {
-                drops.m_drops.Clear();
-            }
-
             prefab.AddComponent<HirdmanTag>();
             prefab.AddComponent<HirdmanBrain>();
 
             var config = new CreatureConfig
             {
                 Name = $"${PrefabName}_name",
-
-                // The faction tamed animals use, so nothing in the world treats a
-                // retainer as prey and no player can swing at one by accident.
                 Faction = Character.Faction.Players,
             };
 
@@ -81,26 +63,42 @@ namespace Hirdman
         }
 
         /// <summary>
-        /// Is this part of what the retainer came with? Its tools are not loot and must
-        /// never end up in a chest, or the first thing a hauling retainer does is put
-        /// its own axe away and stop being able to work.
+        /// Gear the retainer should keep. Hauling sorts everything else into chests, and
+        /// without this the first thing a hauling retainer does is put its axe away and
+        /// stop being able to work.
         /// </summary>
-        internal static bool IsKit(ItemDrop.ItemData item)
+        internal static bool Keep(ItemDrop.ItemData item)
         {
-            if (item == null || item.m_dropPrefab == null)
+            if (item?.m_shared == null)
             {
-                return false;
+                return true;
             }
 
-            var name = item.m_dropPrefab.name;
-            return name == Axe || name == Pickaxe;
+            if (item.m_equipped)
+            {
+                return true;
+            }
+
+            switch (item.m_shared.m_itemType)
+            {
+                case ItemDrop.ItemData.ItemType.Helmet:
+                case ItemDrop.ItemData.ItemType.Chest:
+                case ItemDrop.ItemData.ItemType.Legs:
+                case ItemDrop.ItemData.ItemType.Shoulder:
+                case ItemDrop.ItemData.ItemType.Shield:
+                    return true;
+            }
+
+            switch (item.m_shared.m_skillType)
+            {
+                case Skills.SkillType.Axes:
+                case Skills.SkillType.Pickaxes:
+                    return true;
+            }
+
+            return false;
         }
 
-        /// <summary>
-        /// Makes it yours. A retainer is not tamed by feeding it: it is hired, so it
-        /// starts tamed, and it is commandable, which is what gives the vanilla
-        /// follow-and-wait handling something to hang on.
-        /// </summary>
         private static bool Enlist(GameObject prefab)
         {
             var humanoid = prefab.GetComponent<Humanoid>();
@@ -111,10 +109,18 @@ namespace Hirdman
             }
 
             humanoid.m_faction = Character.Faction.Players;
-
-            // Its own kit is a dvergr's. What it should carry is decided later, once
-            // ObjectDB can resolve an item prefab by name.
             humanoid.m_defaultItems = new GameObject[0];
+            humanoid.m_randomWeapon = new GameObject[0];
+            humanoid.m_randomArmor = new GameObject[0];
+            humanoid.m_randomShield = new GameObject[0];
+            humanoid.m_randomSets = new Humanoid.ItemSet[0];
+            humanoid.m_randomItems = new Humanoid.RandomItem[0];
+
+            var controller = prefab.GetComponent<PlayerController>();
+            if (controller != null)
+            {
+                controller.enabled = false;
+            }
 
             var tameable = prefab.GetComponent<Tameable>();
             if (tameable == null)
@@ -129,35 +135,24 @@ namespace Hirdman
             return true;
         }
 
-        /// <summary>
-        /// Stops it behaving like something that lives in Mistlands: no wandering off,
-        /// no picking fights. It keeps its alert range, because a retainer that will not
-        /// defend itself is worse than no retainer.
-        /// </summary>
         private static bool Calm(GameObject prefab)
         {
-            var ai = prefab.GetComponent<MonsterAI>();
-            if (ai == null)
+            if (prefab.GetComponent<MonsterAI>() == null && !BorrowAi(prefab))
             {
-                HirdmanPlugin.Log.LogError($"'{CloneSource}' has no MonsterAI component.");
+                HirdmanPlugin.Log.LogError($"Could not give '{PrefabName}' a MonsterAI.");
                 return false;
             }
 
-            // Wandering is this mod's business now: an idle retainer drifts around its
-            // home on purpose, and vanilla's own drift would fight with it.
+            var ai = prefab.GetComponent<MonsterAI>();
             ai.m_randomMoveRange = 0f;
             ai.m_randomMoveInterval = 0f;
-
             ai.m_enableHuntPlayer = false;
-
-            // Trolls break walls through this flag. A retainer swinging at your house
-            // while it chases a greyling would be worse than the greyling.
             ai.m_attackPlayerObjects = false;
-
             ai.m_afraidOfFire = false;
             ai.m_avoidFire = false;
             ai.m_fleeIfLowHealth = 0f;
             ai.m_fleeIfNotAlerted = false;
+            ai.m_pathAgentType = Pathfinding.AgentType.Humanoid;
 
             if (ai.m_consumeItems != null)
             {
@@ -168,35 +163,40 @@ namespace Hirdman
         }
 
         /// <summary>
-        /// Hands every retainer prefab its tools. Separate from <see cref="Register"/>
-        /// because default items are item prefabs, and ObjectDB cannot resolve those
-        /// until items have been registered.
+        /// A player has no AI. The dvergr does, and its humanoid pathing, view and
+        /// hearing are the right starting point for a person who walks.
         /// </summary>
-        internal static void RegisterKit()
+        private static bool BorrowAi(GameObject dest)
         {
-            var prefab = PrefabManager.Instance.GetPrefab(PrefabName);
-            var humanoid = prefab == null ? null : prefab.GetComponent<Humanoid>();
-            if (humanoid == null)
+            var donor = PrefabManager.Instance.GetPrefab(AiDonor);
+            var from = donor == null ? null : donor.GetComponent<MonsterAI>();
+            var to = dest.AddComponent<MonsterAI>();
+            if (from == null)
             {
-                HirdmanPlugin.Log.LogWarning("No retainer prefab to equip.");
-                return;
+                return to != null;
             }
 
-            var kit = new System.Collections.Generic.List<GameObject>();
-            foreach (var name in new[] { Axe, Pickaxe })
+            for (var type = typeof(MonsterAI); type != null && type != typeof(MonoBehaviour); type = type.BaseType)
             {
-                var item = ObjectDB.instance == null ? null : ObjectDB.instance.GetItemPrefab(name);
-                if (item == null)
+                foreach (var field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
                 {
-                    HirdmanPlugin.Log.LogWarning($"Could not resolve '{name}'; retainers will go without it.");
-                    continue;
-                }
+                    if (field.IsLiteral)
+                    {
+                        continue;
+                    }
 
-                kit.Add(item);
+                    var value = field.GetValue(from);
+                    if (value is Component component && component != null &&
+                        component.transform.root == from.transform.root)
+                    {
+                        continue;
+                    }
+
+                    field.SetValue(to, value);
+                }
             }
 
-            humanoid.m_defaultItems = kit.ToArray();
-            HirdmanPlugin.Log.LogInfo($"Retainers carry {kit.Count} tool(s).");
+            return true;
         }
     }
 }

@@ -109,11 +109,14 @@ the player's own language. "Raspberries", "raspberry" and `RaspberryBush` are th
 spellings of one thing and none of them is reliably the one somebody types, so all of
 them are matched, loosely, and the cost of being loose is picking the wrong mushroom.
 
-The retainer itself is a dvergr. Of the 157 humanoids in the game it is the only one that
-arrives with everything a working companion needs already attached — bipedal and clothed,
-a `VisEquipment` so the gear in its hands is the gear you gave it, an `NpcTalk`, and the
-humanoid path agent, so it walks and swims where a person would. The player rig would
-look more human, but it is a `Player` (input, skills, food, respawn) with no AI at all.
+The retainer itself is a player. The dvergr was a working companion with the wrong face
+and the wrong animator: `swing_axe` is a player clip, and a dvergr has no such state, so
+a swing returned true and hit nothing. Armour numbers lived on `Player` too, applied only
+when `IsPlayer()` was true. There is no way to keep the look, the clips and the armour
+math without keeping the component, because `Player` *is* the `Humanoid`. What is added
+is the AI a player does not have. What is taken away is everything the component then
+does because it believes it is the person at the keyboard. What is not given is tools:
+a retainer who arrives with an axe will never need one handed to them.
 
 Work is the only thing written from scratch, because the game has no idea of a creature
 with a job. Following is left to `MonsterAI`, which has a tamed wolf's worth of
@@ -121,7 +124,7 @@ experience at walking behind someone, and a fight is left to it the moment it ha
 target; the brain is asked first each frame and claims only the frames it needs. Felling
 a tree uses the damage of the axe actually in the retainer's hands, so the game's own
 tool tiers and drop tables decide what happens — a stone axe will not bring down a birch
-for a retainer either.
+for a retainer either, and they will not stand at one trying.
 
 Each job is a class rather than a branch in the brain, because a job owns memory — which
 tree it chose, how long it has been swinging — that has to be thrown away when the order
