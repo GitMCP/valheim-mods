@@ -1,3 +1,4 @@
+using Hirdman.Patches;
 using Hirdman.Work;
 using UnityEngine;
 
@@ -27,10 +28,13 @@ namespace Hirdman
         private HirdmanBody _body;
         private HirdmanBag _bag;
 
+        private const string OrderRpc = "Hirdman_Order";
+
         private HirdmanOrder _order;
         private HirdmanWork _work;
         private float _polledAt;
         private bool _carrying;
+        private bool _rpc;
 
         private void Awake()
         {
@@ -45,6 +49,34 @@ namespace Hirdman
             }
 
             _work = HirdmanWork.For(_order.Job);
+            Bind();
+        }
+
+        /// <summary>
+        /// The owner is the only peer that may write the order. Everyone else sends it
+        /// here and this method writes it down.
+        /// </summary>
+        private void Bind()
+        {
+            if (_rpc || _nview == null || !_nview.IsValid())
+            {
+                return;
+            }
+
+            _nview.Register<ZPackage>(OrderRpc, RPC_Order);
+            _rpc = true;
+        }
+
+        private void RPC_Order(long sender, ZPackage package)
+        {
+            if (_nview == null || !_nview.IsValid() || !_nview.IsOwner() || package == null)
+            {
+                return;
+            }
+
+            var order = HirdmanOrder.Unpack(package);
+            order.Write(_nview.GetZDO());
+            Heard();
         }
 
         /// <summary>
@@ -62,10 +94,11 @@ namespace Hirdman
         /// <summary>
         /// Gives a retainer an order, from any peer.
         ///
-        /// Only the peer that owns a creature may write its ZDO, and the player giving
-        /// the order is often not that peer, so ownership is taken first. That is the
-        /// same move the game makes when you open someone else's chest, and it is why an
-        /// order needs no message of its own.
+        /// Only the peer that owns a creature may write its ZDO. Taking ownership here
+        /// used to be how the order travelled, the same way opening a chest does - but
+        /// a walking person is not a chest, and yanking the simulation onto the speaker
+        /// is what made them glitch and fall over the moment they were told to follow.
+        /// The owner is asked instead, and writes it down itself.
         /// </summary>
         internal static bool Give(GameObject retainer, HirdmanOrder order)
         {
@@ -75,13 +108,40 @@ namespace Hirdman
                 return false;
             }
 
-            if (!nview.IsOwner())
+            if (nview.IsOwner())
             {
-                nview.ClaimOwnership();
+                order.Write(nview.GetZDO());
+                var brain = retainer.GetComponent<HirdmanBrain>();
+                if (brain != null)
+                {
+                    brain.Heard();
+                }
+
+                return true;
             }
 
-            order.Write(nview.GetZDO());
+            nview.InvokeRPC(OrderRpc, order.Pack());
             return true;
+        }
+
+        /// <summary>The order changed; pick it up on the next think rather than waiting.</summary>
+        internal void Heard()
+        {
+            _polledAt = 0f;
+        }
+
+        /// <summary>Writes the bag and puts on whatever armour is in it.</summary>
+        internal void Stow()
+        {
+            if (_bag != null)
+            {
+                _bag.Save();
+            }
+
+            if (_body != null)
+            {
+                _body.Wear();
+            }
         }
 
         internal static HirdmanOrder Orders(GameObject retainer)
@@ -105,6 +165,8 @@ namespace Hirdman
                 return false;
             }
 
+            Bind();
+
             if (!_nview.IsOwner())
             {
                 // Someone else is running this retainer now, and is free to empty its
@@ -124,11 +186,20 @@ namespace Hirdman
                 _bag.Load();
                 HirdmanLooks.Dress(gameObject);
                 _body.Wear();
+                PlayerPatch.Wake(GetComponent<Player>());
             }
 
             _bag.Keep();
 
             PollOrder();
+
+            // Something dropped at their feet is for them, whether they are working or
+            // walking with you. Jobs also scoop what they themselves just made; this is
+            // the case of an employer handing over an axe.
+            if (_ai.GetTargetCreature() == null)
+            {
+                _body.Pocket(2.5f);
+            }
 
             // A fight outranks any order except the one that went looking for it. Handing
             // the frame back is also how a retainer gets the game's own flinching,

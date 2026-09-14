@@ -80,6 +80,13 @@ namespace Hirdman
             }
 
             var words = sentence.ToLowerInvariant();
+            if (IsChestTalk(words))
+            {
+                order = Compose(HirdmanJob.Haul, words, "chest", speaker, retainer);
+                reply = order.Acknowledgement();
+                return true;
+            }
+
             foreach (var rule in Rules)
             {
                 var hit = rule.Match(words);
@@ -112,8 +119,44 @@ namespace Hirdman
                 // "chop wood" the same order, which is what a player means.
                 Anchor = retainer.transform.position,
                 Master = HirdmanOrder.Identify(speaker),
-                Subject = HirdmanJobs.TakesSubject(job) ? Subject(sentence, matched) : string.Empty,
+                Subject = SubjectFor(job, sentence, matched),
             };
+        }
+
+        private static string SubjectFor(HirdmanJob job, string sentence, string matched)
+        {
+            if (!HirdmanJobs.TakesSubject(job))
+            {
+                return string.Empty;
+            }
+
+            var subject = Subject(sentence, matched);
+            return job == HirdmanJob.Haul
+                ? Work.HirdmanHaul.Label(sentence, subject)
+                : subject;
+        }
+
+        /// <summary>
+        /// "Put wood in the chest" and "get iron from the chest" would otherwise be
+        /// chopping and mining, because those jobs match on the item's name first. A
+        /// sentence that is about a chest is a haul, whatever else it names.
+        /// </summary>
+        private static bool IsChestTalk(string words)
+        {
+            if (words.IndexOf("chest", System.StringComparison.Ordinal) < 0 &&
+                words.IndexOf("store", System.StringComparison.Ordinal) < 0 &&
+                words.IndexOf("stash", System.StringComparison.Ordinal) < 0)
+            {
+                return false;
+            }
+
+            return words.IndexOf("put", System.StringComparison.Ordinal) >= 0
+                   || words.IndexOf("take", System.StringComparison.Ordinal) >= 0
+                   || words.IndexOf("get", System.StringComparison.Ordinal) >= 0
+                   || words.IndexOf("fetch", System.StringComparison.Ordinal) >= 0
+                   || words.IndexOf("bring", System.StringComparison.Ordinal) >= 0
+                   || words.IndexOf("from", System.StringComparison.Ordinal) >= 0
+                   || words.IndexOf("into", System.StringComparison.Ordinal) >= 0;
         }
 
         /// <summary>
@@ -149,26 +192,13 @@ namespace Hirdman
 
         /// <summary>
         /// A word belongs to the order rather than to its subject if it is part of the
-        /// phrase that chose the job, or if it would have chosen a different one. The
-        /// second half matters for "gather wood and berries", where "wood" is a job word
-        /// even though it did not win.
+        /// phrase that chose the job. Other jobs' words are left alone: "put wood in the
+        /// chest" has to keep "wood", even though chopping also answers to that word.
         /// </summary>
         private static bool IsJobWord(string word, string matched)
         {
-            if (!string.IsNullOrEmpty(matched) && matched.IndexOf(word, StringComparison.Ordinal) >= 0)
-            {
-                return true;
-            }
-
-            foreach (var rule in Rules)
-            {
-                if (rule.Match(word) != null)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return !string.IsNullOrEmpty(matched) &&
+                   matched.IndexOf(word, StringComparison.Ordinal) >= 0;
         }
 
         private struct Rule

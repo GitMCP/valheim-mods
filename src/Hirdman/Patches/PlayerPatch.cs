@@ -36,21 +36,50 @@ namespace Hirdman.Patches
                 // The same Awake hooks inventory changes to the local profile's pickup
                 // stats. A retainer gathering wood is not the player picking it up.
                 var inventory = __instance.GetInventory();
-                if (inventory == null)
-                {
-                    return;
-                }
-
                 var method = AccessTools.Method(typeof(Player), "OnInventoryChanged");
-                if (method == null)
+                if (inventory != null && method != null)
                 {
-                    return;
+                    inventory.m_onChanged = (Action)Delegate.Remove(
+                        inventory.m_onChanged,
+                        Delegate.CreateDelegate(typeof(Action), __instance, method));
                 }
 
-                inventory.m_onChanged = (Action)Delegate.Remove(
-                    inventory.m_onChanged,
-                    Delegate.CreateDelegate(typeof(Action), __instance, method));
+                // Player.Awake puts every instance into the bed-wakeup clip, and the
+                // only thing that ever clears it is Player.FixedUpdate, which is skipped
+                // below. Without this they spend the rest of their lives lying flat.
+                Wake(__instance);
             }
+        }
+
+        /// <summary>
+        /// Gets a retainer onto its feet. The player rig starts in the wakeup pose, and
+        /// a borrowed dvergr AI can also put the animator to sleep; either looks like a
+        /// person who cannot walk.
+        /// </summary>
+        internal static void Wake(Player player)
+        {
+            if (player == null)
+            {
+                return;
+            }
+
+            if (player.m_animator != null)
+            {
+                player.m_animator.SetBool("wakeup", false);
+                player.m_animator.SetBool("sleeping", false);
+            }
+
+            Traverse.Create(player).Field("m_wakeupTimer").SetValue(-1f);
+
+            var nview = player.GetComponent<ZNetView>();
+            if (nview == null || !nview.IsValid() || !nview.IsOwner())
+            {
+                return;
+            }
+
+            var zdo = nview.GetZDO();
+            zdo.Set(ZDOVars.s_wakeup, false);
+            zdo.Set(ZDOVars.s_sleeping, false);
         }
 
         [HarmonyPatch(typeof(Player), "FixedUpdate")]
@@ -167,8 +196,13 @@ namespace Hirdman.Patches
                     ? "Wait here"
                     : "Follow me";
 
-                __result = Localization.instance.Localize(
-                    $"{name}\n[<color=yellow><b>$KEY_Use</b></color>] {prompt}");
+                var text = $"{name}\n[<color=yellow><b>$KEY_Use</b></color>] {prompt}";
+                if (HirdmanContract.Of(__instance.gameObject).BelongsTo(Player.m_localPlayer))
+                {
+                    text += "\n[<color=yellow><b>$KEY_AltPlace + $KEY_Use</b></color>] Look in their pack";
+                }
+
+                __result = Localization.instance.Localize(text);
                 return false;
             }
         }

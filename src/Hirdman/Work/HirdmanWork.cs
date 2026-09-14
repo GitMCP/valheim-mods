@@ -106,7 +106,7 @@ namespace Hirdman.Work
 
             foreach (var collider in Physics.OverlapSphere(body.Position, radius, HirdmanBody.ItemMask()))
             {
-                var drop = DropOn(collider);
+                var drop = HirdmanBody.DropOn(collider);
                 if (drop == null || (wanted != null && !wanted(drop.gameObject)))
                 {
                     continue;
@@ -119,29 +119,6 @@ namespace Hirdman.Work
             }
 
             return taken;
-        }
-
-        /// <summary>
-        /// The same resolution the player uses: the collider is often a child, and the
-        /// <see cref="ItemDrop"/> lives on the rigidbody.
-        /// </summary>
-        protected static ItemDrop DropOn(Collider collider)
-        {
-            if (collider == null)
-            {
-                return null;
-            }
-
-            if (collider.attachedRigidbody != null)
-            {
-                var onBody = collider.attachedRigidbody.GetComponent<ItemDrop>();
-                if (onBody != null)
-                {
-                    return onBody;
-                }
-            }
-
-            return collider.GetComponentInParent<ItemDrop>();
         }
 
         /// <summary>

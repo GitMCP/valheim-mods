@@ -299,6 +299,50 @@ namespace Hirdman
         }
 
         /// <summary>
+        /// Pockets whatever is lying at the retainer's feet. Used when an employer
+        /// drops a tool in front of them, which is not a job and should not have to
+        /// wait for one.
+        /// </summary>
+        internal int Pocket(float radius)
+        {
+            var taken = 0;
+
+            foreach (var collider in Physics.OverlapSphere(Position, radius, ItemMask()))
+            {
+                var drop = DropOn(collider);
+                if (drop != null && Take(drop))
+                {
+                    taken++;
+                }
+            }
+
+            return taken;
+        }
+
+        /// <summary>
+        /// The same resolution the player uses: the collider is often a child, and the
+        /// <see cref="ItemDrop"/> lives on the rigidbody.
+        /// </summary>
+        internal static ItemDrop DropOn(Collider collider)
+        {
+            if (collider == null)
+            {
+                return null;
+            }
+
+            if (collider.attachedRigidbody != null)
+            {
+                var onBody = collider.attachedRigidbody.GetComponent<ItemDrop>();
+                if (onBody != null)
+                {
+                    return onBody;
+                }
+            }
+
+            return collider.GetComponentInParent<ItemDrop>();
+        }
+
+        /// <summary>
         /// How full the retainer is, as a fraction. Jobs use it to decide when to stop
         /// working and go and empty their arms.
         /// </summary>

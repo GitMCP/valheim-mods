@@ -91,7 +91,38 @@ namespace Hirdman
                 return true;
             }
 
-            var tokens = Describe(thing);
+            return Hits(subject, Describe(thing));
+        }
+
+        /// <summary>
+        /// The same match, for something already in a bag or a chest rather than in the
+        /// world. Chests store <see cref="ItemDrop.ItemData"/>, not prefabs.
+        /// </summary>
+        internal static bool Answers(string subject, ItemDrop.ItemData item)
+        {
+            if (string.IsNullOrEmpty(subject))
+            {
+                return true;
+            }
+
+            if (item?.m_shared == null)
+            {
+                return false;
+            }
+
+            var tokens = new List<string>();
+            if (item.m_dropPrefab != null)
+            {
+                Add(tokens, PrefabName(item.m_dropPrefab));
+            }
+
+            Add(tokens, item.m_shared.m_name);
+            Add(tokens, Localise(item.m_shared.m_name));
+            return Hits(subject, tokens.ToArray());
+        }
+
+        private static bool Hits(string subject, string[] tokens)
+        {
             var any = false;
 
             foreach (var word in subject.Split(' '))
@@ -112,8 +143,6 @@ namespace Hirdman
                 }
             }
 
-            // Nothing in the subject was a word worth matching on, so it was never
-            // really a subject.
             return !any;
         }
 

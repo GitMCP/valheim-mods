@@ -8,10 +8,11 @@ they will work out which of eleven jobs you meant.
 
 They work under the same rules you play by. They spawn with empty pockets, so an axe
 for chopping and a pickaxe for mining have to come from you; they will ask if you send
-them to work without one. A stone axe will not bring down a birch for them either, and
-they will walk past it to a tree they can actually cut. Armour they are given is worn
-and counted, and they look like people because they use the player model and the
-player's own animations.
+them to work without one. Hold **Alt + Use** on one of yours to open their pack like a
+chest and put the tools in by hand, or drop them at their feet. A stone axe will not
+bring down a birch for them either, and they will walk past it to a tree they can
+actually cut. Armour they are given is worn and counted, and they look like people
+because they use the player model and the player's own animations.
 
 ## Installation
 
@@ -47,6 +48,8 @@ dig for copper
 tend the field
 get something on the fire
 hunt boar
+put wood in the chest
+get iron from the chest
 tidy the chests
 wait here
 ```
@@ -68,7 +71,10 @@ nothing in particular and they take whatever the job applies to.
 | Farm | Sow seeds from your chests, and lift what is ripe. |
 | Cook | Put raw food on the fires and take it off before it burns. |
 | Hunt | Kill things and collect what they drop. |
-| Haul | Pick up what is on the floor, and sort the chests. |
+| Haul | Pick up what is on the floor, and sort the chests. Name a thing to put it in or take it out: "put wood in the chest", "get iron from the chest". |
+
+Press **Use** on a retainer to tell them to follow or wait. Hold **Alt + Use** on one
+of yours to look in their pack.
 
 Work happens where the retainer is standing when you tell it, so "chop wood" and "chop
 wood here" are the same order. They range about 24 m from that spot, which is a server

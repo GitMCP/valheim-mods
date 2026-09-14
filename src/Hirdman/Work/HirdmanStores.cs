@@ -26,7 +26,9 @@ namespace Hirdman.Work
             foreach (var collider in Physics.OverlapSphere(centre, radius))
             {
                 var container = collider.GetComponentInParent<Container>();
-                if (container == null || found.Contains(container) || !Allowed(container, owner))
+                if (container == null || found.Contains(container) ||
+                    container.GetComponentInParent<HirdmanTag>() != null ||
+                    !Allowed(container, owner))
                 {
                     continue;
                 }

@@ -154,6 +154,16 @@ namespace Hirdman
             ai.m_fleeIfNotAlerted = false;
             ai.m_pathAgentType = Pathfinding.AgentType.Humanoid;
 
+            // The dvergr this AI was copied from can lie down to sleep, and the player
+            // rig has a sleeping clip that puts them flat on the ground. They are not
+            // meant to nap on the job. Smooth movement also stops a follow if they are
+            // not already facing the right way, which reads as a glitch rather than a turn.
+            ai.m_sleeping = false;
+            ai.m_wakeupRange = 0f;
+            ai.m_fallAsleepDistance = 0f;
+            ai.m_noiseWakeup = false;
+            ai.m_smoothMovement = false;
+
             if (ai.m_consumeItems != null)
             {
                 ai.m_consumeItems.Clear();

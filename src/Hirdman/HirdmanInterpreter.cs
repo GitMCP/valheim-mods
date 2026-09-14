@@ -53,7 +53,7 @@ namespace Hirdman
                 case HirdmanJob.Farm: return "sow seeds from the chests and harvest ripe crops";
                 case HirdmanJob.Cook: return "put raw food on the cooking fires and take it off when done";
                 case HirdmanJob.Hunt: return "kill animals or monsters nearby and collect what they drop";
-                case HirdmanJob.Haul: return "pick up loose items and sort the chests";
+                case HirdmanJob.Haul: return "pick up loose items, put a named thing into a chest, or take a named thing out of a chest";
                 default: return "wait where you are and do nothing";
             }
         }
@@ -153,6 +153,11 @@ namespace Hirdman
                 Master = HirdmanOrder.Identify(speaker),
                 Subject = HirdmanJobs.TakesSubject(job) ? subject : string.Empty,
             };
+
+            if (job == HirdmanJob.Haul)
+            {
+                order.Subject = Work.HirdmanHaul.Label(sentence, order.Subject);
+            }
 
             done(true, order, order.Acknowledgement());
         }

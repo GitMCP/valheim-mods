@@ -31,6 +31,7 @@ namespace Hirdman.Patches
             HirdmanCalls.Forget();
             Work.HirdmanFarm.Forget();
             HirdmanChatWindow.Close();
+            HirdmanPack.Close();
         }
     }
 }

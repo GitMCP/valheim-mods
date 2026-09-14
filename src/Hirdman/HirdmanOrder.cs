@@ -112,6 +112,7 @@ namespace Hirdman
                 case HirdmanJob.Hunt:
                 case HirdmanJob.Farm:
                 case HirdmanJob.Cook:
+                case HirdmanJob.Haul:
                     return true;
                 default:
                     return false;
@@ -180,6 +181,32 @@ namespace Hirdman
             zdo.Set(SubjectKey, Subject ?? string.Empty);
         }
 
+        /// <summary>
+        /// An order as a message, for the peer that owns the retainer rather than
+        /// whoever spoke. The ZDO is still what stores it; this is only how it travels
+        /// to the machine that is allowed to write that ZDO.
+        /// </summary>
+        internal ZPackage Pack()
+        {
+            var package = new ZPackage();
+            package.Write((int)Job);
+            package.Write(Anchor);
+            package.Write(Master);
+            package.Write(Subject ?? string.Empty);
+            return package;
+        }
+
+        internal static HirdmanOrder Unpack(ZPackage package)
+        {
+            return new HirdmanOrder
+            {
+                Job = (HirdmanJob)package.ReadInt(),
+                Anchor = package.ReadVector3(),
+                Master = package.ReadZDOID(),
+                Subject = package.ReadString(),
+            };
+        }
+
         internal bool SameAs(HirdmanOrder other)
         {
             return Job == other.Job
@@ -214,10 +241,34 @@ namespace Hirdman
                 case HirdmanJob.Hunt:
                     return about == null ? "I'll go hunting." : $"I'll hunt {about}.";
                 case HirdmanJob.Haul:
-                    return "I'll put things away.";
+                    return HaulReply();
                 default:
                     return "I'll wait here.";
             }
+        }
+
+        private string HaulReply()
+        {
+            string item;
+            bool take;
+            bool put;
+            Hirdman.Work.HirdmanHaul.Read(Subject, out take, out put, out item);
+
+            if (take)
+            {
+                return string.IsNullOrEmpty(item)
+                    ? "I'll get that from the chests."
+                    : $"I'll get {item} from the chests.";
+            }
+
+            if (put)
+            {
+                return string.IsNullOrEmpty(item)
+                    ? "I'll put that in a chest."
+                    : $"I'll put the {item} away.";
+            }
+
+            return "I'll put things away.";
         }
     }
 }

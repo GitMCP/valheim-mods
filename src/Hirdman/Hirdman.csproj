@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>Hirdman</AssemblyName>
     <RootNamespace>Hirdman</RootNamespace>
-    <Version>0.3.0</Version>
+    <Version>0.3.1</Version>
     <Authors>GitMCP</Authors>
     <Description>Adds NPC retainers you command in plain language.</Description>
   </PropertyGroup>

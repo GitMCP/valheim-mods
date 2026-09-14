@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.3.1
+
+They walk on their feet, their pack opens like a chest, and they will put things in
+chests and take them out when told.
+
+The player rig they borrowed starts lying down, as if getting out of bed, and the only
+code that ever stood it up was skipped so they would not count as a second player. They
+now get up as soon as they exist, and telling them to follow no longer yanks the
+simulation onto whoever spoke, which is what made them glitch and fall over.
+
+What they are carrying is yours to look at. Hold the alt key and Use to open their pack
+the way you open a chest, and move things in or out by hand. They will also pocket
+whatever you drop at their feet.
+
+Hauling understands a named thing: "put wood in the chest", "get iron from the chest".
+Unnamed, they still tidy the yard and sort like with like.
+
 ## 0.3.0
 
 Retainers are people now, and they no longer arrive already armed.
