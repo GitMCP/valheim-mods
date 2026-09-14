@@ -71,13 +71,23 @@ namespace Hirdman.Work
         /// <summary>Takes a cooked portion off, onto the ground, and then picks it up.</summary>
         private static void Serve(HirdmanBody body, CookingStation station)
         {
-            var nview = station.m_nview;
-            if (!nview.IsOwner())
-            {
-                nview.ClaimOwnership();
-            }
+            // Sent to whichever peer holds the station rather than taken over, so that a
+            // player standing at the same fire is not interrupted. Only an ownerless
+            // station is claimed, which is what the game does for its own interactions.
+            Attend(station);
+            station.m_nview.InvokeRPC("RPC_RemoveDoneItem", body.Position, 1);
+        }
 
-            nview.InvokeRPC("RPC_RemoveDoneItem", body.Position, 1);
+        /// <summary>
+        /// A message to a station nobody owns goes nowhere, and the ingredient that was
+        /// taken out of the retainer's hands to send it is gone.
+        /// </summary>
+        private static void Attend(CookingStation station)
+        {
+            if (!station.m_nview.HasOwner())
+            {
+                station.m_nview.ClaimOwnership();
+            }
         }
 
         /// <summary>Puts one raw thing on, if the retainer is carrying anything the fire wants.</summary>
@@ -116,6 +126,7 @@ namespace Hirdman.Work
                 return;
             }
 
+            Attend(station);
             arms.RemoveOneItem(fuel);
             station.m_nview.InvokeRPC("RPC_AddFuel");
         }
