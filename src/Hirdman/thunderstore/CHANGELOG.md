@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.3
+
+Chopping a tree now means the whole tree. They split the logs that fall, pick up the
+wood, and only then walk to the next standing trunk.
+
 ## 0.3.2
 
 Pressing Use while they are working now actually stops them and puts them at your heel.

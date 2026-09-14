@@ -86,6 +86,17 @@ namespace Hirdman.Work
         protected static T Closest<T>(HirdmanBody body, Vector3 centre, float radius, System.Func<T, bool> wanted)
             where T : Component
         {
+            return Closest(body.Position, centre, radius, wanted);
+        }
+
+        /// <summary>
+        /// The same search, measured from an arbitrary point. Finishing a tree wants the
+        /// log that belongs to that stump, not whichever log happens to be nearest the
+        /// retainer's feet.
+        /// </summary>
+        protected static T Closest<T>(Vector3 from, Vector3 centre, float radius, System.Func<T, bool> wanted)
+            where T : Component
+        {
             T closest = null;
             var shortest = float.MaxValue;
 
@@ -97,7 +108,7 @@ namespace Hirdman.Work
                     continue;
                 }
 
-                var distance = Vector3.Distance(body.Position, candidate.transform.position);
+                var distance = Vector3.Distance(from, candidate.transform.position);
                 if (distance < shortest)
                 {
                     shortest = distance;

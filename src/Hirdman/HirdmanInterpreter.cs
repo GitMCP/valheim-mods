@@ -46,7 +46,7 @@ namespace Hirdman
             {
                 case HirdmanJob.Follow: return "walk with the speaker wherever they go";
                 case HirdmanJob.Guard: return "hold this ground and fight whatever attacks";
-                case HirdmanJob.ChopWood: return "fell trees nearby and carry the wood back";
+                case HirdmanJob.ChopWood: return "fell a tree, split the logs that fall, pick up the wood, then move to the next tree";
                 case HirdmanJob.Explore: return "range around the speaker and map the land";
                 case HirdmanJob.Gather: return "pick berries, mushrooms, herbs and other growing things";
                 case HirdmanJob.Mine: return "break rock and ore deposits and carry the metal back";

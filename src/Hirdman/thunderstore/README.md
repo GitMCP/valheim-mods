@@ -65,7 +65,7 @@ nothing in particular and they take whatever the job applies to.
 | Wait | Drift around home, stand by the fire, get in your way. The default. |
 | Follow | Walk with you. |
 | Guard | Hold the ground and fight whatever comes. |
-| Chop wood | Fell trees nearby and carry the wood. |
+| Chop wood | Fell a tree, split the logs, pick up what falls, then the next tree. |
 | Explore | Range around you and uncover ground on **your** map. |
 | Gather | Pick berries, mushrooms and herbs. |
 | Mine | Break ore deposits and carry the metal. |
