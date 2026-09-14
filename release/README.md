@@ -10,22 +10,22 @@ two ever disagree, the source is right.
 This branch keeps **only the current package**. Older zips are dropped when a new one
 is built.
 
-## Hirdman 0.3.3
+## Hirdman 0.3.4
 
-Built from commit `7bff996` on
+Built from commit `37a5441` on
 [`cursor/hirdman-retainer-fixes-020c`](https://github.com/GitMCP/valheim-mods/pull/8),
-which the assembly carries in its own version string (`0.3.3+7bff996…`).
+which the assembly carries in its own version string (`0.3.4+37a5441…`).
 
-Hire NPC retainers and order them about in plain language. They are player models with
-a real inventory, no spawned tools, and they finish a tree — logs, stump, and drops —
-before walking to the next one.
+Hire NPC retainers and order them about in plain language. A standing job keeps going:
+chop (or mine, or gather) until you say otherwise, take a full bag home to the chests,
+mend a worn tool at a bench, and come back.
 
 Hire fresh retainers; anyone hired under 0.2.0 is still the old dvergr prefab.
 
 | File | What it is for |
 | --- | --- |
-| `Hirdman-0.3.3/Hirdman-0.3.3.zip` | The Thunderstore package: upload it, or import it into r2modman or Gale |
-| `Hirdman-0.3.3/Hirdman.dll` | The plugin on its own, for installing by hand |
+| `Hirdman-0.3.4/Hirdman-0.3.4.zip` | The Thunderstore package: upload it, or import it into r2modman or Gale |
+| `Hirdman-0.3.4/Hirdman.dll` | The plugin on its own, for installing by hand |
 
 ### Installing the zip
 
