@@ -33,6 +33,10 @@ namespace Hirdman
                 string.IsNullOrEmpty(name) ? "Retainer" : name,
                 text,
                 large: false);
+
+            // A bubble lasts five seconds. If the player is mid-conversation with this
+            // particular retainer, what it said also belongs in the conversation.
+            HirdmanChatWindow.Hear(speaker, text);
         }
     }
 }

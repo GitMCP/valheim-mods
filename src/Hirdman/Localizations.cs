@@ -18,11 +18,17 @@ namespace Hirdman
                 "English",
                 new Dictionary<string, string>
                 {
-                    { $"{HirdmanMuster.PrefabName}_name", "Muster post" },
+                    { $"{HirdmanOutpost.PrefabName}_name", "Hirdman outpost" },
                     {
-                        $"{HirdmanMuster.PrefabName}_description",
-                        "Plant it, and someone comes to stand by it. Press Use to send them " +
-                        "with you or leave them; type 'hird' in the console to say more."
+                        $"{HirdmanOutpost.PrefabName}_description",
+                        "A banner post where fighters looking for work gather. Press Use to " +
+                        "hire one for coins, as often as you can pay for it."
+                    },
+                    { $"{HirdmanBell.PrefabName}_name", "Muster bell" },
+                    {
+                        $"{HirdmanBell.PrefabName}_description",
+                        "Press Use to call every retainer in your service back to it, " +
+                        "wherever you left them. Where it stands is where home is."
                     },
                     { $"{HirdmanRetainer.PrefabName}_name", "Hirdman" },
                 });

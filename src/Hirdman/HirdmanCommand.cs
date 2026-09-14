@@ -32,7 +32,7 @@ namespace Hirdman
                 return;
             }
 
-            var retainer = HirdmanRoster.Nearest(player.transform.position, HirdmanRoster.EarshotRadius);
+            var retainer = HirdmanRoster.Listening(player, HirdmanRoster.EarshotRadius);
             if (retainer == null)
             {
                 Console.instance?.Print("No retainer within earshot.");
