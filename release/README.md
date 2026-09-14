@@ -10,22 +10,24 @@ two ever disagree, the source is right.
 This branch keeps **only the current package**. Older zips are dropped when a new one
 is built.
 
-## Hirdman 0.3.4
+## Hirdman 0.3.5
 
-Built from commit `37a5441` on
+Built from commit `40d8089` on
 [`cursor/hirdman-retainer-fixes-020c`](https://github.com/GitMCP/valheim-mods/pull/8),
-which the assembly carries in its own version string (`0.3.4+37a5441…`).
+which the assembly carries in its own version string (`0.3.5+40d8089…`).
 
-Hire NPC retainers and order them about in plain language. A standing job keeps going:
-chop (or mine, or gather) until you say otherwise, take a full bag home to the chests,
-mend a worn tool at a bench, and come back.
+Hire NPC retainers and order them about in plain language. Leftover sentences that
+keywords cannot place go to a small CPU model that starts with Valheim. The first
+client launch fetches about 470 MB into `BepInEx/config/Hirdman/ear/`; later launches
+just start it. No Ollama install, and no endpoint to paste in. Dedicated servers skip
+the download. Keywords still work if the ear is off or not ready.
 
 Hire fresh retainers; anyone hired under 0.2.0 is still the old dvergr prefab.
 
 | File | What it is for |
 | --- | --- |
-| `Hirdman-0.3.4/Hirdman-0.3.4.zip` | The Thunderstore package: upload it, or import it into r2modman or Gale |
-| `Hirdman-0.3.4/Hirdman.dll` | The plugin on its own, for installing by hand |
+| `Hirdman-0.3.5/Hirdman-0.3.5.zip` | The Thunderstore package: upload it, or import it into r2modman or Gale |
+| `Hirdman-0.3.5/Hirdman.dll` | The plugin on its own, for installing by hand |
 
 ### Installing the zip
 
