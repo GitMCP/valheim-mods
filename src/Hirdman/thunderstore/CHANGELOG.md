@@ -1,0 +1,49 @@
+# Changelog
+
+## 0.2.0
+
+Retainers are hired rather than built, and there can be several of them.
+
+The muster post is gone. In its place is an **outpost**: a banner post you build once and
+then hire at, for coins, as often as you can pay, up to a limit the server sets. Each
+retainer signs a contract naming who it works for and where home is, which is what makes
+the rest of this possible — everyone gets a name of their own, the outpost knows how many
+you already keep, and nobody can ring for somebody else's household.
+
+A **muster bell** calls every retainer in your service back to it, wherever you left
+them, and where you ring it is where home now is.
+
+Orders are given in a **window of their own**, on a key, instead of in the debug console.
+It names who is listening and keeps what was said.
+
+An unordered retainer no longer stands to attention on the spot it was left. It drifts
+around home, gravitates to the fire and the chests and the workbench, stands about, and
+occasionally says something.
+
+Seven new things to be ordered to do, on top of following, guarding and chopping:
+
+| Order | What it does |
+| --- | --- |
+| Explore | Ranges around you and uncovers ground on **your** map, and nobody else's. |
+| Gather | Picks berries, mushrooms and herbs. You can say which. |
+| Mine | Breaks ore deposits and carries the metal back. You can say which. |
+| Farm | Sows seeds out of your chests and lifts crops that are ready. |
+| Cook | Puts raw food on the fires, keeps ovens fuelled, takes food off before it burns. |
+| Hunt | Kills animals or monsters and collects what they drop. You can say which. |
+| Haul | Picks up what is on the floor and sorts the chests. |
+
+Orders that are about a particular thing can name it — "gather raspberries", "mine
+copper", "hunt boar" — and the name is matched against what the thing is called in the
+game files, what it drops, and what that is called on your screen, so whichever of the
+three you happen to say works.
+
+Every retainer now carries a pickaxe as well as an axe. Which axe and which pickaxe is a
+server setting, and their tool tier is what decides how much of the world a retainer can
+touch, exactly as it does for you.
+
+The `hird` console command still works and now speaks the full vocabulary.
+
+## 0.1.0
+
+First build: a retainer cloned from a dvergr, a muster post to raise one, and four
+orders — wait, follow, guard, chop wood — given as sentences typed in the console.

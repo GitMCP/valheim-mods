@@ -2,7 +2,7 @@
   "name": "Hirdman",
   "version_number": "0.1.0",
   "website_url": "https://github.com/GitMCP/valheim-mods",
-  "description": "Recruit NPC retainers and order them about in plain language.",
+  "description": "Hire NPC retainers and order them about in plain language.",
   "dependencies": [
     "denikson-BepInExPack_Valheim-5.4.2350",
     "ValheimModding-Jotunn-2.30.0"
