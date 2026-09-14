@@ -126,6 +126,15 @@ namespace Hirdman
                 return;
             }
 
+            // Until the map has been drawn for this character, whatever a scout reports
+            // is written onto a sheet the game is about to throw away and replace with
+            // the one saved in the character file. Early reports are dropped rather than
+            // lost silently; the scout will be somewhere similar a moment later anyway.
+            if (!Minimap.instance.m_hasGenerated)
+            {
+                return;
+            }
+
             // The same call the game makes for a walking player, at the radius the mod
             // allows a scout. Exploration is per-character and saved with it, so this is
             // a permanent addition to one person's map and nobody else's.
