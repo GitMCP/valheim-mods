@@ -12,9 +12,9 @@ is built.
 
 ## Storage Hub 1.0.0
 
-Built from commit `6b44ede` on
+Built from commit `c6be129` on
 [`cursor/gateway-chest-020c`](https://github.com/GitMCP/valheim-mods/pull/12),
-which the assembly carries in its own version string (`1.0.0+6b44ede…`).
+which the assembly carries in its own version string (`1.0.0+c6be129…`).
 
 A black metal chest that lists and moves items across every nearby container.
 
