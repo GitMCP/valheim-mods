@@ -1,17 +1,17 @@
 # Changelog
 
-## 0.2.1
+## 1.0.0
 
-Temporary F5 command `rows [n]` pretends that many extra people are rowing, with
-no models, so the speed can be tried from a single client.
+First release. Passenger seats on boats get oars. Each occupied gunwale seat adds
+a full copy of the helm's paddle, including while the sail is up. The mast seat
+is left alone.
 
 ## 0.2.0
 
-Each helper now adds a full copy of the helm's paddle, so one extra rower doubles
-the paddle, and that extra still pushes when the sail is up. Oars dip into the
-water. The seat on the mast has no oar: it is too far inboard to reach.
+Each helper adds a full copy of the helm's paddle, including while the sail is
+up. Oars dip into the water. The seat on the mast has no oar.
 
 ## 0.1.0
 
-First build: an oar on every passenger seat, and each occupied seat pushes with the
-captain.
+First build: an oar on every passenger seat, and each occupied seat pushes with
+the captain.

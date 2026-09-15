@@ -28,9 +28,3 @@ of the world, so the server's copy wins.
 | Setting | Default | Description |
 | --- | --- | --- |
 | `Rows / Speed` | `1` | How much one helper adds, as a multiple of the helm's paddle. `1` doubles the paddle with a second rower, and still applies with the sail up. |
-
-## Testing
-
-Temporary: open the console (F5) and type `rows 1` to pretend one extra person is
-rowing, `rows 2` for two, `rows 0` to clear. There are no dummy models; the hull
-just takes the extra paddle. This command will be removed later.

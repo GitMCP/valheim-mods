@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>Rows</AssemblyName>
     <RootNamespace>Rows</RootNamespace>
-    <Version>0.2.1</Version>
+    <Version>1.0.0</Version>
     <Authors>GitMCP</Authors>
     <Description>Adds oars to boat seats so extra players help the ship go faster.</Description>
   </PropertyGroup>

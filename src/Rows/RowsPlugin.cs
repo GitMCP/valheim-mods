@@ -3,7 +3,6 @@ using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
-using Jotunn.Managers;
 using Jotunn.Utils;
 
 namespace Rows
@@ -61,8 +60,6 @@ namespace Rows
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
 
             Localizations.Register();
-
-            CommandManager.Instance.AddConsoleCommand(new RowsCommand());
 
             _harmony = new Harmony(PluginGuid);
             _harmony.PatchAll(typeof(RowsPlugin).Assembly);
