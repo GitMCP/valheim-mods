@@ -45,12 +45,22 @@
       <StampedManifest>$([System.Text.RegularExpressions.Regex]::Replace('$(ManifestTemplate)', '("version_number"\s*:\s*")[^"]*(")', '${1}$(Version)${2}'))</StampedManifest>
     </PropertyGroup>
 
+    <!-- Player-facing README lives next to the project. thunderstore/README.md is
+         only a fallback for older layouts. CHANGELOG.md stays in thunderstore/
+         and is copied only when the mod keeps one. -->
+    <PropertyGroup>
+      <PackageReadme Condition="Exists('$(MSBuildProjectDirectory)/README.md')">$(MSBuildProjectDirectory)/README.md</PackageReadme>
+      <PackageReadme Condition="'$(PackageReadme)' == '' AND Exists('$(ThunderstoreDir)README.md')">$(ThunderstoreDir)README.md</PackageReadme>
+    </PropertyGroup>
+    <Error Condition="'$(PackageReadme)' == ''"
+           Text="No README.md in the mod folder (expected $(MSBuildProjectDirectory)/README.md)." />
+
     <RemoveDir Directories="$(PackageStageDir)" />
     <MakeDir Directories="$(PackageStageDir)" />
-    <!-- Thunderstore reads a CHANGELOG.md if there is one and ignores its absence, so
-         it is copied only when the mod keeps one. -->
+
     <ItemGroup>
-      <PackageFile Include="$(TargetPath);$(ThunderstoreDir)icon.png;$(ThunderstoreDir)README.md" />
+      <PackageFile Include="$(TargetPath);$(ThunderstoreDir)icon.png" />
+      <PackageFile Include="$(PackageReadme)" Condition="'$(PackageReadme)' != ''" />
       <PackageFile Include="$(ThunderstoreDir)CHANGELOG.md" Condition="Exists('$(ThunderstoreDir)CHANGELOG.md')" />
     </ItemGroup>
 

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>TogetherWeRow</AssemblyName>
+    <RootNamespace>TogetherWeRow</RootNamespace>
+    <Version>1.0.0</Version>
+    <Authors>GitMCP</Authors>
+    <Description>Passenger seats on boats get oars. Sit down to help the captain go faster.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- See the Bicicreta project file for why Jotunn's build assets are excluded. -->
+    <PackageReference Include="JotunnLib" Version="2.30.0" ExcludeAssets="build" />
+  </ItemGroup>
+
+</Project>
