@@ -29,7 +29,7 @@ namespace GatewayChest.Patches
 
         /// <summary>
         /// Vanilla turns the container panel back on every frame while the hub is owned.
-        /// Hide that grid — the hub panel is parented next to it, in the same slot —
+        /// Hide that grid — the hub panel sits in the gap between backpack and craft —
         /// and keep the hub marked in-use so walking away still closes it.
         /// </summary>
         [HarmonyPostfix]

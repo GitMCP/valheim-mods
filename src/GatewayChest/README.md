@@ -24,9 +24,9 @@ Requires [Jötunn](https://thunderstore.io/c/valheim/p/ValheimModding/Jotunn/).
 
 ## Using it
 
-Walk up and press use. Your inventory stays on the left. The hub panel opens
-beside it, in the same place a normal chest would, with search, category tabs,
-sort, and a count of used slots across every connected chest.
+Walk up and press use. Your inventory stays on the left and crafting on the
+right. The hub panel opens in the center, between them, with search, category
+tabs, sort, and a count of used slots across every connected chest.
 
 - **Click a row** to pull that stack into your inventory.
 - **Shift-click** an item in your inventory, or press **Deposit**, to send it

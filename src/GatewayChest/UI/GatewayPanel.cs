@@ -8,8 +8,8 @@ using UnityEngine.UI;
 namespace GatewayChest.UI
 {
     /// <summary>
-    /// Sits in the vanilla container slot (beside the player inventory, not over the
-    /// crafting column) and lists the nearby chests as full-width rows.
+    /// Sits in the gap between the backpack and the crafting column and lists the
+    /// nearby chests as full-width rows.
     /// </summary>
     internal static class GatewayPanel
     {
@@ -40,6 +40,7 @@ namespace GatewayChest.UI
         private static string _query = "";
         private static float _nextRefresh;
         private static Container _pending;
+        private static readonly Vector3[] Corners = new Vector3[4];
 
         internal static void Open(Container hub)
         {
@@ -63,7 +64,7 @@ namespace GatewayChest.UI
                 return;
             }
 
-            SnapToChestSlot();
+            SnapBetweenInventoryAndCrafting();
             _root.SetActive(true);
             _nextRefresh = 0f;
             Refresh();
@@ -94,7 +95,7 @@ namespace GatewayChest.UI
                 return;
             }
 
-            SnapToChestSlot();
+            SnapBetweenInventoryAndCrafting();
             if (Time.time >= _nextRefresh)
             {
                 Refresh();
@@ -112,33 +113,68 @@ namespace GatewayChest.UI
         }
 
         /// <summary>
-        /// The overlay canvas is full-screen, so a centred offset lands on the crafting
-        /// column. The vanilla container rect is already parked between the backpack
-        /// and the craft list; follow that.
+        /// Stay on the inventory canvas and sit in the open gap between the backpack
+        /// and the crafting column, vertically centered.
         /// </summary>
-        private static void SnapToChestSlot()
+        private static void SnapBetweenInventoryAndCrafting()
         {
             var gui = InventoryGui.instance;
-            if (gui == null || gui.m_container == null || _root == null)
+            if (gui == null || gui.m_player == null || _root == null)
             {
                 return;
             }
 
             var ours = _root.GetComponent<RectTransform>();
-            var slot = gui.m_container;
-            if (ours.parent != slot.parent)
+            var parent = gui.m_player.parent as RectTransform;
+            if (parent == null)
             {
-                ours.SetParent(slot.parent, false);
+                return;
+            }
+
+            if (ours.parent != parent)
+            {
+                ours.SetParent(parent, false);
                 _root.transform.SetAsLastSibling();
             }
 
-            ours.anchorMin = slot.anchorMin;
-            ours.anchorMax = slot.anchorMax;
-            ours.pivot = slot.pivot;
-            ours.anchoredPosition = slot.anchoredPosition + new Vector2(-80f, -20f);
-            ours.sizeDelta = new Vector2(
-                Mathf.Max(slot.rect.width, PanelWidth),
-                Mathf.Max(slot.rect.height, PanelHeight));
+            ours.anchorMin = new Vector2(0.5f, 0.5f);
+            ours.anchorMax = new Vector2(0.5f, 0.5f);
+            ours.pivot = new Vector2(0.5f, 0.5f);
+            ours.sizeDelta = new Vector2(PanelWidth, PanelHeight);
+
+            var center = parent.rect.center;
+            var pos = Vector2.zero;
+            if (gui.m_crafting != null)
+            {
+                var left = EdgeX(parent, gui.m_player, right: true);
+                if (gui.m_info != null &&
+                    parent.InverseTransformPoint(gui.m_info.position).x <
+                    parent.InverseTransformPoint(gui.m_crafting.position).x)
+                {
+                    left = Mathf.Max(left, EdgeX(parent, gui.m_info, right: true));
+                }
+
+                var right = EdgeX(parent, gui.m_crafting, right: false);
+                var midX = (left + right) * 0.5f;
+                var half = PanelWidth * 0.5f;
+                const float pad = 12f;
+                if (midX + half > right - pad)
+                {
+                    midX = right - pad - half;
+                }
+
+                pos = new Vector2(midX - center.x, 0f);
+            }
+
+            ours.anchoredPosition = pos;
+        }
+
+        private static float EdgeX(RectTransform parent, RectTransform child, bool right)
+        {
+            child.GetWorldCorners(Corners);
+            var a = parent.InverseTransformPoint(Corners[right ? 2 : 0]).x;
+            var b = parent.InverseTransformPoint(Corners[right ? 3 : 1]).x;
+            return right ? Mathf.Max(a, b) : Mathf.Min(a, b);
         }
 
         private static void EnsureBuilt()
