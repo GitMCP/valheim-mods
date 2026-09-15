@@ -5,7 +5,9 @@
 Njord, Warehouse Keeper. The piece is no longer a chest: it is Njord, a
 stationary keeper in a leather tunic and pants, placed from the hammer for
 200 gold coins. He has no storage of his own. Nearby chests are the stores.
-He greets, remarks, and nods goodbye the way a vendor does.
+He greets, remarks, and nods goodbye the way a vendor does. The hover
+collider is a standing capsule, so you can talk to him by looking at
+his torso or head, not only his feet.
 
 Favourites, a client preferences tab, and Resupply. Star an item in the list
 to pin it. The Favourites category and the star filter show only those items.

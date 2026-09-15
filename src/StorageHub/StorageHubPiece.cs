@@ -71,9 +71,9 @@ namespace StorageHub
                 pieceComp.m_description = $"${PrefabName}_description";
             }
 
-            FitCollider(prefab);
             NjordLook.Attach(prefab);
             NjordLook.HideHostVisuals(prefab);
+            FitCollider(prefab);
 
             var config = new PieceConfig
             {
@@ -100,14 +100,35 @@ namespace StorageHub
             StorageHubPlugin.Log.LogInfo($"Njord cloned from '{source}'.");
         }
 
-        private static void FitCollider(GameObject prefab)
+        /// <summary>
+        /// The clone keeps the wood chest's low colliders, so a look-at aimed
+        /// at Njord's chest or head misses them. Drop those and put a standing
+        /// capsule on the same object as the Container, which is what the
+        /// hover ray uses.
+        /// </summary>
+        internal static void FitCollider(GameObject prefab)
         {
-            var box = prefab.GetComponent<BoxCollider>();
-            if (box != null)
+            if (prefab == null)
             {
-                box.center = new Vector3(0f, 0.9f, 0f);
-                box.size = new Vector3(0.7f, 1.8f, 0.7f);
+                return;
             }
+
+            var existing = prefab.GetComponentsInChildren<Collider>(true);
+            for (var i = 0; i < existing.Length; i++)
+            {
+                if (existing[i] != null)
+                {
+                    Object.DestroyImmediate(existing[i], true);
+                }
+            }
+
+            var capsule = prefab.AddComponent<CapsuleCollider>();
+            capsule.direction = 1;
+            capsule.center = new Vector3(0f, 1f, 0f);
+            capsule.height = 2f;
+            capsule.radius = 0.4f;
+            capsule.isTrigger = false;
+            capsule.enabled = true;
         }
     }
 
@@ -126,6 +147,13 @@ namespace StorageHub
             if (body == null)
             {
                 NjordLook.Attach(gameObject);
+            }
+
+            StorageHubPiece.FitCollider(gameObject);
+            var wear = GetComponent<WearNTear>();
+            if (wear != null)
+            {
+                wear.SetupColliders();
             }
         }
 
