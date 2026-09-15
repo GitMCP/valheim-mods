@@ -135,7 +135,7 @@ namespace GatewayChest.UI
             ours.anchorMin = slot.anchorMin;
             ours.anchorMax = slot.anchorMax;
             ours.pivot = slot.pivot;
-            ours.anchoredPosition = slot.anchoredPosition + new Vector2(-20f, -30f);
+            ours.anchoredPosition = slot.anchoredPosition + new Vector2(-80f, -20f);
             ours.sizeDelta = new Vector2(
                 Mathf.Max(slot.rect.width, PanelWidth),
                 Mathf.Max(slot.rect.height, PanelHeight));
