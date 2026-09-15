@@ -10,20 +10,19 @@ two ever disagree, the source is right.
 This branch keeps **only the current package**. Older zips are dropped when a new one
 is built.
 
-## Rows 0.2.0
+## Rows 0.2.1
 
-Built from commit `eea37bf` on
+Built from commit `40129e2` on
 [`cursor/rows-mod-020c`](https://github.com/GitMCP/valheim-mods/pull/9),
-which the assembly carries in its own version string (`0.2.0+eea37bf…`).
+which the assembly carries in its own version string (`0.2.1+40129e2…`).
 
 Passenger seats on boats get oars. Sit in one and you help the captain go faster.
-One extra rower doubles the helm's paddle, including while the sail is up. Oars
-dip into the water. The mast seat is left alone.
+Temporary F5 command: `rows [n]` pretends n extra people are rowing (no models).
 
 | File | What it is for |
 | --- | --- |
-| `Rows-0.2.0/Rows-0.2.0.zip` | The Thunderstore package: upload it, or import it into r2modman or Gale |
-| `Rows-0.2.0/Rows.dll` | The plugin on its own, for installing by hand |
+| `Rows-0.2.1/Rows-0.2.1.zip` | The Thunderstore package: upload it, or import it into r2modman or Gale |
+| `Rows-0.2.1/Rows.dll` | The plugin on its own, for installing by hand |
 
 ### Installing the zip
 
