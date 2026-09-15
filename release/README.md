@@ -10,17 +10,19 @@ two ever disagree, the source is right.
 This branch keeps **only the current package**. Older zips are dropped when a new one
 is built.
 
-## Storage Hub 1.1.0
+## Njord, Warehouse Keeper 1.1.0
 
-Built from commit `e4aa23c` on
+Built from commit `91560e6` on
 [`cursor/storage-hub-favourites-020c`](https://github.com/GitMCP/valheim-mods/pull/14),
-which the assembly carries in its own version string (`1.1.0+e4aa23c…`).
+which the assembly carries in its own version string (`1.1.0+91560e6…`).
 
-A black metal chest that lists and moves items across nearby containers. Star
-items as favourites, bind a Deposit+Resupply hotkey, withdraw known-recipe
-ingredients, and Resupply the pack to the counts set in Preferences. The hub
-panel uses Items and Recipes tabs; Recipes can be filtered by crafting station.
-Deposit / Resupply / Quick Stack sit above the filters.
+Thunderstore package name: **NjordWarehouseKeeper**. The plugin dll is still
+`StorageHub.dll`.
+
+Njord is a warehouse keeper you place with the hammer for 200 gold coins. He
+uses the player mesh in a leather tunic and pants, stays where you put him, and
+lists items across nearby chests. He has no storage of his own. He greets,
+remarks, and nods goodbye the way a vendor does.
 
 | File | What it is for |
 | --- | --- |
@@ -42,5 +44,5 @@ there already or the plugin will not load.
 
 ### Everyone needs it
 
-Storage Hub is declared `EveryoneMustHaveMod` with minor-version strictness, so the
+The mod is declared `EveryoneMustHaveMod` with minor-version strictness, so the
 server and every player have to run the same 1.1.x build.
