@@ -20,7 +20,7 @@ Requires [Jötunn](https://thunderstore.io/c/valheim/p/ValheimModding/Jotunn/).
 
 | Cost | Where |
 | --- | --- |
-| 10 Wood, 2 Tar, 6 Black metal | Hammer, Furniture, near a workbench |
+| 10 Fine wood, 2 Iron, 2 Surtling cores | Hammer, Furniture, near a workbench |
 
 The piece uses the vanilla black metal chest model.
 

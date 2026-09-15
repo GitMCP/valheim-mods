@@ -16,9 +16,9 @@ namespace StorageHub
 
         internal static readonly RequirementConfig[] Resources =
         {
-            new RequirementConfig("Wood", 10, 0, true),
-            new RequirementConfig("Tar", 2, 0, true),
-            new RequirementConfig("BlackMetal", 6, 0, true),
+            new RequirementConfig("FineWood", 10, 0, true),
+            new RequirementConfig("Iron", 2, 0, true),
+            new RequirementConfig("SurtlingCore", 2, 0, true),
         };
 
         private static readonly string[] CloneSources =
