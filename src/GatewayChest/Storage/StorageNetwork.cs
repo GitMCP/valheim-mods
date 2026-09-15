@@ -53,23 +53,46 @@ namespace GatewayChest.Storage
                 return false;
             }
 
+            return RouteAmount(from, item, item.m_stack, hub, allowHub) && !from.ContainsItem(item);
+        }
+
+        internal static bool RouteAmount(
+            Inventory from,
+            ItemDrop.ItemData item,
+            int amount,
+            Container hub,
+            bool allowHub)
+        {
+            if (from == null || item == null || hub == null || amount <= 0)
+            {
+                return false;
+            }
+
+            amount = Mathf.Min(amount, item.m_stack);
+            if (amount <= 0 || !from.ContainsItem(item))
+            {
+                return false;
+            }
+
             var network = StorageScanner.Scan(hub);
-            if (TryFillStacks(from, item, network.Chests) && !from.ContainsItem(item))
+            var left = amount;
+            left -= PutIntoStacks(from, item, left, network.Chests);
+            if (left > 0 && from.ContainsItem(item))
             {
-                return true;
+                left -= PutIntoEmpty(from, item, left, network.Chests);
             }
 
-            if (TryEmptySlots(from, item, network.Chests) && !from.ContainsItem(item))
+            if (left > 0 && allowHub && from.ContainsItem(item))
             {
-                return true;
+                var hubOnly = new List<Container> { hub };
+                left -= PutIntoStacks(from, item, left, hubOnly);
+                if (left > 0 && from.ContainsItem(item))
+                {
+                    left -= PutIntoEmpty(from, item, left, hubOnly);
+                }
             }
 
-            if (allowHub && from.ContainsItem(item))
-            {
-                TryMove(hub, from, item);
-            }
-
-            return !from.ContainsItem(item);
+            return left < amount;
         }
 
         internal static void DepositAll(Player player, Container hub)
@@ -111,30 +134,97 @@ namespace GatewayChest.Storage
             }
         }
 
-        internal static bool Withdraw(Player player, IndexedStack stack)
+        internal static bool Withdraw(Player player, IndexedStack group, int amount)
         {
-            if (player == null || stack == null)
+            if (player == null || group == null || amount <= 0)
             {
                 return false;
             }
 
-            var item = stack.Live();
-            var source = stack.Source == null ? null : stack.Source.GetInventory();
             var dest = player.GetInventory();
-            if (item == null || source == null || dest == null)
+            var sample = group.FirstLive();
+            if (dest == null || sample == null)
             {
                 return false;
             }
 
-            if (!dest.CanAddItem(item, 1))
+            var take = HowManyFit(dest, sample, amount);
+            if (take <= 0)
             {
                 player.Message(MessageHud.MessageType.Center, "$gatewaychest_playerfull");
                 return false;
             }
 
-            EnsureOwner(stack.Source);
-            dest.MoveItemToThis(source, item);
-            return true;
+            var left = take;
+            for (var i = 0; i < group.Parts.Count && left > 0; i++)
+            {
+                left -= TakeFrom(player, group.Parts[i], left);
+            }
+
+            return left < take;
+        }
+
+        private static int HowManyFit(Inventory dest, ItemDrop.ItemData sample, int want)
+        {
+            if (want <= 0 || !dest.CanAddItem(sample, 1))
+            {
+                return 0;
+            }
+
+            if (dest.CanAddItem(sample, want))
+            {
+                return want;
+            }
+
+            var lo = 1;
+            var hi = want;
+            while (lo < hi)
+            {
+                var mid = (lo + hi + 1) / 2;
+                if (dest.CanAddItem(sample, mid))
+                {
+                    lo = mid;
+                }
+                else
+                {
+                    hi = mid - 1;
+                }
+            }
+
+            return lo;
+        }
+
+        private static int TakeFrom(Player player, StackPart part, int take)
+        {
+            var item = part.Live();
+            var source = part.Source == null ? null : part.Source.GetInventory();
+            var dest = player.GetInventory();
+            if (item == null || source == null || dest == null || take <= 0)
+            {
+                return 0;
+            }
+
+            take = Mathf.Min(take, item.m_stack);
+            EnsureOwner(part.Source);
+            var before = item.m_stack;
+            if (take >= item.m_stack)
+            {
+                dest.MoveItemToThis(source, item);
+            }
+            else
+            {
+                var clone = item.Clone();
+                clone.m_stack = take;
+                if (!dest.AddItem(clone))
+                {
+                    return 0;
+                }
+
+                source.RemoveItem(item, take);
+            }
+
+            var after = source.ContainsItem(item) ? item.m_stack : 0;
+            return Mathf.Max(0, before - after);
         }
 
         private static void AddFrom(List<IndexedStack> listed, Container hub, Container chest)
@@ -153,28 +243,60 @@ namespace GatewayChest.Storage
                     continue;
                 }
 
-                listed.Add(new IndexedStack
+                var part = new StackPart
                 {
                     Source = chest,
                     Pos = item.m_gridPos,
                     SharedName = item.m_shared.m_name,
-                    DisplayName = Localization.instance.Localize(item.m_shared.m_name),
-                    Quantity = item.m_stack,
-                    Category = ItemCategories.Of(item),
-                    Icon = item.GetIcon(),
-                    Distance = distance,
-                });
+                };
+
+                IndexedStack group = null;
+                for (var i = 0; i < listed.Count; i++)
+                {
+                    if (listed[i].SameAs(item))
+                    {
+                        group = listed[i];
+                        break;
+                    }
+                }
+
+                if (group == null)
+                {
+                    group = new IndexedStack
+                    {
+                        SharedName = item.m_shared.m_name,
+                        DisplayName = Localization.instance.Localize(item.m_shared.m_name),
+                        Quality = item.m_quality,
+                        Variant = item.m_variant,
+                        WorldLevel = item.m_worldLevel,
+                        Category = ItemCategories.Of(item),
+                        Icon = item.GetIcon(),
+                        Distance = distance,
+                    };
+                    listed.Add(group);
+                }
+
+                group.Parts.Add(part);
+                group.Quantity += item.m_stack;
+                if (distance < group.Distance)
+                {
+                    group.Distance = distance;
+                }
             }
         }
 
-        private static bool TryFillStacks(Inventory from, ItemDrop.ItemData item, List<Container> chests)
+        private static int PutIntoStacks(
+            Inventory from,
+            ItemDrop.ItemData item,
+            int amount,
+            List<Container> chests)
         {
-            var moved = false;
+            var moved = 0;
             foreach (var chest in chests)
             {
-                if (!from.ContainsItem(item))
+                if (amount <= 0 || !from.ContainsItem(item) || item.m_stack <= 0)
                 {
-                    return true;
+                    break;
                 }
 
                 var inventory = chest.GetInventory();
@@ -183,45 +305,103 @@ namespace GatewayChest.Storage
                     continue;
                 }
 
-                if (inventory.FindFreeStackItem(item.m_shared.m_name, item.m_quality, item.m_worldLevel) == null)
+                while (amount > 0 && from.ContainsItem(item) && item.m_stack > 0)
                 {
-                    continue;
-                }
+                    var existing = inventory.FindFreeStackItem(
+                        item.m_shared.m_name,
+                        item.m_quality,
+                        item.m_worldLevel);
+                    if (existing == null)
+                    {
+                        break;
+                    }
 
-                moved |= TryMove(chest, from, item);
+                    var space = existing.m_shared.m_maxStackSize - existing.m_stack;
+                    var n = Mathf.Min(amount, Mathf.Min(space, item.m_stack));
+                    if (n <= 0)
+                    {
+                        break;
+                    }
+
+                    var got = MoveAmount(chest, from, item, n, existing.m_gridPos);
+                    if (got <= 0)
+                    {
+                        break;
+                    }
+
+                    moved += got;
+                    amount -= got;
+                }
             }
 
             return moved;
         }
 
-        private static bool TryEmptySlots(Inventory from, ItemDrop.ItemData item, List<Container> chests)
+        private static int PutIntoEmpty(
+            Inventory from,
+            ItemDrop.ItemData item,
+            int amount,
+            List<Container> chests)
         {
-            var moved = false;
+            var moved = 0;
             foreach (var chest in chests)
             {
-                if (!from.ContainsItem(item))
+                if (amount <= 0 || !from.ContainsItem(item) || item.m_stack <= 0)
                 {
-                    return true;
+                    break;
                 }
 
                 var inventory = chest.GetInventory();
-                if (inventory == null || !inventory.HaveEmptySlot())
+                if (inventory == null)
                 {
                     continue;
                 }
 
-                moved |= TryMove(chest, from, item);
+                while (amount > 0 && from.ContainsItem(item) && item.m_stack > 0 && inventory.HaveEmptySlot())
+                {
+                    var slot = inventory.FindEmptySlot(false);
+                    if (slot.x < 0)
+                    {
+                        break;
+                    }
+
+                    var n = Mathf.Min(amount, Mathf.Min(item.m_stack, item.m_shared.m_maxStackSize));
+                    if (n <= 0)
+                    {
+                        break;
+                    }
+
+                    var got = MoveAmount(chest, from, item, n, slot);
+                    if (got <= 0)
+                    {
+                        break;
+                    }
+
+                    moved += got;
+                    amount -= got;
+                }
             }
 
             return moved;
         }
 
-        private static bool TryMove(Container chest, Inventory from, ItemDrop.ItemData item)
+        private static int MoveAmount(
+            Container chest,
+            Inventory from,
+            ItemDrop.ItemData item,
+            int amount,
+            Vector2i pos)
         {
+            if (chest == null || from == null || item == null || amount <= 0)
+            {
+                return 0;
+            }
+
             var before = item.m_stack;
             EnsureOwner(chest);
-            chest.GetInventory().MoveItemToThis(from, item);
-            return !from.ContainsItem(item) || item.m_stack < before;
+            chest.GetInventory().MoveItemToThis(from, item, amount, pos.x, pos.y);
+            var after = from.ContainsItem(item) ? item.m_stack : 0;
+            return Mathf.Max(0, before - after);
         }
 
         private static void EnsureOwner(Container container)

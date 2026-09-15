@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using GatewayChest.Storage;
 using Jotunn.Managers;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace GatewayChest.UI
@@ -32,14 +34,17 @@ namespace GatewayChest.UI
         private static InputField _search;
         private static RectTransform _scrollRect;
         private static Transform _rowParent;
-        private static readonly List<GameObject> _rows = new List<GameObject>();
+        private static readonly List<RowView> _rows = new List<RowView>();
         private static readonly List<Button> _categoryButtons = new List<Button>();
         private static readonly List<Button> _sortButtons = new List<Button>();
         private static ItemCategory _category = ItemCategory.All;
         private static SortMode _sort = SortMode.Name;
         private static string _query = "";
         private static float _nextRefresh;
+        private static float _nextSnap;
         private static Container _pending;
+        private static IndexedStack _splitGroup;
+        private static bool _searchBlocked;
         private static readonly Vector3[] Corners = new Vector3[4];
 
         internal static void Open(Container hub)
@@ -64,6 +69,7 @@ namespace GatewayChest.UI
                 return;
             }
 
+            _nextSnap = 0f;
             SnapBetweenInventoryAndCrafting();
             _root.SetActive(true);
             _nextRefresh = 0f;
@@ -74,12 +80,12 @@ namespace GatewayChest.UI
         {
             GatewayChestHub.OpenHub = null;
             _pending = null;
+            _splitGroup = null;
+            UnfocusSearch();
             if (_root != null)
             {
                 _root.SetActive(false);
             }
-
-            GUIManager.BlockInput(false);
         }
 
         internal static void Tick()
@@ -95,11 +101,56 @@ namespace GatewayChest.UI
                 return;
             }
 
-            SnapBetweenInventoryAndCrafting();
+            if (Time.time >= _nextSnap)
+            {
+                SnapBetweenInventoryAndCrafting();
+            }
+
+            SyncSearchFocus();
             if (Time.time >= _nextRefresh)
             {
                 Refresh();
             }
+        }
+
+        internal static bool SearchHasFocus()
+        {
+            return _search != null && _search.isFocused && _root != null && _root.activeSelf;
+        }
+
+        internal static bool HandleSplitOk()
+        {
+            if (_splitGroup == null)
+            {
+                return false;
+            }
+
+            var gui = InventoryGui.instance;
+            var amount = gui != null && gui.m_splitDialog != null
+                ? Mathf.Max(1, (int)gui.m_splitDialog.SliderValue)
+                : 1;
+            var group = _splitGroup;
+            _splitGroup = null;
+            gui?.HideSplitDialog();
+            StorageNetwork.Withdraw(Player.m_localPlayer, group, amount);
+            Refresh();
+            return true;
+        }
+
+        internal static void ClearSplit()
+        {
+            _splitGroup = null;
+        }
+
+        internal static bool TryDepositDrag()
+        {
+            if (!IsDragging() || !PointerOverPanel())
+            {
+                return false;
+            }
+
+            DepositDragged();
+            return true;
         }
 
         private static void BuildPending()
@@ -140,7 +191,10 @@ namespace GatewayChest.UI
             ours.anchorMin = new Vector2(0.5f, 0.5f);
             ours.anchorMax = new Vector2(0.5f, 0.5f);
             ours.pivot = new Vector2(0.5f, 0.5f);
-            ours.sizeDelta = new Vector2(PanelWidth, PanelHeight);
+            if (ours.sizeDelta.x != PanelWidth || ours.sizeDelta.y != PanelHeight)
+            {
+                ours.sizeDelta = new Vector2(PanelWidth, PanelHeight);
+            }
 
             var center = parent.rect.center;
             var pos = Vector2.zero;
@@ -166,7 +220,12 @@ namespace GatewayChest.UI
                 pos = new Vector2(midX - center.x, 0f);
             }
 
-            ours.anchoredPosition = pos;
+            if ((ours.anchoredPosition - pos).sqrMagnitude > 4f)
+            {
+                ours.anchoredPosition = pos;
+            }
+
+            _nextSnap = Time.time + 0.35f;
         }
 
         private static float EdgeX(RectTransform parent, RectTransform child, bool right)
@@ -230,6 +289,10 @@ namespace GatewayChest.UI
                 30f).GetComponent<InputField>();
             _search.onValueChanged.AddListener(OnSearch);
             PlaceTop(_search.GetComponent<RectTransform>(), 80f, 320f, 30f);
+            _search.interactable = true;
+            _search.navigation = new Navigation { mode = Navigation.Mode.None };
+            WireSearchFocus();
+            WirePanelDrop();
 
             var depositGo = gui.CreateButton(
                 Localization.instance.Localize("$gatewaychest_deposit"),
@@ -428,6 +491,12 @@ namespace GatewayChest.UI
 
                 button.onClick.AddListener(() =>
                 {
+                    if (IsDragging())
+                    {
+                        DepositDragged();
+                        return;
+                    }
+
                     _category = captured;
                     Refresh();
                 });
@@ -473,6 +542,12 @@ namespace GatewayChest.UI
                 gui.ApplyButtonStyle(button, 13);
                 button.onClick.AddListener(() =>
                 {
+                    if (IsDragging())
+                    {
+                        DepositDragged();
+                        return;
+                    }
+
                     _sort = captured;
                     Refresh();
                 });
@@ -489,13 +564,25 @@ namespace GatewayChest.UI
 
         private static void OnDeposit()
         {
+            if (IsDragging())
+            {
+                DepositDragged();
+                return;
+            }
+
             StorageNetwork.DepositAll(Player.m_localPlayer, GatewayChestHub.OpenHub);
+            var gui = InventoryGui.instance;
+            if (gui != null && gui.m_dragGo != null)
+            {
+                gui.SetupDragItem(null, null, 1);
+            }
+
             Refresh();
         }
 
         private static void Refresh()
         {
-            _nextRefresh = Time.time + 0.45f;
+            _nextRefresh = Time.time + 0.6f;
             var hub = GatewayChestHub.OpenHub;
             if (hub == null || _rowParent == null)
             {
@@ -521,22 +608,30 @@ namespace GatewayChest.UI
 
             TintFilters();
 
-            foreach (var row in _rows)
-            {
-                UnityEngine.Object.Destroy(row);
-            }
-
-            _rows.Clear();
-
             var visible = Filter(StorageNetwork.ListItems(hub));
             if (_empty != null)
             {
                 _empty.gameObject.SetActive(visible.Count == 0);
             }
 
-            foreach (var stack in visible)
+            while (_rows.Count > visible.Count)
             {
-                _rows.Add(MakeRow(stack));
+                var extra = _rows[_rows.Count - 1];
+                _rows.RemoveAt(_rows.Count - 1);
+                if (extra.Go != null)
+                {
+                    UnityEngine.Object.Destroy(extra.Go);
+                }
+            }
+
+            while (_rows.Count < visible.Count)
+            {
+                _rows.Add(MakeRow());
+            }
+
+            for (var i = 0; i < visible.Count; i++)
+            {
+                BindRow(_rows[i], visible[i]);
             }
         }
 
@@ -622,7 +717,7 @@ namespace GatewayChest.UI
             return order != 0 ? order : a.Distance.CompareTo(b.Distance);
         }
 
-        private static GameObject MakeRow(IndexedStack stack)
+        private static RowView MakeRow()
         {
             var gui = GUIManager.Instance;
             var row = gui.CreateButton(
@@ -650,24 +745,20 @@ namespace GatewayChest.UI
             rt.anchorMax = new Vector2(1f, 1f);
             rt.pivot = new Vector2(0.5f, 1f);
 
-            if (stack.Icon != null)
-            {
-                var iconGo = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-                iconGo.transform.SetParent(row.transform, false);
-                var icon = iconGo.GetComponent<Image>();
-                icon.sprite = stack.Icon;
-                icon.preserveAspect = true;
-                icon.raycastTarget = false;
-                var iconRt = icon.rectTransform;
-                iconRt.anchorMin = new Vector2(0f, 0.5f);
-                iconRt.anchorMax = new Vector2(0f, 0.5f);
-                iconRt.pivot = new Vector2(0f, 0.5f);
-                iconRt.sizeDelta = new Vector2(IconSize, IconSize);
-                iconRt.anchoredPosition = new Vector2(8f, 0f);
-            }
+            var iconGo = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            iconGo.transform.SetParent(row.transform, false);
+            var icon = iconGo.GetComponent<Image>();
+            icon.preserveAspect = true;
+            icon.raycastTarget = false;
+            var iconRt = icon.rectTransform;
+            iconRt.anchorMin = new Vector2(0f, 0.5f);
+            iconRt.anchorMax = new Vector2(0f, 0.5f);
+            iconRt.pivot = new Vector2(0f, 0.5f);
+            iconRt.sizeDelta = new Vector2(IconSize, IconSize);
+            iconRt.anchoredPosition = new Vector2(8f, 0f);
 
             var nameGo = gui.CreateText(
-                stack.DisplayName,
+                "",
                 row.transform,
                 new Vector2(0f, 0.5f),
                 new Vector2(1f, 0.5f),
@@ -691,7 +782,7 @@ namespace GatewayChest.UI
             name.raycastTarget = false;
 
             var qtyGo = gui.CreateText(
-                "x" + stack.Quantity,
+                "",
                 row.transform,
                 new Vector2(1f, 0.5f),
                 new Vector2(1f, 0.5f),
@@ -714,14 +805,297 @@ namespace GatewayChest.UI
             qty.alignment = TextAnchor.MiddleRight;
             qty.raycastTarget = false;
 
-            var captured = stack;
-            row.GetComponent<Button>().onClick.AddListener(() =>
+            var view = new RowView
             {
-                StorageNetwork.Withdraw(Player.m_localPlayer, captured);
-                Refresh();
-            });
+                Go = row,
+                Icon = icon,
+                Name = name,
+                Qty = qty,
+            };
+            row.GetComponent<Button>().onClick.AddListener(() => OnRowClicked(view));
+            return view;
+        }
 
-            return row;
+        private static void BindRow(RowView view, IndexedStack stack)
+        {
+            view.Stack = stack;
+            if (view.Go != null && !view.Go.activeSelf)
+            {
+                view.Go.SetActive(true);
+            }
+
+            if (view.Icon != null)
+            {
+                view.Icon.sprite = stack.Icon;
+                view.Icon.enabled = stack.Icon != null;
+            }
+
+            if (view.Name != null)
+            {
+                view.Name.text = stack.DisplayName;
+            }
+
+            if (view.Qty != null)
+            {
+                view.Qty.text = "x" + stack.Quantity;
+            }
+        }
+
+        private static void OnRowClicked(RowView view)
+        {
+            if (view == null || view.Stack == null)
+            {
+                return;
+            }
+
+            if (IsDragging())
+            {
+                DepositDragged();
+                return;
+            }
+
+            if (IsShift() && view.Stack.Quantity > 1)
+            {
+                BeginSplitWithdraw(view.Stack);
+                return;
+            }
+
+            StorageNetwork.Withdraw(Player.m_localPlayer, view.Stack, view.Stack.Quantity);
+            Refresh();
+        }
+
+        private static void BeginSplitWithdraw(IndexedStack group)
+        {
+            var gui = InventoryGui.instance;
+            var sample = group == null ? null : group.FirstLive();
+            if (gui == null || sample == null)
+            {
+                return;
+            }
+
+            _splitGroup = group;
+            var sourceInv = group.Parts.Count > 0 && group.Parts[0].Source != null
+                ? group.Parts[0].Source.GetInventory()
+                : null;
+            gui.ShowSplitDialog(sample, sourceInv);
+            gui.m_splitDialog.UpdateLimits(group.Quantity, false);
+        }
+
+        private static bool IsShift()
+        {
+            return ZInput.GetKey(KeyCode.LeftShift) || ZInput.GetKey(KeyCode.RightShift);
+        }
+
+        private static bool IsDragging()
+        {
+            var gui = InventoryGui.instance;
+            return gui != null && gui.m_dragGo != null && gui.m_dragItem != null;
+        }
+
+        private static void DepositDragged()
+        {
+            var gui = InventoryGui.instance;
+            var player = Player.m_localPlayer;
+            var hub = GatewayChestHub.OpenHub;
+            if (gui == null || player == null || hub == null || gui.m_dragItem == null || gui.m_dragInventory == null)
+            {
+                return;
+            }
+
+            var from = gui.m_dragInventory;
+            var item = gui.m_dragItem;
+            if (from != player.GetInventory() || !from.ContainsItem(item))
+            {
+                gui.SetupDragItem(null, null, 1);
+                return;
+            }
+
+            StorageNetwork.RouteAmount(from, item, gui.m_dragAmount, hub, allowHub: true);
+            gui.SetupDragItem(null, null, 1);
+            Refresh();
+        }
+
+        private static bool PointerOverPanel()
+        {
+            if (_root == null)
+            {
+                return false;
+            }
+
+            var rt = _root.GetComponent<RectTransform>();
+            var cam = null as Camera;
+            var canvas = _root.GetComponentInParent<Canvas>();
+            if (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay)
+            {
+                cam = canvas.worldCamera;
+            }
+
+            return RectTransformUtility.RectangleContainsScreenPoint(rt, Input.mousePosition, cam);
+        }
+
+        private static void WirePanelDrop()
+        {
+            var graphic = _root.GetComponent<Image>();
+            if (graphic != null)
+            {
+                graphic.raycastTarget = true;
+            }
+
+            var trigger = _root.GetComponent<EventTrigger>();
+            if (trigger == null)
+            {
+                trigger = _root.AddComponent<EventTrigger>();
+            }
+
+            var entry = new EventTrigger.Entry { eventID = EventTriggerType.PointerClick };
+            entry.callback.AddListener(new UnityAction<BaseEventData>(OnBackgroundClicked));
+            trigger.triggers.Add(entry);
+        }
+
+        private static void OnBackgroundClicked(BaseEventData _)
+        {
+            if (IsDragging())
+            {
+                DepositDragged();
+            }
+        }
+
+        private static void WireSearchFocus()
+        {
+            if (_search == null)
+            {
+                return;
+            }
+
+            var image = _search.GetComponent<Image>();
+            if (image != null)
+            {
+                image.raycastTarget = true;
+            }
+
+            _search.onEndEdit.AddListener(OnSearchEndEdit);
+
+            var trigger = _search.gameObject.GetComponent<EventTrigger>();
+            if (trigger == null)
+            {
+                trigger = _search.gameObject.AddComponent<EventTrigger>();
+            }
+
+            var entry = new EventTrigger.Entry { eventID = EventTriggerType.PointerClick };
+            entry.callback.AddListener(new UnityAction<BaseEventData>(OnSearchClicked));
+            trigger.triggers.Add(entry);
+        }
+
+        private static void OnSearchClicked(BaseEventData _)
+        {
+            if (IsDragging())
+            {
+                DepositDragged();
+                return;
+            }
+
+            FocusSearch();
+        }
+
+        private static void OnSearchEndEdit(string _)
+        {
+            SetSearchBlock(false);
+        }
+
+        private static void SyncSearchFocus()
+        {
+            if (_search == null)
+            {
+                SetSearchBlock(false);
+                return;
+            }
+
+            if (ZInput.GetMouseButtonDown(0) && PointerOverSearch())
+            {
+                if (IsDragging())
+                {
+                    DepositDragged();
+                    return;
+                }
+
+                FocusSearch();
+            }
+
+            SetSearchBlock(SearchHasFocus());
+        }
+
+        private static bool PointerOverSearch()
+        {
+            if (_search == null)
+            {
+                return false;
+            }
+
+            var cam = null as Camera;
+            var canvas = _search.GetComponentInParent<Canvas>();
+            if (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay)
+            {
+                cam = canvas.worldCamera;
+            }
+
+            return RectTransformUtility.RectangleContainsScreenPoint(
+                _search.GetComponent<RectTransform>(),
+                Input.mousePosition,
+                cam);
+        }
+
+        private static void FocusSearch()
+        {
+            if (_search == null)
+            {
+                return;
+            }
+
+            _search.ActivateInputField();
+            _search.Select();
+            if (EventSystem.current != null)
+            {
+                EventSystem.current.SetSelectedGameObject(_search.gameObject);
+            }
+
+            SetSearchBlock(true);
+        }
+
+        internal static void UnfocusSearch()
+        {
+            if (_search != null && _search.isFocused)
+            {
+                _search.DeactivateInputField();
+            }
+
+            if (EventSystem.current != null &&
+                _search != null &&
+                EventSystem.current.currentSelectedGameObject == _search.gameObject)
+            {
+                EventSystem.current.SetSelectedGameObject(null);
+            }
+
+            SetSearchBlock(false);
+        }
+
+        private static void SetSearchBlock(bool on)
+        {
+            if (on == _searchBlocked)
+            {
+                return;
+            }
+
+            GUIManager.BlockInput(on);
+            _searchBlocked = on;
+        }
+
+        private sealed class RowView
+        {
+            internal GameObject Go;
+            internal Image Icon;
+            internal Text Name;
+            internal Text Qty;
+            internal IndexedStack Stack;
         }
     }
 }

@@ -1,5 +1,6 @@
 using GatewayChest.UI;
 using HarmonyLib;
+using UnityEngine;
 
 namespace GatewayChest.Patches
 {
@@ -47,6 +48,58 @@ namespace GatewayChest.Patches
             }
 
             GatewayPanel.Tick();
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch("OnDropOutside")]
+        private static bool DepositDragOnPanel()
+        {
+            return !GatewayPanel.TryDepositDrag();
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch("OnSplitOk")]
+        private static bool HubSplitOk()
+        {
+            return !GatewayPanel.HandleSplitOk();
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch("OnSplitCancel")]
+        private static void HubSplitCancel()
+        {
+            GatewayPanel.ClearSplit();
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch("Update")]
+        private static void KeepOpenWhileSearching()
+        {
+            if (!GatewayPanel.SearchHasFocus())
+            {
+                return;
+            }
+
+            ZInput.ResetButtonStatus("Use");
+            ZInput.ResetButtonStatus("Inventory");
+            ZInput.ResetButtonStatus("JoyButtonB");
+            ZInput.ResetButtonStatus("JoyButtonY");
+        }
+    }
+
+    /// <summary>
+    /// InventoryGui skips close-keys while chat is focused. Treat the hub search
+    /// field the same so typing E does not close the chest.
+    /// </summary>
+    [HarmonyPatch(typeof(Chat), nameof(Chat.HasFocus))]
+    internal static class ChatFocusPatch
+    {
+        private static void Postfix(ref bool __result)
+        {
+            if (GatewayPanel.SearchHasFocus())
+            {
+                __result = true;
+            }
         }
     }
 }

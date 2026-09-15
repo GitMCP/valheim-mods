@@ -26,11 +26,16 @@ Requires [Jötunn](https://thunderstore.io/c/valheim/p/ValheimModding/Jotunn/).
 
 Walk up and press use. Your inventory stays on the left and crafting on the
 right. The hub panel opens in the center, between them, with search, category
-tabs, sort, and a count of used slots across every connected chest.
+tabs, sort, and a count of used slots across every connected chest. Identical
+items from different chests share one row.
 
-- **Click a row** to pull that stack into your inventory.
+- **Click a row** to pull that item into your inventory (as much as will fit).
+- **Shift-click a row** to pick how many to take.
+- **Click an item in your inventory**, then click the hub panel (or a row) to
+  store it. Dropping on a row stores the dragged item; it does not withdraw.
 - **Shift-click** an item in your inventory, or press **Deposit**, to send it
   into the network. The hotbar is left alone unless you turn that on in config.
+- Click the search box to type. It keeps focus, so E does not close the panel.
 - Hold use on the chest, the same as a vanilla chest, to stack everything that
   will fit.
 
