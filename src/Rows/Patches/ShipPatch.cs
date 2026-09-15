@@ -22,9 +22,13 @@ namespace Rows.Patches
 
         /// <summary>
         /// Extra hands add the same impulse the captain's paddle already uses, at the
-        /// same point on the hull, in the direction the helm has asked for. It runs
-        /// only on the owner because that is who integrates the rigidbody; everyone
-        /// else is already watching that result.
+        /// same point on the hull, in the direction the helm has asked for. One helper
+        /// at Speed 1 is a second copy of that paddle, so the hull goes twice as fast
+        /// from rowing. The same copies are added when the sail is up: the cloth keeps
+        /// doing what it does, and the oars still push.
+        ///
+        /// It runs only on the owner because that is who integrates the rigidbody;
+        /// everyone else is already watching that result.
         /// </summary>
         [HarmonyPostfix]
         [HarmonyPatch(nameof(Ship.CustomFixedUpdate))]
@@ -52,7 +56,7 @@ namespace Rows.Patches
                 return;
             }
 
-            var amount = rowers * RowsPlugin.ForcePerRower.Value;
+            var amount = rowers * RowsPlugin.Speed.Value;
             if (amount <= 0f)
             {
                 return;

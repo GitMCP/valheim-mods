@@ -2,12 +2,15 @@
 
 Passenger seats on boats get oars. Sit in one and you help the captain go faster.
 
-The person at the helm still steers and still sets the sail. Everyone else on a chair
-is a rower: each occupied seat adds a push in the direction the helm has asked for.
-An empty seat does nothing. Nobody at the helm, and the oars rest.
+The person at the helm still steers and still sets the sail. Everyone else on a
+gunwale chair is a rower: each occupied seat adds a full copy of the helm's
+paddle in the direction the helm has asked for, including while the sail is up.
+One helper doubles the paddle. An empty seat does nothing. Nobody at the helm,
+and the oars rest. The seat against the mast has no oar; it is too far from the
+water.
 
-The oars are wooden stand-ins until there is a real mesh. They stroke while you sit
-and the ship is under way.
+The oars are wooden stand-ins until there is a real mesh. They hang in the
+water and stroke while you sit and the ship is under way.
 
 Because this changes how a shared ship moves, it has to be installed on the **server
 and on every client**.
@@ -24,4 +27,4 @@ of the world, so the server's copy wins.
 
 | Setting | Default | Description |
 | --- | --- | --- |
-| `Rows / ForcePerRower` | `0.35` | How much one occupied passenger seat adds, as a fraction of the ship's own paddle force. |
+| `Rows / Speed` | `1` | How much one helper adds, as a multiple of the helm's paddle. `1` doubles the paddle with a second rower, and still applies with the sail up. |

@@ -15,8 +15,10 @@ namespace Rows
     /// sculling with the rudder; Half and Full are the sail. The chairs on the deck
     /// are ordinary furniture that happen to be on a boat, and sitting in one does
     /// nothing to the hull. This mod does not add a new control: it counts who is
-    /// already sat down, other than the helmsman, and adds the same kind of force
-    /// the paddle already uses, once per occupied seat.
+    /// already sat down, other than the helmsman and anyone on the mast, and adds
+    /// the same kind of force the paddle already uses, once per occupied gunwale
+    /// seat. One helper is a second copy of that paddle, including while the sail
+    /// is up.
     ///
     /// The oars are scenery borrowed from wooden building pieces. They are not
     /// networked objects. Every client builds the same ones locally, and the extra
@@ -38,7 +40,7 @@ namespace Rows
 
         internal static ManualLogSource Log;
 
-        internal static ConfigEntry<float> ForcePerRower;
+        internal static ConfigEntry<float> Speed;
 
         private Harmony _harmony;
 
@@ -46,14 +48,15 @@ namespace Rows
         {
             Log = Logger;
 
-            ForcePerRower = Config.Bind(
+            Speed = Config.Bind(
                 "Rows",
-                "ForcePerRower",
-                0.35f,
+                "Speed",
+                1f,
                 new ConfigDescription(
-                    "How much one occupied passenger seat adds, as a fraction of the " +
-                    "ship's own paddle force. The helmsman is not counted.",
-                    new AcceptableValueRange<float>(0f, 2f),
+                    "How much one helper adds, as a multiple of the helm's paddle. 1 means " +
+                    "the helm plus one rower goes twice as fast from paddling, and that " +
+                    "same extra still applies with the sail up.",
+                    new AcceptableValueRange<float>(0f, 4f),
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
 
             Localizations.Register();

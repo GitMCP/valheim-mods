@@ -84,9 +84,10 @@ the rudder; Half and Full are the sail. The chairs on the deck are ordinary furn
 that happen to be on a boat, and sitting in one does nothing to the hull.
 
 `src/Rows` does not add a new control. It counts who is already sat down, other than the
-helmsman, and adds the same kind of force the paddle already uses, once per occupied
-seat, on the peer that owns the ship. That peer is the one already integrating the
-rigidbody, so the extra push does not need a second network path.
+helmsman and anyone on the mast, and adds the same kind of force the paddle already uses,
+once per occupied gunwale seat, on the peer that owns the ship. One helper is a second
+copy of that paddle, including while the sail is up. That peer is the one already
+integrating the rigidbody, so the extra push does not need a second network path.
 
 The oars themselves are scenery. A real oar mesh would need an AssetBundle; until then a
 shaft and a blade are two boxes of the wooden pole every client already has loaded. They

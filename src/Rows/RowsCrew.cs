@@ -3,15 +3,27 @@ using UnityEngine;
 namespace Rows
 {
     /// <summary>
-    /// Who is actually rowing: anyone attached to this ship who is not at the helm.
+    /// Who is actually rowing: anyone attached to this ship who can reach the water.
     ///
     /// The captain already contributes Slow, Back, Half and Full through
     /// <see cref="ShipControlls"/>. Counting them again would double the paddle.
-    /// A passenger chair is just an attach point, so the test is "attached to this
-    /// hull, and not to the helm's own point".
+    /// A seat on the mast is too far inboard and too high to dip an oar, so it is
+    /// not a rowing bench either.
     /// </summary>
     internal static class RowsCrew
     {
+        /// <summary>
+        /// Seats closer to the mast than this, in the horizontal plane, sit on the
+        /// spine of the ship rather than at the gunwale.
+        /// </summary>
+        private const float MastRadius = 0.9f;
+
+        /// <summary>
+        /// Ship-local X inside this is the centerline: far from the water even when
+        /// the mast object itself is a little forward or aft of the chair.
+        /// </summary>
+        private const float Centerline = 0.5f;
+
         internal static int Count(Ship ship)
         {
             if (ship == null)
@@ -19,7 +31,6 @@ namespace Rows
                 return 0;
             }
 
-            var helm = ship.m_shipControlls != null ? ship.m_shipControlls.m_attachPoint : null;
             var rowers = 0;
             foreach (var player in Player.GetAllPlayers())
             {
@@ -28,13 +39,7 @@ namespace Rows
                     continue;
                 }
 
-                var point = player.GetAttachPoint();
-                if (point == null || point == helm)
-                {
-                    continue;
-                }
-
-                if (point.GetComponentInParent<Ship>() == ship)
+                if (CanRow(ship, player.GetAttachPoint()))
                 {
                     rowers++;
                 }
@@ -59,6 +64,48 @@ namespace Rows
             }
 
             return false;
+        }
+
+        internal static bool CanRow(Ship ship, Transform attach)
+        {
+            if (ship == null || attach == null)
+            {
+                return false;
+            }
+
+            if (attach.GetComponentInParent<Ship>() != ship)
+            {
+                return false;
+            }
+
+            if (ship.m_shipControlls != null && attach == ship.m_shipControlls.m_attachPoint)
+            {
+                return false;
+            }
+
+            var local = ship.transform.InverseTransformPoint(attach.position);
+            if (Mathf.Abs(local.x) < Centerline)
+            {
+                return false;
+            }
+
+            var mast = ship.m_mastObject;
+            if (mast != null)
+            {
+                if (attach.IsChildOf(mast.transform))
+                {
+                    return false;
+                }
+
+                var offset = attach.position - mast.transform.position;
+                offset.y = 0f;
+                if (offset.sqrMagnitude < MastRadius * MastRadius)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

@@ -12,6 +12,12 @@ namespace Rows.Patches
                 return;
             }
 
+            var ship = __instance.GetComponentInParent<Ship>();
+            if (ship == null || !RowsCrew.CanRow(ship, __instance.m_attachPoint))
+            {
+                return;
+            }
+
             // Too-far already decided; leave it. The success line is rebuilt so the
             // prompt can say Row without depending on which language $piece_use became.
             if (__result.IndexOf("888888", System.StringComparison.Ordinal) >= 0)

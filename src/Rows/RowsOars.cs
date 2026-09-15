@@ -10,17 +10,34 @@ namespace Rows
     /// are two boxes of wood, the same trick the bicycle uses for its handlebar.
     /// They are local scenery: no ZNetView, no collider, nothing the simulation
     /// has to agree about beyond the fact that a player is sitting.
+    ///
+    /// The pivot lives in the ship's own space, not the seat's. A chair's attach
+    /// point is aimed at a sitter, so hanging the oar there left the blade in the
+    /// air. In hull space, +X is starboard and +Y is up, and a roll around forward
+    /// is what dips the outboard end into the water.
     /// </summary>
     internal static class RowsOars
     {
         private const string WoodSource = "wood_pole";
         private const string WoodPath = "New";
 
-        internal static Transform Build(Transform parent, float side)
+        /// <summary>
+        /// Degrees below the horizontal, outboard end down. Positive for both sides
+        /// once it is multiplied by <c>-side</c>: starboard rolls one way, port the other.
+        /// </summary>
+        private const float Dip = 48f;
+
+        private const float Stroke = 16f;
+
+        internal static Transform Build(Transform ship, Transform attach, float side)
         {
             var pivot = new GameObject("RowsOar").transform;
-            pivot.SetParent(parent, worldPositionStays: false);
-            pivot.localPosition = new Vector3(side * 0.55f, 0.35f, 0f);
+            pivot.SetParent(ship, worldPositionStays: false);
+
+            var local = ship.InverseTransformPoint(attach.position);
+            local.x += side * 0.55f;
+            local.y += 0.2f;
+            pivot.localPosition = local;
             pivot.localRotation = Rest(side);
 
             // The pole is a unit cube. Stretching it makes a shaft; flattening a
@@ -32,12 +49,12 @@ namespace Rows
 
         internal static Quaternion Rest(float side)
         {
-            return Quaternion.Euler(0f, 0f, side * 18f);
+            return Quaternion.Euler(0f, 0f, -side * Dip);
         }
 
-        internal static Quaternion Stroke(float side, float time)
+        internal static Quaternion StrokeAt(float side, float time)
         {
-            return Quaternion.Euler(0f, 0f, side * (18f + Mathf.Sin(time * 3.2f) * 26f));
+            return Quaternion.Euler(0f, 0f, -side * (Dip + Mathf.Sin(time * 3.2f) * Stroke));
         }
 
         private static void Fit(string name, Transform parent, Vector3 target, Vector3 scale)
