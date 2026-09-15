@@ -33,7 +33,7 @@ namespace StorageHub.Client
                 "Client",
                 "Favourites",
                 "",
-                "Item keys marked with a star in the hub list. Local to this client.");
+                "Item keys marked with a star in Njord's list. Local to this client.");
 
             ResupplyRaw = config.Bind(
                 "Client",

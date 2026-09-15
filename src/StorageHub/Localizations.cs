@@ -61,7 +61,7 @@ namespace StorageHub
                     { "storagehub_hotkey_norange", "No warehouse keeper in range." },
                     { "storagehub_recipe", "Recipe" },
                     { "storagehub_recipes", "Recipes" },
-                    { "storagehub_recipe_hint", "Known recipes. Greyed out if the hub is short of ingredients. Click to take them." },
+                    { "storagehub_recipe_hint", "Known recipes. Greyed out if nearby chests are short of ingredients. Click to take them." },
                     { "storagehub_station_all", "All" },
                     { "storagehub_station_hand", "Handcraft" },
                     { "storagehub_station_hammer", "Hammer" },
@@ -72,7 +72,7 @@ namespace StorageHub
                     { "storagehub_pref_hotkey", "Deposit + Resupply hotkey" },
                     { "storagehub_pref_hotkey_none", "None" },
                     { "storagehub_pref_hotkey_listen", "Press a key…" },
-                    { "storagehub_pref_resupply_hint", "Tick items to keep in your pack. Resupply pulls that many from the hub." },
+                    { "storagehub_pref_resupply_hint", "Tick items to keep in your pack. Resupply pulls that many from nearby chests." },
                 });
         }
     }

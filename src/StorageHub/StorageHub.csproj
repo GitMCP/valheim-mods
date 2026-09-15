@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <AssemblyName>StorageHub</AssemblyName>
+    <AssemblyName>NjordWarehouseKeeper</AssemblyName>
     <RootNamespace>StorageHub</RootNamespace>
-    <Version>1.1.0</Version>
+    <Version>1.0.0</Version>
     <Authors>GitMCP</Authors>
-    <Description>Njord, a warehouse keeper who lists and moves items across nearby containers.</Description>
+    <Description>Njord, Warehouse Keeper. Lists and moves items across nearby chests.</Description>
   </PropertyGroup>
 
   <ItemGroup>

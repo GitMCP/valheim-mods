@@ -13,8 +13,11 @@ on every client**. A client whose version does not match the server's is refused
 
 ## Installation
 
-Drop `StorageHub.dll` into `BepInEx/plugins`, or install the zip with a mod manager.
-Requires [Jötunn](https://thunderstore.io/c/valheim/p/ValheimModding/Jotunn/).
+Drop `NjordWarehouseKeeper.dll` into `BepInEx/plugins`, or install the zip with a
+mod manager. Requires [Jötunn](https://thunderstore.io/c/valheim/p/ValheimModding/Jotunn/).
+
+If you previously tested a `StorageHub.dll` build, remove that file so BepInEx
+does not load two copies.
 
 ## Building one
 
@@ -70,9 +73,9 @@ are synced to clients. Favourites, Resupply, and the deposit-skip toggle are
 
 | Setting | Default | Description |
 | --- | --- | --- |
-| `StorageHub / Radius` | `15` | How far, in metres, a container is still part of Njord's network. |
-| `StorageHub / RequireLineOfSight` | `false` | Only include chests he can see. Off so a chest in the next room still counts. |
-| `StorageHub / DepositHotbar` | `false` | Also deposit the first inventory row. |
+| `Njord / Radius` | `15` | How far, in metres, a container is still part of Njord's network. |
+| `Njord / RequireLineOfSight` | `false` | Only include chests he can see. Off so a chest in the next room still counts. |
+| `Njord / DepositHotbar` | `false` | Also deposit the first inventory row. |
 | `Client / DepositSkipFavourites` | `false` | Deposit leaves starred items in the pack. Also set from the cog. |
 | `Client / RestockHotkey` | *(none)* | In range of Njord, Deposit then Resupply. Bound from the cog. |
 | `Client / Favourites` | *(empty)* | Starred item keys. Edited from the item list. |

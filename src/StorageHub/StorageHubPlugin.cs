@@ -17,7 +17,7 @@ namespace StorageHub
     /// first empty slot.
     ///
     /// Items never leave the chest they already sit in until someone takes or moves
-    /// them. The hub does not clone stacks into a fake inventory: withdraw and deposit
+    /// them. Njord does not clone stacks into a fake inventory: withdraw and deposit
     /// call the same <see cref="Inventory.MoveItemToThis"/> the vanilla GUI uses, after
     /// claiming ZDO ownership the same way Take All does, so multiplayer does not
     /// duplicate or drop items.
@@ -71,26 +71,26 @@ namespace StorageHub
         private void BindConfig()
         {
             Radius = Config.Bind(
-                "StorageHub",
+                "Njord",
                 "Radius",
                 15f,
                 new ConfigDescription(
-                    "How far from the hub, in metres, a container is still part of the network.",
+                    "How far from Njord, in metres, a container is still part of the network.",
                     new AcceptableValueRange<float>(4f, 40f),
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
 
             RequireLineOfSight = Config.Bind(
-                "StorageHub",
+                "Njord",
                 "RequireLineOfSight",
                 false,
                 new ConfigDescription(
-                    "Only include chests the hub can see. Off by default so a chest in the " +
+                    "Only include chests Njord can see. Off by default so a chest in the " +
                     "next room still counts; turn it on if a busy hall is pulling in too much.",
                     null,
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
 
             DepositHotbar = Config.Bind(
-                "StorageHub",
+                "Njord",
                 "DepositHotbar",
                 false,
                 new ConfigDescription(
