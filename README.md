@@ -7,10 +7,9 @@ macOS, and Windows and needs no Visual Studio and no local copy of the game.
 | Project | What it is |
 | --- | --- |
 | `src/Bicicreta` | Adds a buildable, rideable bicycle. |
-| `src/Hirdman` | Adds NPC retainers you hire and order about in plain language. |
 | `src/HelloValheim` | A minimal plugin kept as the template for mods that only patch existing behavior. |
 
-All three are verified to load into a running game.
+Both are verified to load into a running game.
 
 ## How the bicycle works
 
@@ -76,75 +75,6 @@ front of the frame's body and a short neck carries the bar back to the hands. Ev
 wooden building piece in the game turns out to be the same unit cube under a different
 scale, which is why a pole and a beam are the same mesh here and any box of wood can be
 had by asking for one of them at a size.
-
-## How the retainers work
-
-A frame is 16 ms and understanding a sentence is not, so language can never sit in the
-loop that drives a character. Everything about `src/Hirdman` follows from that. A
-retainer only ever does one of eleven things — wait, follow, guard, chop, explore,
-gather, mine, farm, cook, hunt, haul — and each is hand-written behaviour that runs
-deterministically on whichever peer owns it. Understanding happens once, when somebody
-speaks, and its entire output is one of those eleven values plus a position, a player,
-and at most a couple of words naming what the order is about.
-
-That makes the order small enough to live in the ZDO, which is what gives it everything
-else for free: it survives a logout, it is already on every peer, and a retainer that
-changes hands mid-task picks up an order it never saw given. Prose would have none of
-those properties, which is the reason prose is never what gets stored.
-
-Keywords are tried first and a model is only asked what they could not place. "Follow
-me" and "go get wood" are most of what anyone types, and answering them instantly beats
-answering them cleverly two seconds later; the model earns its place on "the camp needs
-looking after while I'm gone". Its reply is constrained by a JSON schema rather than
-trusted, so a 4B model physically cannot answer with anything but one of eleven words.
-It is also entirely optional, and its settings are deliberately not synced: a model
-describes the machine a player is sitting at, and what reaches the server is an order and
-not a sentence.
-
-Naming *what* an order is about could not be a second closed list, because the answer is
-every plant, ore and animal in the game plus whatever other mods add. So a subject stays
-as the word the player said, and matching happens against the thing in front of the
-retainer: its prefab name, the item it drops, and what that item is called on screen in
-the player's own language. "Raspberries", "raspberry" and `RaspberryBush` are three
-spellings of one thing and none of them is reliably the one somebody types, so all of
-them are matched, loosely, and the cost of being loose is picking the wrong mushroom.
-
-The retainer itself is a player. The dvergr was a working companion with the wrong face
-and the wrong animator: `swing_axe` is a player clip, and a dvergr has no such state, so
-a swing returned true and hit nothing. Armour numbers lived on `Player` too, applied only
-when `IsPlayer()` was true. There is no way to keep the look, the clips and the armour
-math without keeping the component, because `Player` *is* the `Humanoid`. What is added
-is the AI a player does not have. What is taken away is everything the component then
-does because it believes it is the person at the keyboard. What is not given is tools:
-a retainer who arrives with an axe will never need one handed to them.
-
-Work is the only thing written from scratch, because the game has no idea of a creature
-with a job. Following is left to `MonsterAI`, which has a tamed wolf's worth of
-experience at walking behind someone, and a fight is left to it the moment it has a
-target; the brain is asked first each frame and claims only the frames it needs. Felling
-a tree uses the damage of the axe actually in the retainer's hands, so the game's own
-tool tiers and drop tables decide what happens — a stone axe will not bring down a birch
-for a retainer either, and they will not stand at one trying.
-
-Each job is a class rather than a branch in the brain, because a job owns memory — which
-tree it chose, how long it has been swinging — that has to be thrown away when the order
-changes under it. It also means the brain is the length it was at four jobs.
-
-Two things cannot travel in a ZDO and so are messages instead. Ringing the bell has to
-reach retainers held by peers this machine cannot see, and a scout's discoveries have to
-land on one particular player's map and no one else's, because exploration is saved per
-character. Everything else a retainer does is state, and state is what a ZDO is for.
-
-Hiring replaced building for a reason worth recording: a hammer piece is placed once and
-costs its materials once, which makes every retainer a separate building project and
-leaves nowhere to put the rules that actually matter — how many you may keep, what each
-costs, and whose they are. An outpost is built once and then hires as often as you can
-pay, which is both how a mercenary post reads and where those rules belong.
-
-Neither the outpost nor the bell ships a model. Valheim has no bell, and a real one would
-mean an AssetBundle; instead both are assembled from meshes already loaded on every peer,
-which is the same trick the bicycle uses. A cauldron upside down is the only shape in the
-game with a bell's silhouette.
 
 ## Requirements
 
