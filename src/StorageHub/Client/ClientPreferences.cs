@@ -12,6 +12,7 @@ namespace StorageHub.Client
     internal static class ClientPreferences
     {
         internal static ConfigEntry<bool> DepositSkipFavourites;
+        internal static ConfigEntry<KeyboardShortcut> RestockHotkey;
 
         private static ConfigEntry<string> FavouritesRaw;
         private static ConfigEntry<string> ResupplyRaw;
@@ -39,6 +40,12 @@ namespace StorageHub.Client
                 "Resupply",
                 "",
                 "Item keys and counts the Resupply button tries to keep in your pack.");
+
+            RestockHotkey = config.Bind(
+                "Client",
+                "RestockHotkey",
+                KeyboardShortcut.Empty,
+                "While in range of a Storage Hub, press this to Deposit and then Resupply without opening it.");
 
             FavouritesRaw.SettingChanged += OnTextChanged;
             ResupplyRaw.SettingChanged += OnTextChanged;

@@ -6,6 +6,7 @@ using HarmonyLib;
 using Jotunn.Managers;
 using Jotunn.Utils;
 using StorageHub.Client;
+using StorageHub.UI;
 
 namespace StorageHub
 {
@@ -50,6 +51,21 @@ namespace StorageHub
             _harmony.PatchAll(typeof(StorageHubPlugin).Assembly);
 
             PrefabManager.OnVanillaPrefabsAvailable += RegisterContent;
+        }
+
+        private void Update()
+        {
+            if (GUIManager.IsHeadless())
+            {
+                return;
+            }
+
+            if (StorageHubPrefs.TickCapture())
+            {
+                return;
+            }
+
+            HubHotkey.Tick();
         }
 
         private void BindConfig()

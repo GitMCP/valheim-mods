@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using StorageHub.Client;
 using StorageHub.Storage;
+using BepInEx.Configuration;
 using Jotunn.Managers;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -19,9 +20,70 @@ namespace StorageHub.UI
 
         private static GameObject _root;
         private static Toggle _skipFavourites;
+        private static Button _hotkeyButton;
+        private static Text _hotkeyLabel;
         private static Transform _rowParent;
         private static readonly List<PrefRow> _rows = new List<PrefRow>();
         private static bool _suppress;
+        private static bool _capturing;
+
+        internal static bool IsCapturingHotkey
+        {
+            get { return _capturing; }
+        }
+
+        internal static bool TickCapture()
+        {
+            if (!_capturing)
+            {
+                return false;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                _capturing = false;
+                PaintHotkeyButton();
+                return true;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Delete) || Input.GetKeyDown(KeyCode.Backspace))
+            {
+                if (ClientPreferences.RestockHotkey != null)
+                {
+                    ClientPreferences.RestockHotkey.Value = KeyboardShortcut.Empty;
+                }
+
+                _capturing = false;
+                PaintHotkeyButton();
+                return true;
+            }
+
+            var codes = (KeyCode[])System.Enum.GetValues(typeof(KeyCode));
+            for (var i = 0; i < codes.Length; i++)
+            {
+                var key = codes[i];
+                if ((int)key == 0 || IsMouse(key) || IsModifier(key))
+                {
+                    continue;
+                }
+
+                if (!Input.GetKeyDown(key))
+                {
+                    continue;
+                }
+
+                if (ClientPreferences.RestockHotkey != null)
+                {
+                    ClientPreferences.RestockHotkey.Value = new KeyboardShortcut(key, CurrentModifiers());
+                }
+
+                _capturing = false;
+                PaintHotkeyButton();
+                return true;
+            }
+
+            return true;
+        }
 
         internal static bool IsOpen
         {
@@ -64,6 +126,54 @@ namespace StorageHub.UI
             skipRt.anchoredPosition = new Vector2(38f, 0f);
             skipRt.sizeDelta = new Vector2(-38f, 26f);
 
+            var hotkeyLabel = MakeLabel(
+                gui,
+                _root.transform,
+                Localization.instance.Localize("$storagehub_pref_hotkey"),
+                15,
+                Color.white,
+                TextAnchor.MiddleLeft);
+            var hotkeyRt = hotkeyLabel.GetComponent<RectTransform>();
+            hotkeyRt.anchorMin = new Vector2(0f, 1f);
+            hotkeyRt.anchorMax = new Vector2(1f, 1f);
+            hotkeyRt.pivot = new Vector2(0f, 1f);
+            hotkeyRt.anchoredPosition = new Vector2(4f, -32f);
+            hotkeyRt.sizeDelta = new Vector2(-150f, 28f);
+
+            var hotkeyGo = gui.CreateButton(
+                "",
+                _root.transform,
+                new Vector2(1f, 1f),
+                new Vector2(1f, 1f),
+                Vector2.zero,
+                140f,
+                28f);
+            gui.ApplyButtonStyle(hotkeyGo.GetComponent<Button>(), 13);
+            var hotkeyBtnRt = hotkeyGo.GetComponent<RectTransform>();
+            hotkeyBtnRt.anchorMin = new Vector2(1f, 1f);
+            hotkeyBtnRt.anchorMax = new Vector2(1f, 1f);
+            hotkeyBtnRt.pivot = new Vector2(1f, 1f);
+            hotkeyBtnRt.anchoredPosition = new Vector2(0f, -32f);
+            hotkeyBtnRt.sizeDelta = new Vector2(140f, 28f);
+            _hotkeyButton = hotkeyGo.GetComponent<Button>();
+            _hotkeyLabel = hotkeyGo.GetComponentInChildren<Text>();
+            _hotkeyButton.onClick.AddListener(BeginCaptureHotkey);
+            PaintHotkeyButton();
+
+            var title = MakeLabel(
+                gui,
+                _root.transform,
+                Localization.instance.Localize("$storagehub_resupply"),
+                18,
+                gui.ValheimOrange,
+                TextAnchor.MiddleLeft);
+            var titleRt = title.GetComponent<RectTransform>();
+            titleRt.anchorMin = new Vector2(0f, 1f);
+            titleRt.anchorMax = new Vector2(1f, 1f);
+            titleRt.pivot = new Vector2(0f, 1f);
+            titleRt.anchoredPosition = new Vector2(4f, -66f);
+            titleRt.sizeDelta = new Vector2(-8f, 24f);
+
             var hint = MakeLabel(
                 gui,
                 _root.transform,
@@ -75,8 +185,8 @@ namespace StorageHub.UI
             hintRt.anchorMin = new Vector2(0f, 1f);
             hintRt.anchorMax = new Vector2(1f, 1f);
             hintRt.pivot = new Vector2(0f, 1f);
-            hintRt.anchoredPosition = new Vector2(4f, -32f);
-            hintRt.sizeDelta = new Vector2(-8f, 36f);
+            hintRt.anchoredPosition = new Vector2(4f, -90f);
+            hintRt.sizeDelta = new Vector2(-8f, 32f);
             hint.horizontalOverflow = HorizontalWrapMode.Wrap;
             hint.verticalOverflow = VerticalWrapMode.Overflow;
 
@@ -94,7 +204,7 @@ namespace StorageHub.UI
             scrollRt.anchorMin = new Vector2(0f, 0f);
             scrollRt.anchorMax = new Vector2(1f, 1f);
             scrollRt.offsetMin = new Vector2(0f, 0f);
-            scrollRt.offsetMax = new Vector2(0f, -72f);
+            scrollRt.offsetMax = new Vector2(0f, -124f);
 
             var scrollView = scroll.GetComponentInChildren<ScrollRect>(true);
             if (scrollView != null)
@@ -154,12 +264,18 @@ namespace StorageHub.UI
             }
             else
             {
+                _capturing = false;
                 UnfocusInputs();
             }
         }
 
         internal static bool InputHasFocus()
         {
+            if (_capturing)
+            {
+                return true;
+            }
+
             if (!IsOpen)
             {
                 return false;
@@ -190,6 +306,8 @@ namespace StorageHub.UI
             }
 
             _suppress = false;
+
+            PaintHotkeyButton();
 
             var visible = Candidates(StorageHubPanel.SearchQuery);
             while (_rows.Count > visible.Count)
@@ -550,6 +668,76 @@ namespace StorageHub.UI
             label.alignment = align;
             label.raycastTarget = false;
             return label;
+        }
+
+        private static void BeginCaptureHotkey()
+        {
+            if (StorageHubPanel.IsDragging())
+            {
+                StorageHubPanel.DepositDragged();
+                return;
+            }
+
+            _capturing = true;
+            PaintHotkeyButton();
+        }
+
+        private static void PaintHotkeyButton()
+        {
+            if (_hotkeyLabel == null)
+            {
+                return;
+            }
+
+            if (_capturing)
+            {
+                _hotkeyLabel.text = Localization.instance.Localize("$storagehub_pref_hotkey_listen");
+                return;
+            }
+
+            var shortcut = ClientPreferences.RestockHotkey;
+            if (shortcut == null || shortcut.Value.MainKey == KeyCode.None)
+            {
+                _hotkeyLabel.text = Localization.instance.Localize("$storagehub_pref_hotkey_none");
+                return;
+            }
+
+            _hotkeyLabel.text = shortcut.Value.Serialize();
+        }
+
+        private static bool IsMouse(KeyCode key)
+        {
+            return key >= KeyCode.Mouse0 && key <= KeyCode.Mouse6;
+        }
+
+        private static bool IsModifier(KeyCode key)
+        {
+            return key == KeyCode.LeftShift || key == KeyCode.RightShift
+                || key == KeyCode.LeftControl || key == KeyCode.RightControl
+                || key == KeyCode.LeftAlt || key == KeyCode.RightAlt
+                || key == KeyCode.LeftCommand || key == KeyCode.RightCommand
+                || key == KeyCode.LeftApple || key == KeyCode.RightApple;
+        }
+
+        private static KeyCode[] CurrentModifiers()
+        {
+            var mods = new List<KeyCode>();
+            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+            {
+                mods.Add(KeyCode.LeftShift);
+            }
+
+            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+            {
+                mods.Add(KeyCode.LeftControl);
+            }
+
+            if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
+            {
+                mods.Add(KeyCode.LeftAlt);
+            }
+
+            return mods.ToArray();
         }
 
         private sealed class PrefRow

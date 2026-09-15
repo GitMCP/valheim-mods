@@ -38,6 +38,7 @@ namespace StorageHub.UI
         private static Transform _rowParent;
         private static GameObject _depositGo;
         private static GameObject _resupplyGo;
+        private static GameObject _recipeGo;
         private static Button _cogButton;
         private static Button _favFilterButton;
         private static readonly List<RowView> _rows = new List<RowView>();
@@ -49,6 +50,7 @@ namespace StorageHub.UI
         private static string _query = "";
         private static bool _favouritesOnly;
         private static bool _prefsOpen;
+        private static bool _recipesOpen;
         private static float _nextRefresh;
         private static float _nextSnap;
         private static Container _pending;
@@ -79,6 +81,7 @@ namespace StorageHub.UI
             }
 
             SetPrefsOpen(false);
+            SetRecipesOpen(false);
             _nextSnap = 0f;
             SnapBetweenInventoryAndCrafting();
             _root.SetActive(true);
@@ -93,6 +96,7 @@ namespace StorageHub.UI
             _splitGroup = null;
             UnfocusSearch();
             SetPrefsOpen(false);
+            SetRecipesOpen(false);
             if (_root != null)
             {
                 _root.SetActive(false);
@@ -118,7 +122,7 @@ namespace StorageHub.UI
             }
 
             SyncSearchFocus();
-            if (_prefsOpen)
+            if (_prefsOpen || _recipesOpen)
             {
                 return;
             }
@@ -321,6 +325,7 @@ namespace StorageHub.UI
                         return;
                     }
 
+                    SetRecipesOpen(false);
                     SetPrefsOpen(!_prefsOpen);
                 });
             PlaceTopRight(_cogButton.GetComponent<RectTransform>(), 18f, 28f, 28f, 16f);
@@ -333,10 +338,10 @@ namespace StorageHub.UI
                 InputField.ContentType.Standard,
                 Localization.instance.Localize("$storagehub_search"),
                 16,
-                236f,
+                176f,
                 30f).GetComponent<InputField>();
             _search.onValueChanged.AddListener(OnSearch);
-            PlaceTop(_search.GetComponent<RectTransform>(), 80f, 236f, 30f);
+            PlaceTop(_search.GetComponent<RectTransform>(), 80f, 176f, 30f);
             _search.interactable = true;
             _search.navigation = new Navigation { mode = Navigation.Mode.None };
             WireSearchFocus();
@@ -349,11 +354,11 @@ namespace StorageHub.UI
                 mid,
                 mid,
                 Vector2.zero,
-                112f,
+                96f,
                 30f);
             gui.ApplyButtonStyle(_depositGo.GetComponent<Button>(), 14);
             _depositGo.GetComponent<Button>().onClick.AddListener(OnDeposit);
-            PlaceTopRight(_depositGo.GetComponent<RectTransform>(), 80f, 112f, 30f, 16f);
+            PlaceTopRight(_depositGo.GetComponent<RectTransform>(), 80f, 96f, 30f, 16f);
             _browseUi.Add(_depositGo);
 
             _resupplyGo = gui.CreateButton(
@@ -362,12 +367,24 @@ namespace StorageHub.UI
                 mid,
                 mid,
                 Vector2.zero,
-                112f,
+                96f,
                 30f);
             gui.ApplyButtonStyle(_resupplyGo.GetComponent<Button>(), 14);
             _resupplyGo.GetComponent<Button>().onClick.AddListener(OnResupply);
-            PlaceTopRight(_resupplyGo.GetComponent<RectTransform>(), 80f, 112f, 30f, 134f);
+            PlaceTopRight(_resupplyGo.GetComponent<RectTransform>(), 80f, 96f, 30f, 118f);
             _browseUi.Add(_resupplyGo);
+
+            _recipeGo = gui.CreateButton(
+                Localization.instance.Localize("$storagehub_recipe"),
+                _root.transform,
+                mid,
+                mid,
+                Vector2.zero,
+                96f,
+                30f);
+            gui.ApplyButtonStyle(_recipeGo.GetComponent<Button>(), 14);
+            _recipeGo.GetComponent<Button>().onClick.AddListener(OnRecipe);
+            PlaceTopRight(_recipeGo.GetComponent<RectTransform>(), 80f, 96f, 30f, 220f);
 
             AddCategoryButtons(gui);
             AddSortButtons(gui);
@@ -434,6 +451,7 @@ namespace StorageHub.UI
             }
 
             StorageHubPrefs.Build(_root.transform, gui);
+            StorageHubRecipes.Build(_root.transform, gui);
             _root.SetActive(false);
         }
 
@@ -558,13 +576,38 @@ namespace StorageHub.UI
 
         private static void SetPrefsOpen(bool on)
         {
+            if (on)
+            {
+                _recipesOpen = false;
+                StorageHubRecipes.SetOpen(false);
+            }
+
             _prefsOpen = on;
             StorageHubPrefs.SetOpen(on);
+            ApplyOverlayUi();
+        }
+
+        private static void SetRecipesOpen(bool on)
+        {
+            if (on)
+            {
+                _prefsOpen = false;
+                StorageHubPrefs.SetOpen(false);
+            }
+
+            _recipesOpen = on;
+            StorageHubRecipes.SetOpen(on);
+            ApplyOverlayUi();
+        }
+
+        private static void ApplyOverlayUi()
+        {
+            var overlay = _prefsOpen || _recipesOpen;
             for (var i = 0; i < _browseUi.Count; i++)
             {
                 if (_browseUi[i] != null)
                 {
-                    _browseUi[i].SetActive(!on);
+                    _browseUi[i].SetActive(!overlay);
                 }
             }
 
@@ -575,16 +618,26 @@ namespace StorageHub.UI
 
             if (_title != null)
             {
-                _title.text = Localization.instance.Localize(
-                    on ? "$storagehub_preferences" : "$storage_hub_name");
+                var token = "$storage_hub_name";
+                if (_prefsOpen)
+                {
+                    token = "$storagehub_preferences";
+                }
+                else if (_recipesOpen)
+                {
+                    token = "$storagehub_recipes";
+                }
+
+                _title.text = Localization.instance.Localize(token);
             }
 
-            Tint(_cogButton, on);
-            if (on)
+            Tint(_cogButton, _prefsOpen);
+            if (_recipeGo != null)
             {
-                UnfocusSearch();
+                Tint(_recipeGo.GetComponent<Button>(), _recipesOpen);
             }
-            else
+
+            if (!overlay)
             {
                 Refresh();
             }
@@ -773,6 +826,10 @@ namespace StorageHub.UI
             {
                 StorageHubPrefs.Refresh();
             }
+            else if (_recipesOpen)
+            {
+                StorageHubRecipes.Refresh();
+            }
             else
             {
                 Refresh();
@@ -809,6 +866,25 @@ namespace StorageHub.UI
             Refresh();
         }
 
+        private static void OnRecipe()
+        {
+            if (IsDragging())
+            {
+                DepositDragged();
+                return;
+            }
+
+            SetRecipesOpen(!_recipesOpen);
+        }
+
+        internal static void RefreshAfterRemote()
+        {
+            if (_root != null && _root.activeSelf)
+            {
+                Refresh();
+            }
+        }
+
         private static void Refresh()
         {
             _nextRefresh = Time.time + 0.6f;
@@ -818,7 +894,7 @@ namespace StorageHub.UI
                 return;
             }
 
-            if (_title != null && !_prefsOpen)
+            if (_title != null && !_prefsOpen && !_recipesOpen)
             {
                 _title.text = Localization.instance.Localize("$storage_hub_name");
             }
@@ -836,7 +912,7 @@ namespace StorageHub.UI
             }
 
             TintFilters();
-            if (_prefsOpen)
+            if (_prefsOpen || _recipesOpen)
             {
                 return;
             }
@@ -1197,13 +1273,13 @@ namespace StorageHub.UI
             return ZInput.GetKey(KeyCode.LeftShift) || ZInput.GetKey(KeyCode.RightShift);
         }
 
-        private static bool IsDragging()
+        internal static bool IsDragging()
         {
             var gui = InventoryGui.instance;
             return gui != null && gui.m_dragGo != null && gui.m_dragItem != null;
         }
 
-        private static void DepositDragged()
+        internal static void DepositDragged()
         {
             var gui = InventoryGui.instance;
             var player = Player.m_localPlayer;

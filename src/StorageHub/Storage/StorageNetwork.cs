@@ -96,17 +96,22 @@ namespace StorageHub.Storage
             return left < amount;
         }
 
-        internal static void DepositAll(Player player, Container hub)
+        internal static int DepositAll(Player player, Container hub)
+        {
+            return DepositAll(player, hub, notify: true);
+        }
+
+        internal static int DepositAll(Player player, Container hub, bool notify)
         {
             if (player == null || hub == null)
             {
-                return;
+                return 0;
             }
 
             var inventory = player.GetInventory();
             if (inventory == null)
             {
-                return;
+                return 0;
             }
 
             var moving = new List<ItemDrop.ItemData>(inventory.GetAllItems());
@@ -135,10 +140,12 @@ namespace StorageHub.Storage
                 }
             }
 
-            if (routed == 0)
+            if (notify && routed == 0)
             {
                 player.Message(MessageHud.MessageType.Center, "$storagehub_nospace");
             }
+
+            return routed;
         }
 
         internal static bool Withdraw(Player player, IndexedStack group, int amount)
@@ -182,6 +189,11 @@ namespace StorageHub.Storage
 
         internal static int Resupply(Player player, Container hub)
         {
+            return Resupply(player, hub, notify: true);
+        }
+
+        internal static int Resupply(Player player, Container hub, bool notify)
+        {
             if (player == null || hub == null)
             {
                 return 0;
@@ -190,7 +202,11 @@ namespace StorageHub.Storage
             var keys = ClientPreferences.ResupplyKeys();
             if (keys.Count == 0)
             {
-                player.Message(MessageHud.MessageType.Center, "$storagehub_resupply_none");
+                if (notify)
+                {
+                    player.Message(MessageHud.MessageType.Center, "$storagehub_resupply_none");
+                }
+
                 return 0;
             }
 
@@ -232,7 +248,7 @@ namespace StorageHub.Storage
                 }
             }
 
-            if (moved == 0)
+            if (notify && moved == 0)
             {
                 player.Message(
                     MessageHud.MessageType.Center,
@@ -240,6 +256,178 @@ namespace StorageHub.Storage
             }
 
             return moved;
+        }
+
+        internal static void Restock(Player player, Container hub)
+        {
+            if (player == null || hub == null)
+            {
+                return;
+            }
+
+            var deposited = DepositAll(player, hub, notify: false);
+            var resupplied = Resupply(player, hub, notify: false);
+            if (deposited > 0 || resupplied > 0)
+            {
+                player.Message(MessageHud.MessageType.Center, "$storagehub_restocked");
+                return;
+            }
+
+            player.Message(MessageHud.MessageType.Center, "$storagehub_restock_none");
+        }
+
+        internal static int CountBySharedName(List<IndexedStack> listed, string sharedName)
+        {
+            var n = 0;
+            if (listed == null || string.IsNullOrEmpty(sharedName))
+            {
+                return 0;
+            }
+
+            for (var i = 0; i < listed.Count; i++)
+            {
+                if (listed[i].SharedName == sharedName)
+                {
+                    n += listed[i].Quantity;
+                }
+            }
+
+            return n;
+        }
+
+        internal static bool CanAffordRecipe(List<IndexedStack> listed, Recipe recipe)
+        {
+            var needs = RecipeNeeds(recipe);
+            if (needs.Count == 0)
+            {
+                return false;
+            }
+
+            if (recipe.m_requireOnlyOneIngredient)
+            {
+                for (var i = 0; i < needs.Count; i++)
+                {
+                    if (CountBySharedName(listed, needs[i].SharedName) >= needs[i].Amount)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            for (var i = 0; i < needs.Count; i++)
+            {
+                if (CountBySharedName(listed, needs[i].SharedName) < needs[i].Amount)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        internal static bool WithdrawRecipe(Player player, Container hub, Recipe recipe)
+        {
+            if (player == null || hub == null || recipe == null)
+            {
+                return false;
+            }
+
+            var listed = ListItems(hub);
+            if (!CanAffordRecipe(listed, recipe))
+            {
+                player.Message(MessageHud.MessageType.Center, "$storagehub_recipe_missing");
+                return false;
+            }
+
+            var needs = RecipeNeeds(recipe);
+            if (recipe.m_requireOnlyOneIngredient)
+            {
+                Need pick = null;
+                for (var i = 0; i < needs.Count; i++)
+                {
+                    if (CountBySharedName(listed, needs[i].SharedName) >= needs[i].Amount)
+                    {
+                        pick = needs[i];
+                        break;
+                    }
+                }
+
+                if (pick == null)
+                {
+                    player.Message(MessageHud.MessageType.Center, "$storagehub_recipe_missing");
+                    return false;
+                }
+
+                needs = new List<Need> { pick };
+            }
+
+            var taken = 0;
+            for (var i = 0; i < needs.Count; i++)
+            {
+                taken += WithdrawShared(player, hub, needs[i].SharedName, needs[i].Amount);
+            }
+
+            if (taken <= 0)
+            {
+                player.Message(MessageHud.MessageType.Center, "$storagehub_playerfull");
+                return false;
+            }
+
+            player.Message(MessageHud.MessageType.Center, "$storagehub_recipe_ok");
+            return true;
+        }
+
+        internal static Container FindHubInRange(Player player)
+        {
+            if (player == null)
+            {
+                return null;
+            }
+
+            if (StorageHubMarker.OpenHub != null)
+            {
+                return StorageHubMarker.OpenHub;
+            }
+
+            var origin = player.transform.position;
+            var radius = StorageHubPlugin.Radius.Value;
+            var playerId = Game.instance != null && Game.instance.GetPlayerProfile() != null
+                ? Game.instance.GetPlayerProfile().GetPlayerID()
+                : 0L;
+            Container best = null;
+            var bestDist = radius;
+            var markers = UnityEngine.Object.FindObjectsByType<StorageHubMarker>(
+                FindObjectsInactive.Exclude,
+                FindObjectsSortMode.None);
+            for (var i = 0; i < markers.Length; i++)
+            {
+                var hub = markers[i] == null ? null : markers[i].GetComponent<Container>();
+                if (hub == null || hub.m_nview == null || !hub.m_nview.IsValid())
+                {
+                    continue;
+                }
+
+                if (hub.m_checkGuardStone && !PrivateArea.CheckAccess(hub.transform.position, 0f, flash: false))
+                {
+                    continue;
+                }
+
+                if (!hub.CheckAccess(playerId))
+                {
+                    continue;
+                }
+
+                var dist = Vector3.Distance(origin, hub.transform.position);
+                if (dist <= bestDist)
+                {
+                    best = hub;
+                    bestDist = dist;
+                }
+            }
+
+            return best;
         }
 
         private static IndexedStack FindGroup(List<IndexedStack> listed, string key)
@@ -253,6 +441,108 @@ namespace StorageHub.Storage
             }
 
             return null;
+        }
+
+        private static List<Need> RecipeNeeds(Recipe recipe)
+        {
+            var needs = new List<Need>();
+            if (recipe?.m_resources == null)
+            {
+                return needs;
+            }
+
+            for (var i = 0; i < recipe.m_resources.Length; i++)
+            {
+                var req = recipe.m_resources[i];
+                if (req == null || req.m_resItem == null || req.m_resItem.m_itemData == null)
+                {
+                    continue;
+                }
+
+                var amount = req.GetAmount(1);
+                if (amount <= 0)
+                {
+                    continue;
+                }
+
+                needs.Add(new Need
+                {
+                    SharedName = req.m_resItem.m_itemData.m_shared.m_name,
+                    Amount = amount,
+                });
+            }
+
+            return needs;
+        }
+
+        private static int WithdrawShared(Player player, Container hub, string sharedName, int amount)
+        {
+            if (amount <= 0 || player == null)
+            {
+                return 0;
+            }
+
+            var dest = player.GetInventory();
+            if (dest == null)
+            {
+                return 0;
+            }
+
+            var listed = ListItems(hub);
+            var left = amount;
+            var taken = 0;
+            var have = CountPlayerName(dest, sharedName);
+            for (var i = 0; i < listed.Count && left > 0; i++)
+            {
+                var group = listed[i];
+                if (group.SharedName != sharedName || group.Quantity <= 0)
+                {
+                    continue;
+                }
+
+                if (!Withdraw(player, group, left, notify: false))
+                {
+                    continue;
+                }
+
+                var now = CountPlayerName(dest, sharedName);
+                var got = Mathf.Max(0, now - have);
+                if (got <= 0)
+                {
+                    break;
+                }
+
+                taken += got;
+                left -= got;
+                have = now;
+            }
+
+            return taken;
+        }
+
+        private static int CountPlayerName(Inventory inventory, string sharedName)
+        {
+            if (inventory == null || string.IsNullOrEmpty(sharedName))
+            {
+                return 0;
+            }
+
+            var n = 0;
+            foreach (var item in inventory.GetAllItems())
+            {
+                if (item?.m_shared != null && item.m_shared.m_name == sharedName)
+                {
+                    n += item.m_stack;
+                }
+            }
+
+            return n;
+        }
+
+        private sealed class Need
+        {
+            internal string SharedName;
+            internal int Amount;
         }
 
         private static int HowManyFit(Inventory dest, ItemDrop.ItemData sample, int want)

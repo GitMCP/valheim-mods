@@ -41,8 +41,13 @@ items from different chests share one row.
 - **Shift-click** an item in your inventory, or press **Deposit**, to send it
   into the network. The hotbar is left alone unless you turn that on in config.
 - **Resupply** fills your pack from the hub up to the counts set in Preferences.
-- **The cog** opens client Preferences: skip favourites on Deposit, and choose
-  which items Resupply should keep, with a quantity for each.
+- **Recipe** lists crafts you know. Rows the hub cannot afford are greyed out.
+  Click a row to pull that recipe's ingredients into your pack.
+- **The cog** opens client Preferences: skip favourites on Deposit, bind a
+  Deposit+Resupply hotkey, and choose which items Resupply should keep, with a
+  quantity for each. The resupply list is titled Resupply.
+- While in range of a hub (the same radius as the network), the hotkey deposits
+  and then resupplies without opening the chest.
 - Click the search box to type. It keeps focus, so E does not close the panel.
 - Hold use on the chest, the same as a vanilla chest, to stack everything that
   will fit.
@@ -64,6 +69,7 @@ are synced to clients. Favourites, Resupply, and the deposit-skip toggle are
 | `StorageHub / RequireLineOfSight` | `false` | Only include chests the hub can see. Off so a chest in the next room still counts. |
 | `StorageHub / DepositHotbar` | `false` | Also deposit the first inventory row. |
 | `Client / DepositSkipFavourites` | `false` | Deposit leaves starred items in the pack. Also set from the hub cog. |
+| `Client / RestockHotkey` | *(none)* | In range of a hub, Deposit then Resupply. Bound from the hub cog. |
 | `Client / Favourites` | *(empty)* | Starred item keys. Edited from the hub list. |
 | `Client / Resupply` | *(empty)* | Item keys and counts for the Resupply button. Edited from the hub cog. |
 

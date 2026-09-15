@@ -5,7 +5,9 @@
 Favourites, a client preferences tab, and Resupply. Star an item in the hub list
 to pin it. The Favourites category and the star filter show only those items.
 The cog opens client-only settings: skip favourites when depositing everything,
-and pick which items Resupply should keep in your pack, with a quantity for each.
+a Deposit+Resupply hotkey used while in range of a hub, and a Resupply list
+(titled Resupply) of items and counts to keep in the pack. Recipe lists known
+crafts and withdraws their ingredients when the hub has enough.
 
 ## 1.0.0
 
