@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.0
+
+Favourites, a client preferences tab, and Resupply. Star an item in the hub list
+to pin it. The Favourites category and the star filter show only those items.
+The cog opens client-only settings: skip favourites when depositing everything,
+and pick which items Resupply should keep in your pack, with a quantity for each.
+
 ## 1.0.0
 
 First release as Storage Hub. A black metal chest that opens a combined view of

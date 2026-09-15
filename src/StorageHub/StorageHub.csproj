@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>StorageHub</AssemblyName>
     <RootNamespace>StorageHub</RootNamespace>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <Authors>GitMCP</Authors>
     <Description>A black metal chest that shows and moves items across nearby containers.</Description>
   </PropertyGroup>

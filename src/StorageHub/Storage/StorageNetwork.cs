@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using StorageHub.Client;
 using UnityEngine;
 
 namespace StorageHub.Storage
@@ -122,6 +123,12 @@ namespace StorageHub.Storage
                     continue;
                 }
 
+                if (ClientPreferences.DepositSkipFavourites.Value &&
+                    ClientPreferences.IsFavourite(ItemKey.Of(item)))
+                {
+                    continue;
+                }
+
                 if (Route(inventory, item, hub, allowHub: true))
                 {
                     routed++;
@@ -135,6 +142,11 @@ namespace StorageHub.Storage
         }
 
         internal static bool Withdraw(Player player, IndexedStack group, int amount)
+        {
+            return Withdraw(player, group, amount, notify: true);
+        }
+
+        internal static bool Withdraw(Player player, IndexedStack group, int amount, bool notify)
         {
             if (player == null || group == null || amount <= 0)
             {
@@ -151,7 +163,11 @@ namespace StorageHub.Storage
             var take = HowManyFit(dest, sample, amount);
             if (take <= 0)
             {
-                player.Message(MessageHud.MessageType.Center, "$storagehub_playerfull");
+                if (notify)
+                {
+                    player.Message(MessageHud.MessageType.Center, "$storagehub_playerfull");
+                }
+
                 return false;
             }
 
@@ -162,6 +178,81 @@ namespace StorageHub.Storage
             }
 
             return left < take;
+        }
+
+        internal static int Resupply(Player player, Container hub)
+        {
+            if (player == null || hub == null)
+            {
+                return 0;
+            }
+
+            var keys = ClientPreferences.ResupplyKeys();
+            if (keys.Count == 0)
+            {
+                player.Message(MessageHud.MessageType.Center, "$storagehub_resupply_none");
+                return 0;
+            }
+
+            var listed = ListItems(hub);
+            var dest = player.GetInventory();
+            var moved = 0;
+            var blocked = false;
+            for (var i = 0; i < keys.Count; i++)
+            {
+                var key = keys[i];
+                int want;
+                if (!ClientPreferences.TryGetResupply(key, out want) || want <= 0)
+                {
+                    continue;
+                }
+
+                var need = want - ItemLookup.CountIn(dest, key);
+                if (need <= 0)
+                {
+                    continue;
+                }
+
+                var group = FindGroup(listed, key);
+                if (group == null || group.Quantity <= 0)
+                {
+                    continue;
+                }
+
+                var sample = group.FirstLive();
+                if (sample != null && HowManyFit(dest, sample, 1) <= 0)
+                {
+                    blocked = true;
+                    continue;
+                }
+
+                if (Withdraw(player, group, need, notify: false))
+                {
+                    moved++;
+                }
+            }
+
+            if (moved == 0)
+            {
+                player.Message(
+                    MessageHud.MessageType.Center,
+                    blocked ? "$storagehub_playerfull" : "$storagehub_resupply_none");
+            }
+
+            return moved;
+        }
+
+        private static IndexedStack FindGroup(List<IndexedStack> listed, string key)
+        {
+            for (var i = 0; i < listed.Count; i++)
+            {
+                if (listed[i].Key() == key)
+                {
+                    return listed[i];
+                }
+            }
+
+            return null;
         }
 
         private static int HowManyFit(Inventory dest, ItemDrop.ItemData sample, int want)

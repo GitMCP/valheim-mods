@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using StorageHub.Client;
 using StorageHub.Storage;
 using Jotunn.Managers;
 using UnityEngine;
@@ -35,12 +36,19 @@ namespace StorageHub.UI
         private static InputField _search;
         private static RectTransform _scrollRect;
         private static Transform _rowParent;
+        private static GameObject _depositGo;
+        private static GameObject _resupplyGo;
+        private static Button _cogButton;
+        private static Button _favFilterButton;
         private static readonly List<RowView> _rows = new List<RowView>();
         private static readonly List<Button> _categoryButtons = new List<Button>();
         private static readonly List<Button> _sortButtons = new List<Button>();
+        private static readonly List<GameObject> _browseUi = new List<GameObject>();
         private static ItemCategory _category = ItemCategory.All;
         private static SortMode _sort = SortMode.Name;
         private static string _query = "";
+        private static bool _favouritesOnly;
+        private static bool _prefsOpen;
         private static float _nextRefresh;
         private static float _nextSnap;
         private static Container _pending;
@@ -70,6 +78,7 @@ namespace StorageHub.UI
                 return;
             }
 
+            SetPrefsOpen(false);
             _nextSnap = 0f;
             SnapBetweenInventoryAndCrafting();
             _root.SetActive(true);
@@ -83,6 +92,7 @@ namespace StorageHub.UI
             _pending = null;
             _splitGroup = null;
             UnfocusSearch();
+            SetPrefsOpen(false);
             if (_root != null)
             {
                 _root.SetActive(false);
@@ -108,15 +118,35 @@ namespace StorageHub.UI
             }
 
             SyncSearchFocus();
+            if (_prefsOpen)
+            {
+                return;
+            }
+
             if (Time.time >= _nextRefresh)
             {
                 Refresh();
             }
         }
 
+        internal static string SearchQuery
+        {
+            get { return _query ?? ""; }
+        }
+
         internal static bool SearchHasFocus()
         {
-            return _search != null && _search.isFocused && _root != null && _root.activeSelf;
+            if (_root == null || !_root.activeSelf)
+            {
+                return false;
+            }
+
+            if (_search != null && _search.isFocused)
+            {
+                return true;
+            }
+
+            return StorageHubPrefs.InputHasFocus();
         }
 
         internal static bool HandleSplitOk()
@@ -244,6 +274,7 @@ namespace StorageHub.UI
                 return;
             }
 
+            HubSprites.Load();
             var gui = GUIManager.Instance;
             var parent = GUIManager.CustomGUIFront.transform;
             var mid = new Vector2(0.5f, 0.5f);
@@ -278,6 +309,22 @@ namespace StorageHub.UI
                 22f);
             _capacity.alignment = TextAnchor.MiddleCenter;
 
+            _cogButton = MakeIconButton(
+                gui,
+                HubSprites.Cog,
+                28f,
+                () =>
+                {
+                    if (IsDragging())
+                    {
+                        DepositDragged();
+                        return;
+                    }
+
+                    SetPrefsOpen(!_prefsOpen);
+                });
+            PlaceTopRight(_cogButton.GetComponent<RectTransform>(), 18f, 28f, 28f, 16f);
+
             _search = gui.CreateInputField(
                 _root.transform,
                 mid,
@@ -286,26 +333,41 @@ namespace StorageHub.UI
                 InputField.ContentType.Standard,
                 Localization.instance.Localize("$storagehub_search"),
                 16,
-                320f,
+                236f,
                 30f).GetComponent<InputField>();
             _search.onValueChanged.AddListener(OnSearch);
-            PlaceTop(_search.GetComponent<RectTransform>(), 80f, 320f, 30f);
+            PlaceTop(_search.GetComponent<RectTransform>(), 80f, 236f, 30f);
             _search.interactable = true;
             _search.navigation = new Navigation { mode = Navigation.Mode.None };
             WireSearchFocus();
             WirePanelDrop();
+            _browseUi.Add(_search.gameObject);
 
-            var depositGo = gui.CreateButton(
+            _depositGo = gui.CreateButton(
                 Localization.instance.Localize("$storagehub_deposit"),
                 _root.transform,
                 mid,
                 mid,
                 Vector2.zero,
-                130f,
+                112f,
                 30f);
-            gui.ApplyButtonStyle(depositGo.GetComponent<Button>(), 15);
-            depositGo.GetComponent<Button>().onClick.AddListener(OnDeposit);
-            PlaceTop(depositGo.GetComponent<RectTransform>(), 80f, 130f, 30f, right: true);
+            gui.ApplyButtonStyle(_depositGo.GetComponent<Button>(), 14);
+            _depositGo.GetComponent<Button>().onClick.AddListener(OnDeposit);
+            PlaceTopRight(_depositGo.GetComponent<RectTransform>(), 80f, 112f, 30f, 16f);
+            _browseUi.Add(_depositGo);
+
+            _resupplyGo = gui.CreateButton(
+                Localization.instance.Localize("$storagehub_resupply"),
+                _root.transform,
+                mid,
+                mid,
+                Vector2.zero,
+                112f,
+                30f);
+            gui.ApplyButtonStyle(_resupplyGo.GetComponent<Button>(), 14);
+            _resupplyGo.GetComponent<Button>().onClick.AddListener(OnResupply);
+            PlaceTopRight(_resupplyGo.GetComponent<RectTransform>(), 80f, 112f, 30f, 134f);
+            _browseUi.Add(_resupplyGo);
 
             AddCategoryButtons(gui);
             AddSortButtons(gui);
@@ -365,7 +427,13 @@ namespace StorageHub.UI
                 400f,
                 28f);
             _empty.alignment = TextAnchor.MiddleCenter;
+            _browseUi.Add(scroll);
+            if (_empty != null)
+            {
+                _browseUi.Add(_empty.gameObject);
+            }
 
+            StorageHubPrefs.Build(_root.transform, gui);
             _root.SetActive(false);
         }
 
@@ -442,6 +510,86 @@ namespace StorageHub.UI
             rt.anchoredPosition = new Vector2(right ? -18f : 18f, -yFromTop);
         }
 
+        private static void PlaceTopRight(RectTransform rt, float yFromTop, float width, float height, float fromRight)
+        {
+            rt.anchorMin = new Vector2(1f, 1f);
+            rt.anchorMax = new Vector2(1f, 1f);
+            rt.pivot = new Vector2(1f, 1f);
+            rt.sizeDelta = new Vector2(width, height);
+            rt.anchoredPosition = new Vector2(-fromRight, -yFromTop);
+        }
+
+        private static Button MakeIconButton(GUIManager gui, Sprite sprite, float size, UnityAction onClick)
+        {
+            var go = gui.CreateButton(
+                "",
+                _root.transform,
+                new Vector2(1f, 1f),
+                new Vector2(1f, 1f),
+                Vector2.zero,
+                size,
+                size);
+            gui.ApplyButtonStyle(go.GetComponent<Button>(), 12);
+            var label = go.GetComponentInChildren<Text>();
+            if (label != null)
+            {
+                label.text = "";
+                label.enabled = false;
+            }
+
+            var image = go.GetComponent<Image>();
+            var iconGo = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            iconGo.transform.SetParent(go.transform, false);
+            var icon = iconGo.GetComponent<Image>();
+            icon.sprite = sprite;
+            icon.preserveAspect = true;
+            icon.raycastTarget = false;
+            icon.color = new Color(1f, 0.9f, 0.7f, 1f);
+            var iconRt = icon.rectTransform;
+            iconRt.anchorMin = new Vector2(0.5f, 0.5f);
+            iconRt.anchorMax = new Vector2(0.5f, 0.5f);
+            iconRt.pivot = new Vector2(0.5f, 0.5f);
+            iconRt.sizeDelta = new Vector2(size - 10f, size - 10f);
+            iconRt.anchoredPosition = Vector2.zero;
+            var button = go.GetComponent<Button>();
+            button.onClick.AddListener(onClick);
+            return button;
+        }
+
+        private static void SetPrefsOpen(bool on)
+        {
+            _prefsOpen = on;
+            StorageHubPrefs.SetOpen(on);
+            for (var i = 0; i < _browseUi.Count; i++)
+            {
+                if (_browseUi[i] != null)
+                {
+                    _browseUi[i].SetActive(!on);
+                }
+            }
+
+            if (_search != null)
+            {
+                _search.gameObject.SetActive(true);
+            }
+
+            if (_title != null)
+            {
+                _title.text = Localization.instance.Localize(
+                    on ? "$storagehub_preferences" : "$storage_hub_name");
+            }
+
+            Tint(_cogButton, on);
+            if (on)
+            {
+                UnfocusSearch();
+            }
+            else
+            {
+                Refresh();
+            }
+        }
+
         private static void PlaceFillBottom(RectTransform rt, float top, float bottom, float inset)
         {
             rt.anchorMin = new Vector2(0f, 0f);
@@ -480,6 +628,7 @@ namespace StorageHub.UI
                 ItemCategory.Materials,
                 ItemCategory.Trophies,
                 ItemCategory.Misc,
+                ItemCategory.Favourites,
             };
 
             PlaceCategoryRow(gui, row1, 118f);
@@ -488,7 +637,7 @@ namespace StorageHub.UI
 
         private static void PlaceCategoryRow(GUIManager gui, ItemCategory[] cats, float yFromTop)
         {
-            var width = 118f;
+            var width = 108f;
             var gap = 6f;
             var total = cats.Length * width + (cats.Length - 1) * gap;
             var x = -total / 2f + width / 2f;
@@ -534,6 +683,7 @@ namespace StorageHub.UI
                     Refresh();
                 });
                 _categoryButtons.Add(button);
+                _browseUi.Add(go);
                 x += width + gap;
             }
         }
@@ -549,9 +699,10 @@ namespace StorageHub.UI
                 "$storagehub_sort_cat",
             };
 
-            var width = 110f;
+            var width = 100f;
             var gap = 8f;
-            var total = modes.Length * width + (modes.Length - 1) * gap;
+            const float starSize = 28f;
+            var total = modes.Length * width + modes.Length * gap + starSize;
             var x = -total / 2f + width / 2f;
             for (var i = 0; i < modes.Length; i++)
             {
@@ -585,14 +736,47 @@ namespace StorageHub.UI
                     Refresh();
                 });
                 _sortButtons.Add(button);
+                _browseUi.Add(go);
                 x += width + gap;
             }
+
+            _favFilterButton = MakeIconButton(
+                gui,
+                HubSprites.StarEmpty,
+                28f,
+                OnFavouritesFilter);
+            var favRt = _favFilterButton.GetComponent<RectTransform>();
+            favRt.anchorMin = new Vector2(0.5f, 1f);
+            favRt.anchorMax = new Vector2(0.5f, 1f);
+            favRt.pivot = new Vector2(0.5f, 1f);
+            favRt.anchoredPosition = new Vector2(x - width * 0.5f + starSize * 0.5f, -184f);
+            favRt.sizeDelta = new Vector2(starSize, starSize);
+            _browseUi.Add(_favFilterButton.gameObject);
+        }
+
+        private static void OnFavouritesFilter()
+        {
+            if (IsDragging())
+            {
+                DepositDragged();
+                return;
+            }
+
+            _favouritesOnly = !_favouritesOnly;
+            Refresh();
         }
 
         private static void OnSearch(string value)
         {
             _query = value ?? "";
-            Refresh();
+            if (_prefsOpen)
+            {
+                StorageHubPrefs.Refresh();
+            }
+            else
+            {
+                Refresh();
+            }
         }
 
         private static void OnDeposit()
@@ -613,6 +797,18 @@ namespace StorageHub.UI
             Refresh();
         }
 
+        private static void OnResupply()
+        {
+            if (IsDragging())
+            {
+                DepositDragged();
+                return;
+            }
+
+            StorageNetwork.Resupply(Player.m_localPlayer, StorageHubMarker.OpenHub);
+            Refresh();
+        }
+
         private static void Refresh()
         {
             _nextRefresh = Time.time + 0.6f;
@@ -622,7 +818,7 @@ namespace StorageHub.UI
                 return;
             }
 
-            if (_title != null)
+            if (_title != null && !_prefsOpen)
             {
                 _title.text = Localization.instance.Localize("$storage_hub_name");
             }
@@ -640,10 +836,18 @@ namespace StorageHub.UI
             }
 
             TintFilters();
+            if (_prefsOpen)
+            {
+                return;
+            }
 
             var visible = Filter(StorageNetwork.ListItems(hub));
             if (_empty != null)
             {
+                _empty.text = Localization.instance.Localize(
+                    _category == ItemCategory.Favourites || _favouritesOnly
+                        ? "$storagehub_empty_favourites"
+                        : "$storagehub_empty");
                 _empty.gameObject.SetActive(visible.Count == 0);
             }
 
@@ -679,6 +883,7 @@ namespace StorageHub.UI
                 ItemCategory.Materials,
                 ItemCategory.Trophies,
                 ItemCategory.Misc,
+                ItemCategory.Favourites,
             };
             for (var i = 0; i < _categoryButtons.Count && i < cats.Length; i++)
             {
@@ -689,6 +894,20 @@ namespace StorageHub.UI
             for (var i = 0; i < _sortButtons.Count && i < sorts.Length; i++)
             {
                 Tint(_sortButtons[i], sorts[i] == _sort);
+            }
+
+            if (_favFilterButton != null)
+            {
+                Tint(_favFilterButton, _favouritesOnly);
+                var icon = _favFilterButton.transform.Find("Icon");
+                var image = icon != null ? icon.GetComponent<Image>() : null;
+                if (image != null)
+                {
+                    image.sprite = _favouritesOnly ? HubSprites.StarFilled : HubSprites.StarEmpty;
+                    image.color = _favouritesOnly
+                        ? new Color(1f, 0.82f, 0.28f, 1f)
+                        : new Color(1f, 0.9f, 0.7f, 1f);
+                }
             }
         }
 
@@ -713,7 +932,15 @@ namespace StorageHub.UI
             var filtered = new List<IndexedStack>();
             foreach (var item in items)
             {
-                if (_category != ItemCategory.All && item.Category != _category)
+                var wantFavourite = _category == ItemCategory.Favourites || _favouritesOnly;
+                if (wantFavourite && !ClientPreferences.IsFavourite(item.Key()))
+                {
+                    continue;
+                }
+
+                if (_category != ItemCategory.All &&
+                    _category != ItemCategory.Favourites &&
+                    item.Category != _category)
                 {
                     continue;
                 }
@@ -838,14 +1065,38 @@ namespace StorageHub.UI
             qty.alignment = TextAnchor.MiddleRight;
             qty.raycastTarget = false;
 
+            var starGo = new GameObject(
+                "Star",
+                typeof(RectTransform),
+                typeof(CanvasRenderer),
+                typeof(Image),
+                typeof(Button));
+            starGo.transform.SetParent(row.transform, false);
+            var star = starGo.GetComponent<Image>();
+            star.preserveAspect = true;
+            star.sprite = HubSprites.StarEmpty;
+            star.color = new Color(1f, 1f, 1f, 0.85f);
+            var starRt = star.rectTransform;
+            starRt.anchorMin = new Vector2(0f, 0.5f);
+            starRt.anchorMax = new Vector2(0f, 0.5f);
+            starRt.pivot = new Vector2(0.5f, 0.5f);
+            starRt.sizeDelta = new Vector2(16f, 16f);
+            starRt.anchoredPosition = new Vector2(8f + IconSize - 1f, 12f);
+            var starBtn = starGo.GetComponent<Button>();
+            starBtn.targetGraphic = star;
+            starBtn.transition = Selectable.Transition.None;
+            starBtn.navigation = new Navigation { mode = Navigation.Mode.None };
+
             var view = new RowView
             {
                 Go = row,
                 Icon = icon,
                 Name = name,
                 Qty = qty,
+                Star = star,
             };
             row.GetComponent<Button>().onClick.AddListener(() => OnRowClicked(view));
+            starBtn.onClick.AddListener(() => OnStarClicked(view));
             return view;
         }
 
@@ -872,6 +1123,33 @@ namespace StorageHub.UI
             {
                 view.Qty.text = "x" + stack.Quantity;
             }
+
+            var favourite = ClientPreferences.IsFavourite(stack.Key());
+            if (view.Star != null)
+            {
+                view.Star.sprite = favourite ? HubSprites.StarFilled : HubSprites.StarEmpty;
+                view.Star.color = favourite
+                    ? new Color(1f, 0.82f, 0.28f, 1f)
+                    : new Color(1f, 1f, 1f, 0.8f);
+            }
+        }
+
+        private static void OnStarClicked(RowView view)
+        {
+            if (view == null || view.Stack == null)
+            {
+                return;
+            }
+
+            if (IsDragging())
+            {
+                DepositDragged();
+                return;
+            }
+
+            var key = view.Stack.Key();
+            ClientPreferences.SetFavourite(key, !ClientPreferences.IsFavourite(key));
+            Refresh();
         }
 
         private static void OnRowClicked(RowView view)
@@ -1128,6 +1406,7 @@ namespace StorageHub.UI
             internal Image Icon;
             internal Text Name;
             internal Text Qty;
+            internal Image Star;
             internal IndexedStack Stack;
         }
     }

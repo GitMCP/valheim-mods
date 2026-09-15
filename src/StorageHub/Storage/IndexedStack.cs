@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using StorageHub.Client;
 using UnityEngine;
 
 namespace StorageHub.Storage
@@ -59,6 +60,11 @@ namespace StorageHub.Storage
         internal string Identity()
         {
             return SharedName + "\0" + Quality + "\0" + Variant + "\0" + WorldLevel;
+        }
+
+        internal string Key()
+        {
+            return ItemKey.Of(SharedName, Quality, Variant, WorldLevel);
         }
 
         internal ItemDrop.ItemData FirstLive()

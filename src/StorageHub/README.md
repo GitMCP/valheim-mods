@@ -33,10 +33,16 @@ items from different chests share one row.
 
 - **Click a row** to pull that item into your inventory (as much as will fit).
 - **Shift-click a row** to pick how many to take.
+- **Click the star** on a row to mark that item as a favourite. The Favourites
+  category lists only starred items. The star next to the sort buttons filters
+  the current category the same way.
 - **Click an item in your inventory**, then click the hub panel (or a row) to
   store it. Dropping on a row stores the dragged item; it does not withdraw.
 - **Shift-click** an item in your inventory, or press **Deposit**, to send it
   into the network. The hotbar is left alone unless you turn that on in config.
+- **Resupply** fills your pack from the hub up to the counts set in Preferences.
+- **The cog** opens client Preferences: skip favourites on Deposit, and choose
+  which items Resupply should keep, with a quantity for each.
 - Click the search box to type. It keeps focus, so E does not close the panel.
 - Hold use on the chest, the same as a vanilla chest, to stack everything that
   will fit.
@@ -48,13 +54,18 @@ out of the scan.
 ## Configuration
 
 `BepInEx/config/com.gitmcp.storagehub.cfg` is written on first launch. The
-server's values are authoritative and are synced to clients.
+server's values for radius, line of sight, and the hotbar are authoritative and
+are synced to clients. Favourites, Resupply, and the deposit-skip toggle are
+**client-only** and stay on that machine.
 
 | Setting | Default | Description |
 | --- | --- | --- |
 | `StorageHub / Radius` | `15` | How far, in metres, a container is still part of the network. |
 | `StorageHub / RequireLineOfSight` | `false` | Only include chests the hub can see. Off so a chest in the next room still counts. |
 | `StorageHub / DepositHotbar` | `false` | Also deposit the first inventory row. |
+| `Client / DepositSkipFavourites` | `false` | Deposit leaves starred items in the pack. Also set from the hub cog. |
+| `Client / Favourites` | *(empty)* | Starred item keys. Edited from the hub list. |
+| `Client / Resupply` | *(empty)* | Item keys and counts for the Resupply button. Edited from the hub cog. |
 
 ## How the hub works
 

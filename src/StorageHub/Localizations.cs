@@ -28,12 +28,19 @@ namespace StorageHub
                     { "storagehub_cat_materials", "Materials" },
                     { "storagehub_cat_trophies", "Trophies" },
                     { "storagehub_cat_misc", "Misc" },
+                    { "storagehub_cat_favourites", "Favourites" },
                     { "storagehub_sort_name", "Name" },
                     { "storagehub_sort_qty", "Qty" },
                     { "storagehub_sort_cat", "Cat" },
                     { "storagehub_empty", "No items in range." },
+                    { "storagehub_empty_favourites", "No favourite items." },
                     { "storagehub_nospace", "No space in nearby chests." },
                     { "storagehub_playerfull", "Inventory full." },
+                    { "storagehub_resupply", "Resupply" },
+                    { "storagehub_resupply_none", "Nothing to resupply." },
+                    { "storagehub_preferences", "Preferences" },
+                    { "storagehub_pref_skip_favourites", "Deposit leaves favourite items in the pack" },
+                    { "storagehub_pref_resupply_hint", "Tick items to keep in your pack. Resupply pulls that many from the hub." },
                 });
         }
     }

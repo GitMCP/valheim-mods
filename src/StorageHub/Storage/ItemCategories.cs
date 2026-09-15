@@ -9,6 +9,7 @@ namespace StorageHub.Storage
         Materials,
         Trophies,
         Misc,
+        Favourites,
     }
 
     internal static class ItemCategories
@@ -68,6 +69,8 @@ namespace StorageHub.Storage
                     return "storagehub_cat_trophies";
                 case ItemCategory.Misc:
                     return "storagehub_cat_misc";
+                case ItemCategory.Favourites:
+                    return "storagehub_cat_favourites";
                 default:
                     return "storagehub_cat_all";
             }

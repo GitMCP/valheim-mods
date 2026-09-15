@@ -5,6 +5,7 @@ using BepInEx.Logging;
 using HarmonyLib;
 using Jotunn.Managers;
 using Jotunn.Utils;
+using StorageHub.Client;
 
 namespace StorageHub
 {
@@ -43,6 +44,7 @@ namespace StorageHub
         {
             Log = Logger;
             BindConfig();
+            ClientPreferences.Bind(Config);
 
             _harmony = new Harmony(PluginGuid);
             _harmony.PatchAll(typeof(StorageHubPlugin).Assembly);

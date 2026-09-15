@@ -15,6 +15,7 @@ namespace StorageHub
         internal static void Load()
         {
             Icon = LoadEmbeddedSprite(Assembly.GetExecutingAssembly(), IconResourceName);
+            UI.HubSprites.Load();
         }
 
         private static Sprite LoadEmbeddedSprite(Assembly assembly, string resourceName)
