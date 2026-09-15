@@ -27,9 +27,10 @@ The piece uses the vanilla black metal chest model.
 ## Using it
 
 Walk up and press use. Your inventory stays on the left and crafting on the
-right. The hub panel opens in the center, between them, with search, category
-tabs, sort, and a count of used slots across every connected chest. Identical
-items from different chests share one row.
+right. The hub panel opens in the center, between them. **Items** and **Recipes**
+tabs sit under the title; the cog still opens Preferences. Identical items from
+different chests share one row. Hover a hub row the same way you hover a pack
+slot: keep the cursor still for a moment and the vanilla item tooltip appears.
 
 - **Click a row** to pull that item into your inventory (as much as will fit).
 - **Shift-click a row** to pick how many to take.
@@ -41,7 +42,8 @@ items from different chests share one row.
 - **Shift-click** an item in your inventory, or press **Deposit**, to send it
   into the network. The hotbar is left alone unless you turn that on in config.
 - **Resupply** fills your pack from the hub up to the counts set in Preferences.
-- **Recipe** lists crafts you know. Rows the hub cannot afford are greyed out.
+- **Quick Stack** deposits and then resupplies in one click.
+- **Recipes** lists crafts you know. Rows the hub cannot afford are greyed out.
   Click a row to pull that recipe's ingredients into your pack.
 - **The cog** opens client Preferences: skip favourites on Deposit, bind a
   Deposit+Resupply hotkey, and choose which items Resupply should keep, with a

@@ -13,7 +13,7 @@ namespace StorageHub.UI
     /// </summary>
     internal static class StorageHubRecipes
     {
-        private const float RowHeight = 42f;
+        private const float RowHeight = 52f;
 
         private static GameObject _root;
         private static Transform _rowParent;
@@ -32,7 +32,7 @@ namespace StorageHub.UI
             rootRt.anchorMin = new Vector2(0f, 0f);
             rootRt.anchorMax = new Vector2(1f, 1f);
             rootRt.offsetMin = new Vector2(16f, 18f);
-            rootRt.offsetMax = new Vector2(-16f, -118f);
+            rootRt.offsetMax = new Vector2(-16f, -StorageHubPanel.ContentTop);
 
             var heading = MakeLabel(
                 gui,
@@ -243,7 +243,7 @@ namespace StorageHub.UI
             iconRt.anchorMin = new Vector2(0f, 0.5f);
             iconRt.anchorMax = new Vector2(0f, 0.5f);
             iconRt.pivot = new Vector2(0f, 0.5f);
-            iconRt.sizeDelta = new Vector2(32f, 32f);
+            iconRt.sizeDelta = new Vector2(40f, 40f);
             iconRt.anchoredPosition = new Vector2(8f, 0f);
 
             var nameGo = gui.CreateText(
@@ -263,7 +263,7 @@ namespace StorageHub.UI
             var nameRt = nameGo.GetComponent<RectTransform>();
             nameRt.anchorMin = new Vector2(0f, 0f);
             nameRt.anchorMax = new Vector2(1f, 1f);
-            nameRt.offsetMin = new Vector2(48f, 4f);
+            nameRt.offsetMin = new Vector2(56f, 4f);
             nameRt.offsetMax = new Vector2(-12f, -4f);
             var name = nameGo.GetComponent<Text>();
             name.alignment = TextAnchor.MiddleLeft;
@@ -331,7 +331,7 @@ namespace StorageHub.UI
             }
 
             StorageNetwork.WithdrawRecipe(Player.m_localPlayer, StorageHubMarker.OpenHub, view.Recipe);
-            Refresh();
+            StorageHubPanel.RefreshAfterRemote();
         }
 
         private static Text MakeLabel(GUIManager gui, string text, int size, Color color)

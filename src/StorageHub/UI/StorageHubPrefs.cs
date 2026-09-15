@@ -98,7 +98,7 @@ namespace StorageHub.UI
             rootRt.anchorMin = new Vector2(0f, 0f);
             rootRt.anchorMax = new Vector2(1f, 1f);
             rootRt.offsetMin = new Vector2(16f, 18f);
-            rootRt.offsetMax = new Vector2(-16f, -118f);
+            rootRt.offsetMax = new Vector2(-16f, -StorageHubPanel.ContentTop);
 
             var toggleGo = gui.CreateToggle(_root.transform, 26f, 26f);
             toggleGo.transform.SetParent(_root.transform, false);
