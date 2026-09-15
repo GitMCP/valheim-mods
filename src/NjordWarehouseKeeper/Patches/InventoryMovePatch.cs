@@ -1,7 +1,7 @@
-using StorageHub.Storage;
+using NjordWarehouseKeeper.Storage;
 using HarmonyLib;
 
-namespace StorageHub.Patches
+namespace NjordWarehouseKeeper.Patches
 {
     /// <summary>
     /// Shift-click and drag-onto-container both end in <see cref="Inventory.MoveItemToThis"/>
@@ -27,7 +27,7 @@ namespace StorageHub.Patches
 
         private static bool Handled(Inventory destination, Inventory from, ItemDrop.ItemData item)
         {
-            var hub = StorageHubMarker.OpenHub;
+            var hub = NjordWarehouseKeeperMarker.OpenHub;
             if (hub == null || destination == null || destination != hub.GetInventory())
             {
                 return false;
@@ -43,7 +43,7 @@ namespace StorageHub.Patches
     {
         private static bool Prefix(Container __instance)
         {
-            if (!StorageHubMarker.IsHub(__instance) || Player.m_localPlayer == null)
+            if (!NjordWarehouseKeeperMarker.IsHub(__instance) || Player.m_localPlayer == null)
             {
                 return true;
             }

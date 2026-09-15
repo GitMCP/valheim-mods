@@ -4,11 +4,11 @@ using System.Reflection;
 using Jotunn.Utils;
 using UnityEngine;
 
-namespace StorageHub
+namespace NjordWarehouseKeeper
 {
-    internal static class StorageHubAssets
+    internal static class NjordWarehouseKeeperAssets
     {
-        private const string IconResourceName = "StorageHub.Assets.storage_hub_icon.png";
+        private const string IconResourceName = "NjordWarehouseKeeper.Assets.njord_warehouse_keeper_icon.png";
 
         internal static Sprite Icon { get; private set; }
 
@@ -29,7 +29,7 @@ namespace StorageHub
             {
                 if (stream == null)
                 {
-                    StorageHubPlugin.Log.LogWarning(
+                    NjordWarehouseKeeperPlugin.Log.LogWarning(
                         $"Embedded sprite '{resourceName}' missing; the piece will use its clone source's icon.");
                     return null;
                 }
@@ -40,7 +40,7 @@ namespace StorageHub
                     var texture = new Texture2D(2, 2);
                     if (!AssetUtils.LoadImage(texture, buffer.ToArray()))
                     {
-                        StorageHubPlugin.Log.LogWarning($"Could not decode '{resourceName}'.");
+                        NjordWarehouseKeeperPlugin.Log.LogWarning($"Could not decode '{resourceName}'.");
                         return null;
                     }
 

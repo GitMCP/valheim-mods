@@ -1,20 +1,20 @@
 using System;
 using System.Collections.Generic;
-using StorageHub.Client;
-using StorageHub.Storage;
+using NjordWarehouseKeeper.Client;
+using NjordWarehouseKeeper.Storage;
 using BepInEx.Configuration;
 using Jotunn.Managers;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace StorageHub.UI
+namespace NjordWarehouseKeeper.UI
 {
     /// <summary>
     /// Client-only hub settings shown when the cog is open: skip favourites on
     /// deposit, and the list of items Resupply should keep in the pack.
     /// </summary>
-    internal static class StorageHubPrefs
+    internal static class NjordWarehouseKeeperPrefs
     {
         private const float RowHeight = 42f;
 
@@ -98,7 +98,7 @@ namespace StorageHub.UI
             rootRt.anchorMin = new Vector2(0f, 0f);
             rootRt.anchorMax = new Vector2(1f, 1f);
             rootRt.offsetMin = new Vector2(16f, 18f);
-            rootRt.offsetMax = new Vector2(-16f, -StorageHubPanel.ContentTop);
+            rootRt.offsetMax = new Vector2(-16f, -NjordWarehouseKeeperPanel.ContentTop);
 
             var toggleGo = gui.CreateToggle(_root.transform, 26f, 26f);
             toggleGo.transform.SetParent(_root.transform, false);
@@ -115,7 +115,7 @@ namespace StorageHub.UI
             var skipLabel = MakeLabel(
                 gui,
                 _root.transform,
-                Localization.instance.Localize("$storagehub_pref_skip_favourites"),
+                Localization.instance.Localize("$njord_pref_skip_favourites"),
                 15,
                 Color.white,
                 TextAnchor.MiddleLeft);
@@ -129,7 +129,7 @@ namespace StorageHub.UI
             var hotkeyLabel = MakeLabel(
                 gui,
                 _root.transform,
-                Localization.instance.Localize("$storagehub_pref_hotkey"),
+                Localization.instance.Localize("$njord_pref_hotkey"),
                 15,
                 Color.white,
                 TextAnchor.MiddleLeft);
@@ -163,7 +163,7 @@ namespace StorageHub.UI
             var title = MakeLabel(
                 gui,
                 _root.transform,
-                Localization.instance.Localize("$storagehub_resupply"),
+                Localization.instance.Localize("$njord_resupply"),
                 18,
                 gui.ValheimOrange,
                 TextAnchor.MiddleLeft);
@@ -177,7 +177,7 @@ namespace StorageHub.UI
             var hint = MakeLabel(
                 gui,
                 _root.transform,
-                Localization.instance.Localize("$storagehub_pref_resupply_hint"),
+                Localization.instance.Localize("$njord_pref_resupply_hint"),
                 13,
                 new Color(1f, 0.9f, 0.75f, 1f),
                 TextAnchor.UpperLeft);
@@ -209,7 +209,7 @@ namespace StorageHub.UI
             var scrollView = scroll.GetComponentInChildren<ScrollRect>(true);
             if (scrollView != null)
             {
-                StorageHubPanel.FitScrollView(scrollView, StorageHubPanel.ListScrollSensitivity());
+                NjordWarehouseKeeperPanel.FitScrollView(scrollView, NjordWarehouseKeeperPanel.ListScrollSensitivity());
                 _rowParent = scrollView.content;
                 var content = _rowParent as RectTransform;
                 if (content != null)
@@ -307,7 +307,7 @@ namespace StorageHub.UI
 
             PaintHotkeyButton();
 
-            var visible = Candidates(StorageHubPanel.SearchQuery);
+            var visible = Candidates(NjordWarehouseKeeperPanel.SearchQuery);
             while (_rows.Count > visible.Count)
             {
                 var extra = _rows[_rows.Count - 1];
@@ -342,7 +342,7 @@ namespace StorageHub.UI
         private static List<IndexedStack> Candidates(string query)
         {
             query = query == null ? "" : query.Trim();
-            var hub = StorageHubMarker.OpenHub;
+            var hub = NjordWarehouseKeeperMarker.OpenHub;
             var listed = hub != null ? StorageNetwork.ListItems(hub) : new List<IndexedStack>();
             var byKey = new Dictionary<string, IndexedStack>();
             for (var i = 0; i < listed.Count; i++)
@@ -670,9 +670,9 @@ namespace StorageHub.UI
 
         private static void BeginCaptureHotkey()
         {
-            if (StorageHubPanel.IsDragging())
+            if (NjordWarehouseKeeperPanel.IsDragging())
             {
-                StorageHubPanel.DepositDragged();
+                NjordWarehouseKeeperPanel.DepositDragged();
                 return;
             }
 
@@ -689,14 +689,14 @@ namespace StorageHub.UI
 
             if (_capturing)
             {
-                _hotkeyLabel.text = Localization.instance.Localize("$storagehub_pref_hotkey_listen");
+                _hotkeyLabel.text = Localization.instance.Localize("$njord_pref_hotkey_listen");
                 return;
             }
 
             var shortcut = ClientPreferences.RestockHotkey;
             if (shortcut == null || shortcut.Value.MainKey == KeyCode.None)
             {
-                _hotkeyLabel.text = Localization.instance.Localize("$storagehub_pref_hotkey_none");
+                _hotkeyLabel.text = Localization.instance.Localize("$njord_pref_hotkey_none");
                 return;
             }
 

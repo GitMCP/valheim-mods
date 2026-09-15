@@ -1,4 +1,4 @@
-namespace StorageHub.Client
+namespace NjordWarehouseKeeper.Client
 {
     /// <summary>
     /// Stable id for a grouped hub row: shared name plus quality, variant, and

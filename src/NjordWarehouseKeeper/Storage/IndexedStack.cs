@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using StorageHub.Client;
+using NjordWarehouseKeeper.Client;
 using UnityEngine;
 
-namespace StorageHub.Storage
+namespace NjordWarehouseKeeper.Storage
 {
     /// <summary>
     /// One slot in a real chest that currently holds part of a grouped row.

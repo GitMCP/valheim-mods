@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using BepInEx.Configuration;
 
-namespace StorageHub.Client
+namespace NjordWarehouseKeeper.Client
 {
     /// <summary>
     /// Client-only hub settings: favourites, deposit skipping those, and the

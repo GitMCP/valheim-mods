@@ -1,7 +1,7 @@
 using Jotunn.Managers;
 using UnityEngine;
 
-namespace StorageHub
+namespace NjordWarehouseKeeper
 {
     /// <summary>
     /// Keeps Njord on the player mesh in a leather tunic and pants, without
@@ -20,7 +20,7 @@ namespace StorageHub
             var playerPrefab = PrefabManagerGetPlayer();
             if (playerPrefab == null)
             {
-                StorageHubPlugin.Log.LogWarning("Could not find the Player prefab to dress Njord.");
+                NjordWarehouseKeeperPlugin.Log.LogWarning("Could not find the Player prefab to dress Njord.");
                 return;
             }
 

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace StorageHub
+namespace NjordWarehouseKeeper
 {
     /// <summary>
     /// Occasional speech bubbles, the same idea as Haldor: a greeting when you
@@ -17,28 +17,28 @@ namespace StorageHub
 
         private static readonly string[] Greets =
         {
-            "$storagehub_talk_greet_1",
-            "$storagehub_talk_greet_2",
-            "$storagehub_talk_greet_3",
+            "$njord_talk_greet_1",
+            "$njord_talk_greet_2",
+            "$njord_talk_greet_3",
         };
 
         private static readonly string[] Idle =
         {
-            "$storagehub_talk_idle_1",
-            "$storagehub_talk_idle_2",
-            "$storagehub_talk_idle_3",
-            "$storagehub_talk_idle_4",
-            "$storagehub_talk_idle_5",
-            "$storagehub_talk_idle_6",
-            "$storagehub_talk_idle_7",
-            "$storagehub_talk_idle_8",
+            "$njord_talk_idle_1",
+            "$njord_talk_idle_2",
+            "$njord_talk_idle_3",
+            "$njord_talk_idle_4",
+            "$njord_talk_idle_5",
+            "$njord_talk_idle_6",
+            "$njord_talk_idle_7",
+            "$njord_talk_idle_8",
         };
 
         private static readonly string[] Goodbyes =
         {
-            "$storagehub_talk_bye_1",
-            "$storagehub_talk_bye_2",
-            "$storagehub_talk_bye_3",
+            "$njord_talk_bye_1",
+            "$njord_talk_bye_2",
+            "$njord_talk_bye_3",
         };
 
         private bool _near;
@@ -103,7 +103,7 @@ namespace StorageHub
                 Mouth,
                 CullDistance,
                 BubbleSeconds,
-                Localization.instance.Localize("$storagehub_npc"),
+                Localization.instance.Localize("$njord_npc"),
                 Localization.instance.Localize(token),
                 large: false);
         }

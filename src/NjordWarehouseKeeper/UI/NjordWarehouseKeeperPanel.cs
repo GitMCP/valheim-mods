@@ -1,20 +1,20 @@
 using System;
 using System.Collections.Generic;
-using StorageHub.Client;
-using StorageHub.Storage;
+using NjordWarehouseKeeper.Client;
+using NjordWarehouseKeeper.Storage;
 using Jotunn.Managers;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-namespace StorageHub.UI
+namespace NjordWarehouseKeeper.UI
 {
     /// <summary>
     /// Sits in the gap between the backpack and the crafting column and lists the
     /// nearby chests as full-width rows.
     /// </summary>
-    internal static class StorageHubPanel
+    internal static class NjordWarehouseKeeperPanel
     {
         private enum SortMode
         {
@@ -89,7 +89,7 @@ namespace StorageHub.UI
                 return;
             }
 
-            StorageHubMarker.OpenHub = hub;
+            NjordWarehouseKeeperMarker.OpenHub = hub;
             if (GUIManager.Instance == null || GUIManager.CustomGUIFront == null)
             {
                 _pending = hub;
@@ -115,14 +115,14 @@ namespace StorageHub.UI
 
         internal static void Close()
         {
-            StorageHubMarker.OpenHub = null;
+            NjordWarehouseKeeperMarker.OpenHub = null;
             _pending = null;
             _splitGroup = null;
             UnfocusSearch();
             HubItemHover.Hide();
             _tab = HubTab.Items;
             SetPrefsOpen(false);
-            StorageHubRecipes.SetOpen(false);
+            NjordWarehouseKeeperRecipes.SetOpen(false);
             if (_root != null)
             {
                 _root.SetActive(false);
@@ -131,7 +131,7 @@ namespace StorageHub.UI
 
         internal static void Tick()
         {
-            if (StorageHubMarker.OpenHub == null || _root == null || !_root.activeSelf)
+            if (NjordWarehouseKeeperMarker.OpenHub == null || _root == null || !_root.activeSelf)
             {
                 return;
             }
@@ -176,7 +176,7 @@ namespace StorageHub.UI
                 return true;
             }
 
-            return StorageHubPrefs.InputHasFocus();
+            return NjordWarehouseKeeperPrefs.InputHasFocus();
         }
 
         internal static bool HandleSplitOk()
@@ -317,7 +317,7 @@ namespace StorageHub.UI
                 PanelWidth,
                 PanelHeight,
                 draggable: false);
-            _root.name = "StorageHubPanel";
+            _root.name = "NjordWarehouseKeeperPanel";
             if (_root.GetComponent<RectMask2D>() == null)
             {
                 _root.AddComponent<RectMask2D>();
@@ -325,7 +325,7 @@ namespace StorageHub.UI
 
             _title = MakeText(
                 gui,
-                Localization.instance.Localize("$storagehub_npc"),
+                Localization.instance.Localize("$njord_npc"),
                 new Vector2(0f, -28f),
                 22,
                 gui.ValheimOrange,
@@ -367,7 +367,7 @@ namespace StorageHub.UI
                 mid,
                 Vector2.zero,
                 InputField.ContentType.Standard,
-                Localization.instance.Localize("$storagehub_search"),
+                Localization.instance.Localize("$njord_search"),
                 16,
                 176f,
                 30f).GetComponent<InputField>();
@@ -380,17 +380,17 @@ namespace StorageHub.UI
 
             _quickStackGo = MakeActionButton(
                 gui,
-                "$storagehub_quickstack",
+                "$njord_quickstack",
                 HubSprites.QuickStack,
                 OnQuickStack);
             _depositGo = MakeActionButton(
                 gui,
-                "$storagehub_deposit",
+                "$njord_deposit",
                 HubSprites.Deposit,
                 OnDeposit);
             _resupplyGo = MakeActionButton(
                 gui,
-                "$storagehub_resupply",
+                "$njord_resupply",
                 HubSprites.Resupply,
                 OnResupply);
             PlaceActionButtons();
@@ -448,7 +448,7 @@ namespace StorageHub.UI
 
             _empty = MakeText(
                 gui,
-                Localization.instance.Localize("$storagehub_empty"),
+                Localization.instance.Localize("$njord_empty"),
                 new Vector2(0f, -80f),
                 16,
                 Color.white,
@@ -461,8 +461,8 @@ namespace StorageHub.UI
                 _itemTabUi.Add(_empty.gameObject);
             }
 
-            StorageHubPrefs.Build(_root.transform, gui);
-            StorageHubRecipes.Build(_root.transform, gui);
+            NjordWarehouseKeeperPrefs.Build(_root.transform, gui);
+            NjordWarehouseKeeperRecipes.Build(_root.transform, gui);
             _root.SetActive(false);
         }
 
@@ -655,7 +655,7 @@ namespace StorageHub.UI
         private static void SetPrefsOpen(bool on)
         {
             _prefsOpen = on;
-            StorageHubPrefs.SetOpen(on);
+            NjordWarehouseKeeperPrefs.SetOpen(on);
             ApplyChrome();
         }
 
@@ -665,7 +665,7 @@ namespace StorageHub.UI
             if (_prefsOpen)
             {
                 _prefsOpen = false;
-                StorageHubPrefs.SetOpen(false);
+                NjordWarehouseKeeperPrefs.SetOpen(false);
             }
 
             ApplyChrome();
@@ -679,7 +679,7 @@ namespace StorageHub.UI
 
             SetActiveAll(_chromeUi, !prefs);
             SetActiveAll(_itemTabUi, items);
-            StorageHubRecipes.SetOpen(recipes);
+            NjordWarehouseKeeperRecipes.SetOpen(recipes);
 
             if (_search != null)
             {
@@ -688,7 +688,7 @@ namespace StorageHub.UI
 
             if (_title != null)
             {
-                var token = prefs ? "$storagehub_preferences" : "$storagehub_npc";
+                var token = prefs ? "$njord_preferences" : "$njord_npc";
                 _title.text = Localization.instance.Localize(token);
             }
 
@@ -719,8 +719,8 @@ namespace StorageHub.UI
             const float width = 180f;
             const float gap = 10f;
             var left = -(width + gap) * 0.5f;
-            _itemsTab = MakeTabButton(gui, "$storagehub_tab_items", HubTab.Items, left, width);
-            _recipesTab = MakeTabButton(gui, "$storagehub_tab_recipes", HubTab.Recipes, -left, width);
+            _itemsTab = MakeTabButton(gui, "$njord_tab_items", HubTab.Items, left, width);
+            _recipesTab = MakeTabButton(gui, "$njord_tab_recipes", HubTab.Recipes, -left, width);
             _chromeUi.Add(_itemsTab.gameObject);
             _chromeUi.Add(_recipesTab.gameObject);
         }
@@ -929,9 +929,9 @@ namespace StorageHub.UI
             var modes = new[] { SortMode.Name, SortMode.Quantity, SortMode.Category };
             var tokens = new[]
             {
-                "$storagehub_sort_name",
-                "$storagehub_sort_qty",
-                "$storagehub_sort_cat",
+                "$njord_sort_name",
+                "$njord_sort_qty",
+                "$njord_sort_cat",
             };
 
             var width = 100f;
@@ -1006,11 +1006,11 @@ namespace StorageHub.UI
             _query = value ?? "";
             if (_prefsOpen)
             {
-                StorageHubPrefs.Refresh();
+                NjordWarehouseKeeperPrefs.Refresh();
             }
             else if (_tab == HubTab.Recipes)
             {
-                StorageHubRecipes.Refresh();
+                NjordWarehouseKeeperRecipes.Refresh();
             }
             else
             {
@@ -1026,7 +1026,7 @@ namespace StorageHub.UI
                 return;
             }
 
-            StorageNetwork.DepositAll(Player.m_localPlayer, StorageHubMarker.OpenHub);
+            StorageNetwork.DepositAll(Player.m_localPlayer, NjordWarehouseKeeperMarker.OpenHub);
             var gui = InventoryGui.instance;
             if (gui != null && gui.m_dragGo != null)
             {
@@ -1044,7 +1044,7 @@ namespace StorageHub.UI
                 return;
             }
 
-            StorageNetwork.Resupply(Player.m_localPlayer, StorageHubMarker.OpenHub);
+            StorageNetwork.Resupply(Player.m_localPlayer, NjordWarehouseKeeperMarker.OpenHub);
             Refresh();
         }
 
@@ -1056,7 +1056,7 @@ namespace StorageHub.UI
                 return;
             }
 
-            StorageNetwork.Restock(Player.m_localPlayer, StorageHubMarker.OpenHub);
+            StorageNetwork.Restock(Player.m_localPlayer, NjordWarehouseKeeperMarker.OpenHub);
             var gui = InventoryGui.instance;
             if (gui != null && gui.m_dragGo != null)
             {
@@ -1077,7 +1077,7 @@ namespace StorageHub.UI
         private static void Refresh()
         {
             _nextRefresh = Time.time + 0.6f;
-            var hub = StorageHubMarker.OpenHub;
+            var hub = NjordWarehouseKeeperMarker.OpenHub;
             if (hub == null || _rowParent == null)
             {
                 return;
@@ -1085,18 +1085,18 @@ namespace StorageHub.UI
 
             if (_title != null && !_prefsOpen)
             {
-                _title.text = Localization.instance.Localize("$storagehub_npc");
+                _title.text = Localization.instance.Localize("$njord_npc");
             }
 
             var snapshot = StorageNetwork.Snapshot(hub);
             if (_capacity != null)
             {
                 _capacity.text =
-                    Localization.instance.Localize("$storagehub_capacity")
+                    Localization.instance.Localize("$njord_capacity")
                         .Replace("{0}", snapshot.UsedSlots.ToString())
                         .Replace("{1}", snapshot.TotalSlots.ToString())
                     + "   ·   " +
-                    Localization.instance.Localize("$storagehub_chests")
+                    Localization.instance.Localize("$njord_chests")
                         .Replace("{0}", snapshot.Chests.Count.ToString());
             }
 
@@ -1110,7 +1110,7 @@ namespace StorageHub.UI
             {
                 if (_tab == HubTab.Recipes)
                 {
-                    StorageHubRecipes.Refresh();
+                    NjordWarehouseKeeperRecipes.Refresh();
                 }
 
                 return;
@@ -1121,8 +1121,8 @@ namespace StorageHub.UI
             {
                 _empty.text = Localization.instance.Localize(
                     _category == ItemCategory.Favourites || _favouritesOnly
-                        ? "$storagehub_empty_favourites"
-                        : "$storagehub_empty");
+                        ? "$njord_empty_favourites"
+                        : "$njord_empty");
                 _empty.gameObject.SetActive(visible.Count == 0);
             }
 
@@ -1488,7 +1488,7 @@ namespace StorageHub.UI
         {
             var gui = InventoryGui.instance;
             var player = Player.m_localPlayer;
-            var hub = StorageHubMarker.OpenHub;
+            var hub = NjordWarehouseKeeperMarker.OpenHub;
             if (gui == null || player == null || hub == null || gui.m_dragItem == null || gui.m_dragInventory == null)
             {
                 return;

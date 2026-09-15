@@ -1,4 +1,4 @@
-namespace StorageHub.Storage
+namespace NjordWarehouseKeeper.Storage
 {
     internal enum ItemCategory
     {
@@ -58,21 +58,21 @@ namespace StorageHub.Storage
             switch (category)
             {
                 case ItemCategory.Weapons:
-                    return "storagehub_cat_weapons";
+                    return "njord_cat_weapons";
                 case ItemCategory.Armor:
-                    return "storagehub_cat_armor";
+                    return "njord_cat_armor";
                 case ItemCategory.Food:
-                    return "storagehub_cat_food";
+                    return "njord_cat_food";
                 case ItemCategory.Materials:
-                    return "storagehub_cat_materials";
+                    return "njord_cat_materials";
                 case ItemCategory.Trophies:
-                    return "storagehub_cat_trophies";
+                    return "njord_cat_trophies";
                 case ItemCategory.Misc:
-                    return "storagehub_cat_misc";
+                    return "njord_cat_misc";
                 case ItemCategory.Favourites:
-                    return "storagehub_cat_favourites";
+                    return "njord_cat_favourites";
                 default:
-                    return "storagehub_cat_all";
+                    return "njord_cat_all";
             }
         }
     }

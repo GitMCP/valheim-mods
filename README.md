@@ -8,7 +8,7 @@ macOS, and Windows and needs no Visual Studio and no local copy of the game.
 | --- | --- |
 | [`src/Bicicreta`](src/Bicicreta/README.md) | A buildable, rideable bicycle. |
 | [`src/TogetherWeRow`](src/TogetherWeRow/README.md) | Oars on boat seats so extra players help the ship go faster. |
-| [`src/StorageHub`](src/StorageHub/README.md) | Njord, Warehouse Keeper: a buildable NPC who lists and moves items across nearby chests. |
+| [`src/NjordWarehouseKeeper`](src/NjordWarehouseKeeper/README.md) | Njord, Warehouse Keeper: a buildable NPC who lists and moves items across nearby chests. |
 | [`src/HelloValheim`](src/HelloValheim/README.md) | A minimal plugin kept as the template for mods that only patch existing behavior. |
 
 Each mod's own README has the player-facing description and how that mod works. The rest

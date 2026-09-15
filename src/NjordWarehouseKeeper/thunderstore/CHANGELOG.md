@@ -29,4 +29,4 @@ show the vanilla item tooltip after the cursor and the row have stayed still
 for a moment, so scrolling the list does not flash tips.
 
 The plugin dll is `NjordWarehouseKeeper.dll`. Thunderstore name
-`NjordWarehouseKeeper`. GUID `com.gitmcp.storagehub`.
+`NjordWarehouseKeeper`. GUID `com.gitmcp.njord`.

@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bicicreta", "src\Bicicreta\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TogetherWeRow", "src\TogetherWeRow\TogetherWeRow.csproj", "{A7C4E291-8B3F-4D5A-9E12-6F80C1D4B2A8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NjordWarehouseKeeper", "src\StorageHub\StorageHub.csproj", "{A88C06FF-A156-4CB0-AA92-182CCC892049}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NjordWarehouseKeeper", "src\NjordWarehouseKeeper\NjordWarehouseKeeper.csproj", "{A88C06FF-A156-4CB0-AA92-182CCC892049}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

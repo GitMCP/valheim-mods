@@ -3,16 +3,16 @@ using Jotunn.Entities;
 using Jotunn.Managers;
 using UnityEngine;
 
-namespace StorageHub
+namespace NjordWarehouseKeeper
 {
     /// <summary>
     /// Hammer piece: Njord, a warehouse keeper. The piece still uses a vanilla
     /// container so opening him brings up the inventory GUI, but his own slots
     /// are never listed or filled — only the chests around him are.
     /// </summary>
-    internal static class StorageHubPiece
+    internal static class NjordWarehouseKeeperPiece
     {
-        internal const string PrefabName = "storage_hub";
+        internal const string PrefabName = "njord_warehouse_keeper";
         internal const string NpcName = "Njord";
 
         internal static readonly RequirementConfig[] Resources =
@@ -43,11 +43,11 @@ namespace StorageHub
 
             if (prefab == null)
             {
-                StorageHubPlugin.Log.LogError("Could not clone a vanilla piece for Njord.");
+                NjordWarehouseKeeperPlugin.Log.LogError("Could not clone a vanilla piece for Njord.");
                 return;
             }
 
-            prefab.AddComponent<StorageHubMarker>();
+            prefab.AddComponent<NjordWarehouseKeeperMarker>();
             if (prefab.GetComponent<NjordTalk>() == null)
             {
                 prefab.AddComponent<NjordTalk>();
@@ -56,7 +56,7 @@ namespace StorageHub
             var container = prefab.GetComponent<Container>();
             if (container != null)
             {
-                container.m_name = "$storagehub_npc";
+                container.m_name = "$njord_npc";
                 container.m_privacy = Container.PrivacySetting.Public;
                 // Dummy grid so InventoryGui still thinks a container is open.
                 // The scan never lists these slots, and deposits never land here.
@@ -85,19 +85,19 @@ namespace StorageHub
                 Requirements = Resources,
             };
 
-            if (StorageHubAssets.Icon != null)
+            if (NjordWarehouseKeeperAssets.Icon != null)
             {
-                config.Icon = StorageHubAssets.Icon;
+                config.Icon = NjordWarehouseKeeperAssets.Icon;
             }
 
             var piece = new CustomPiece(prefab, fixReference: false, config);
             if (!PieceManager.Instance.AddPiece(piece))
             {
-                StorageHubPlugin.Log.LogError($"Failed to register piece '{PrefabName}'.");
+                NjordWarehouseKeeperPlugin.Log.LogError($"Failed to register piece '{PrefabName}'.");
                 return;
             }
 
-            StorageHubPlugin.Log.LogInfo($"Njord cloned from '{source}'.");
+            NjordWarehouseKeeperPlugin.Log.LogInfo($"Njord cloned from '{source}'.");
         }
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace StorageHub
     /// Marker on Njord. The scan skips other keepers so two in one room do not
     /// nest each other's networks.
     /// </summary>
-    internal class StorageHubMarker : MonoBehaviour
+    internal class NjordWarehouseKeeperMarker : MonoBehaviour
     {
         internal static Container OpenHub { get; set; }
 
@@ -149,7 +149,7 @@ namespace StorageHub
                 NjordLook.Attach(gameObject);
             }
 
-            StorageHubPiece.FitCollider(gameObject);
+            NjordWarehouseKeeperPiece.FitCollider(gameObject);
             var wear = GetComponent<WearNTear>();
             if (wear != null)
             {
@@ -159,7 +159,7 @@ namespace StorageHub
 
         internal static bool IsHub(Container container)
         {
-            return container != null && container.GetComponent<StorageHubMarker>() != null;
+            return container != null && container.GetComponent<NjordWarehouseKeeperMarker>() != null;
         }
     }
 }

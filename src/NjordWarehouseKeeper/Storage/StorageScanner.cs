@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace StorageHub.Storage
+namespace NjordWarehouseKeeper.Storage
 {
     /// <summary>
     /// Every <see cref="Container"/> close enough to the hub that the player is allowed
@@ -32,7 +32,7 @@ namespace StorageHub.Storage
             }
 
             var origin = hub.transform.position;
-            var radius = StorageHubPlugin.Radius.Value;
+            var radius = NjordWarehouseKeeperPlugin.Radius.Value;
             var playerId = Game.instance != null && Game.instance.GetPlayerProfile() != null
                 ? Game.instance.GetPlayerProfile().GetPlayerID()
                 : 0L;
@@ -69,7 +69,7 @@ namespace StorageHub.Storage
                 return false;
             }
 
-            if (container.GetComponent<StorageHubMarker>() != null)
+            if (container.GetComponent<NjordWarehouseKeeperMarker>() != null)
             {
                 return false;
             }
@@ -105,7 +105,7 @@ namespace StorageHub.Storage
                 return false;
             }
 
-            if (StorageHubPlugin.RequireLineOfSight.Value && !HasLineOfSight(origin, container))
+            if (NjordWarehouseKeeperPlugin.RequireLineOfSight.Value && !HasLineOfSight(origin, container))
             {
                 return false;
             }

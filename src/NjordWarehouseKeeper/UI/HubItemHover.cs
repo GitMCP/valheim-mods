@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace StorageHub.UI
+namespace NjordWarehouseKeeper.UI
 {
     /// <summary>
     /// Inventory-style item tooltip. Vanilla <see cref="UITooltip"/> waits 0.5s

@@ -16,8 +16,6 @@ on every client**. A client whose version does not match the server's is refused
 Drop `NjordWarehouseKeeper.dll` into `BepInEx/plugins`, or install the zip with a
 mod manager. Requires [Jötunn](https://thunderstore.io/c/valheim/p/ValheimModding/Jotunn/).
 
-If you previously tested a `StorageHub.dll` build, remove that file so BepInEx
-does not load two copies.
 
 ## Building one
 
@@ -66,7 +64,7 @@ out of the scan.
 
 ## Configuration
 
-`BepInEx/config/com.gitmcp.storagehub.cfg` is written on first launch. The
+`BepInEx/config/com.gitmcp.njord.cfg` is written on first launch. The
 server's values for radius, line of sight, and the hotbar are authoritative and
 are synced to clients. Favourites, Resupply, and the deposit-skip toggle are
 **client-only** and stay on that machine.

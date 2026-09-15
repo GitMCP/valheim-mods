@@ -1,8 +1,8 @@
-using StorageHub.UI;
+using NjordWarehouseKeeper.UI;
 using HarmonyLib;
 using UnityEngine;
 
-namespace StorageHub.Patches
+namespace NjordWarehouseKeeper.Patches
 {
     [HarmonyPatch(typeof(InventoryGui))]
     internal static class InventoryGuiPatch
@@ -11,13 +11,13 @@ namespace StorageHub.Patches
         [HarmonyPatch(nameof(InventoryGui.Show))]
         private static void ShowHub(Container container)
         {
-            if (StorageHubMarker.IsHub(container))
+            if (NjordWarehouseKeeperMarker.IsHub(container))
             {
-                StorageHubPanel.Open(container);
+                NjordWarehouseKeeperPanel.Open(container);
             }
             else
             {
-                StorageHubPanel.Close();
+                NjordWarehouseKeeperPanel.Close();
             }
         }
 
@@ -25,7 +25,7 @@ namespace StorageHub.Patches
         [HarmonyPatch(nameof(InventoryGui.Hide))]
         private static void HideHub()
         {
-            StorageHubPanel.Close();
+            NjordWarehouseKeeperPanel.Close();
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace StorageHub.Patches
         [HarmonyPatch("UpdateContainer")]
         private static void HideVanillaContainer(InventoryGui __instance)
         {
-            if (StorageHubMarker.OpenHub == null || __instance.m_currentContainer != StorageHubMarker.OpenHub)
+            if (NjordWarehouseKeeperMarker.OpenHub == null || __instance.m_currentContainer != NjordWarehouseKeeperMarker.OpenHub)
             {
                 return;
             }
@@ -47,35 +47,35 @@ namespace StorageHub.Patches
                 __instance.m_container.gameObject.SetActive(false);
             }
 
-            StorageHubPanel.Tick();
+            NjordWarehouseKeeperPanel.Tick();
         }
 
         [HarmonyPrefix]
         [HarmonyPatch("OnDropOutside")]
         private static bool DepositDragOnPanel()
         {
-            return !StorageHubPanel.TryDepositDrag();
+            return !NjordWarehouseKeeperPanel.TryDepositDrag();
         }
 
         [HarmonyPrefix]
         [HarmonyPatch("OnSplitOk")]
         private static bool HubSplitOk()
         {
-            return !StorageHubPanel.HandleSplitOk();
+            return !NjordWarehouseKeeperPanel.HandleSplitOk();
         }
 
         [HarmonyPostfix]
         [HarmonyPatch("OnSplitCancel")]
         private static void HubSplitCancel()
         {
-            StorageHubPanel.ClearSplit();
+            NjordWarehouseKeeperPanel.ClearSplit();
         }
 
         [HarmonyPrefix]
         [HarmonyPatch("Update")]
         private static void KeepOpenWhileSearching()
         {
-            if (!StorageHubPanel.SearchHasFocus())
+            if (!NjordWarehouseKeeperPanel.SearchHasFocus())
             {
                 return;
             }
@@ -96,7 +96,7 @@ namespace StorageHub.Patches
     {
         private static void Postfix(ref bool __result)
         {
-            if (StorageHubPanel.SearchHasFocus())
+            if (NjordWarehouseKeeperPanel.SearchHasFocus())
             {
                 __result = true;
             }

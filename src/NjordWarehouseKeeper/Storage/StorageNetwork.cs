@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using StorageHub.Client;
+using NjordWarehouseKeeper.Client;
 using UnityEngine;
 
-namespace StorageHub.Storage
+namespace NjordWarehouseKeeper.Storage
 {
     /// <summary>
     /// Moves items between the player and the scanned chests.
@@ -114,7 +114,7 @@ namespace StorageHub.Storage
                     continue;
                 }
 
-                if (!StorageHubPlugin.DepositHotbar.Value && item.m_gridPos.y == 0)
+                if (!NjordWarehouseKeeperPlugin.DepositHotbar.Value && item.m_gridPos.y == 0)
                 {
                     continue;
                 }
@@ -133,7 +133,7 @@ namespace StorageHub.Storage
 
             if (notify && routed == 0)
             {
-                player.Message(MessageHud.MessageType.Center, "$storagehub_nospace");
+                player.Message(MessageHud.MessageType.Center, "$njord_nospace");
             }
 
             return routed;
@@ -163,7 +163,7 @@ namespace StorageHub.Storage
             {
                 if (notify)
                 {
-                    player.Message(MessageHud.MessageType.Center, "$storagehub_playerfull");
+                    player.Message(MessageHud.MessageType.Center, "$njord_playerfull");
                 }
 
                 return false;
@@ -195,7 +195,7 @@ namespace StorageHub.Storage
             {
                 if (notify)
                 {
-                    player.Message(MessageHud.MessageType.Center, "$storagehub_resupply_none");
+                    player.Message(MessageHud.MessageType.Center, "$njord_resupply_none");
                 }
 
                 return 0;
@@ -243,7 +243,7 @@ namespace StorageHub.Storage
             {
                 player.Message(
                     MessageHud.MessageType.Center,
-                    blocked ? "$storagehub_playerfull" : "$storagehub_resupply_none");
+                    blocked ? "$njord_playerfull" : "$njord_resupply_none");
             }
 
             return moved;
@@ -260,11 +260,11 @@ namespace StorageHub.Storage
             var resupplied = Resupply(player, hub, notify: false);
             if (deposited > 0 || resupplied > 0)
             {
-                player.Message(MessageHud.MessageType.Center, "$storagehub_restocked");
+                player.Message(MessageHud.MessageType.Center, "$njord_restocked");
                 return;
             }
 
-            player.Message(MessageHud.MessageType.Center, "$storagehub_restock_none");
+            player.Message(MessageHud.MessageType.Center, "$njord_restock_none");
         }
 
         internal static int CountBySharedName(List<IndexedStack> listed, string sharedName)
@@ -366,7 +366,7 @@ namespace StorageHub.Storage
             var listed = ListItems(hub);
             if (!CanAffordNeeds(listed, needs, onlyOne))
             {
-                player.Message(MessageHud.MessageType.Center, "$storagehub_recipe_missing");
+                player.Message(MessageHud.MessageType.Center, "$njord_recipe_missing");
                 return false;
             }
 
@@ -384,7 +384,7 @@ namespace StorageHub.Storage
 
                 if (pick == null)
                 {
-                    player.Message(MessageHud.MessageType.Center, "$storagehub_recipe_missing");
+                    player.Message(MessageHud.MessageType.Center, "$njord_recipe_missing");
                     return false;
                 }
 
@@ -399,11 +399,11 @@ namespace StorageHub.Storage
 
             if (taken <= 0)
             {
-                player.Message(MessageHud.MessageType.Center, "$storagehub_playerfull");
+                player.Message(MessageHud.MessageType.Center, "$njord_playerfull");
                 return false;
             }
 
-            player.Message(MessageHud.MessageType.Center, "$storagehub_recipe_ok");
+            player.Message(MessageHud.MessageType.Center, "$njord_recipe_ok");
             return true;
         }
 
@@ -414,19 +414,19 @@ namespace StorageHub.Storage
                 return null;
             }
 
-            if (StorageHubMarker.OpenHub != null)
+            if (NjordWarehouseKeeperMarker.OpenHub != null)
             {
-                return StorageHubMarker.OpenHub;
+                return NjordWarehouseKeeperMarker.OpenHub;
             }
 
             var origin = player.transform.position;
-            var radius = StorageHubPlugin.Radius.Value;
+            var radius = NjordWarehouseKeeperPlugin.Radius.Value;
             var playerId = Game.instance != null && Game.instance.GetPlayerProfile() != null
                 ? Game.instance.GetPlayerProfile().GetPlayerID()
                 : 0L;
             Container best = null;
             var bestDist = radius;
-            var markers = UnityEngine.Object.FindObjectsByType<StorageHubMarker>(
+            var markers = UnityEngine.Object.FindObjectsByType<NjordWarehouseKeeperMarker>(
                 FindObjectsInactive.Exclude,
                 FindObjectsSortMode.None);
             for (var i = 0; i < markers.Length; i++)

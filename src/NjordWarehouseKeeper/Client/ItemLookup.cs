@@ -1,7 +1,7 @@
-using StorageHub.Storage;
+using NjordWarehouseKeeper.Storage;
 using UnityEngine;
 
-namespace StorageHub.Client
+namespace NjordWarehouseKeeper.Client
 {
     internal static class ItemLookup
     {

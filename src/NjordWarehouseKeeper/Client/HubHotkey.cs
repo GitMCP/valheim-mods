@@ -1,9 +1,9 @@
 using Jotunn.Managers;
-using StorageHub.Storage;
-using StorageHub.UI;
+using NjordWarehouseKeeper.Storage;
+using NjordWarehouseKeeper.UI;
 using UnityEngine;
 
-namespace StorageHub.Client
+namespace NjordWarehouseKeeper.Client
 {
     /// <summary>
     /// Client hotkey: while standing in a hub's radius, Deposit then Resupply
@@ -18,7 +18,7 @@ namespace StorageHub.Client
                 return;
             }
 
-            if (StorageHubPrefs.IsCapturingHotkey)
+            if (NjordWarehouseKeeperPrefs.IsCapturingHotkey)
             {
                 return;
             }
@@ -38,14 +38,14 @@ namespace StorageHub.Client
             var hub = StorageNetwork.FindHubInRange(player);
             if (hub == null)
             {
-                player?.Message(MessageHud.MessageType.Center, "$storagehub_hotkey_norange");
+                player?.Message(MessageHud.MessageType.Center, "$njord_hotkey_norange");
                 return;
             }
 
             StorageNetwork.Restock(player, hub);
-            if (StorageHubMarker.OpenHub == hub)
+            if (NjordWarehouseKeeperMarker.OpenHub == hub)
             {
-                StorageHubPanel.RefreshAfterRemote();
+                NjordWarehouseKeeperPanel.RefreshAfterRemote();
             }
         }
 
@@ -61,7 +61,7 @@ namespace StorageHub.Client
                 return true;
             }
 
-            if (StorageHubPanel.SearchHasFocus())
+            if (NjordWarehouseKeeperPanel.SearchHasFocus())
             {
                 return true;
             }

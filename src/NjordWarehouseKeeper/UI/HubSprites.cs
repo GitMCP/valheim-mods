@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace StorageHub.UI
+namespace NjordWarehouseKeeper.UI
 {
     /// <summary>
     /// Stars and the preferences cog are drawn in code. Deposit, Resupply, and
@@ -25,9 +25,9 @@ namespace StorageHub.UI
             StarFilled = MakeSprite(DrawStar(filled: true), "hub_star_filled");
             StarEmpty = MakeSprite(DrawStar(filled: false), "hub_star_empty");
             Cog = MakeSprite(DrawCog(), "hub_cog");
-            Deposit = StorageHubAssets.LoadSprite("StorageHub.Assets.hub_deposit.png");
-            Resupply = StorageHubAssets.LoadSprite("StorageHub.Assets.hub_resupply.png");
-            QuickStack = StorageHubAssets.LoadSprite("StorageHub.Assets.hub_quickstack.png");
+            Deposit = NjordWarehouseKeeperAssets.LoadSprite("NjordWarehouseKeeper.Assets.hub_deposit.png");
+            Resupply = NjordWarehouseKeeperAssets.LoadSprite("NjordWarehouseKeeper.Assets.hub_resupply.png");
+            QuickStack = NjordWarehouseKeeperAssets.LoadSprite("NjordWarehouseKeeper.Assets.hub_quickstack.png");
         }
 
         private static Sprite MakeSprite(Texture2D texture, string name)

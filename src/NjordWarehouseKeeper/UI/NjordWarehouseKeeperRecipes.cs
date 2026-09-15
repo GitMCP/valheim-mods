@@ -1,17 +1,17 @@
 using System;
 using System.Collections.Generic;
-using StorageHub.Storage;
+using NjordWarehouseKeeper.Storage;
 using Jotunn.Managers;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace StorageHub.UI
+namespace NjordWarehouseKeeper.UI
 {
     /// <summary>
     /// Known crafting recipes and hammer pieces. Rows the hub cannot afford are
     /// greyed out; a clickable row pulls that craft's ingredients into the pack.
     /// </summary>
-    internal static class StorageHubRecipes
+    internal static class NjordWarehouseKeeperRecipes
     {
         private const float RowHeight = 52f;
         private const string AllKey = "all";
@@ -42,7 +42,7 @@ namespace StorageHub.UI
             rootRt.anchorMin = new Vector2(0f, 0f);
             rootRt.anchorMax = new Vector2(1f, 1f);
             rootRt.offsetMin = new Vector2(16f, 18f);
-            rootRt.offsetMax = new Vector2(-16f, -StorageHubPanel.ContentTop);
+            rootRt.offsetMax = new Vector2(-16f, -NjordWarehouseKeeperPanel.ContentTop);
 
             _stationButton = MakeStationButton(gui);
             BuildStationMenu(gui);
@@ -66,7 +66,7 @@ namespace StorageHub.UI
             var scrollView = scroll.GetComponentInChildren<ScrollRect>(true);
             if (scrollView != null)
             {
-                StorageHubPanel.FitScrollView(scrollView, StorageHubPanel.ListScrollSensitivity());
+                NjordWarehouseKeeperPanel.FitScrollView(scrollView, NjordWarehouseKeeperPanel.ListScrollSensitivity());
                 _rowParent = scrollView.content;
                 var content = _rowParent as RectTransform;
                 if (content != null)
@@ -130,7 +130,7 @@ namespace StorageHub.UI
             RebuildStations();
             PaintStationButton();
 
-            var visible = KnownCrafts(StorageHubPanel.SearchQuery);
+            var visible = KnownCrafts(NjordWarehouseKeeperPanel.SearchQuery);
             while (_rows.Count > visible.Count)
             {
                 var extra = _rows[_rows.Count - 1];
@@ -146,8 +146,8 @@ namespace StorageHub.UI
                 _rows.Add(MakeRow());
             }
 
-            var listed = StorageHubMarker.OpenHub != null
-                ? StorageNetwork.ListItems(StorageHubMarker.OpenHub)
+            var listed = NjordWarehouseKeeperMarker.OpenHub != null
+                ? StorageNetwork.ListItems(NjordWarehouseKeeperMarker.OpenHub)
                 : new List<IndexedStack>();
             for (var i = 0; i < visible.Count; i++)
             {
@@ -234,7 +234,7 @@ namespace StorageHub.UI
             var scrollView = scroll.GetComponentInChildren<ScrollRect>(true);
             if (scrollView != null)
             {
-                StorageHubPanel.FitScrollView(scrollView, 80f);
+                NjordWarehouseKeeperPanel.FitScrollView(scrollView, 80f);
                 _stationMenuParent = scrollView.content;
                 var content = _stationMenuParent as RectTransform;
                 if (content != null)
@@ -275,9 +275,9 @@ namespace StorageHub.UI
 
         private static void ToggleMenu()
         {
-            if (StorageHubPanel.IsDragging())
+            if (NjordWarehouseKeeperPanel.IsDragging())
             {
-                StorageHubPanel.DepositDragged();
+                NjordWarehouseKeeperPanel.DepositDragged();
                 return;
             }
 
@@ -319,9 +319,9 @@ namespace StorageHub.UI
             }
 
             _stations.Clear();
-            _stations.Add(new StationOpt { Key = AllKey, Token = "$storagehub_station_all" });
-            _stations.Add(new StationOpt { Key = HandKey, Token = "$storagehub_station_hand" });
-            _stations.Add(new StationOpt { Key = HammerKey, Token = "$storagehub_station_hammer" });
+            _stations.Add(new StationOpt { Key = AllKey, Token = "$njord_station_all" });
+            _stations.Add(new StationOpt { Key = HandKey, Token = "$njord_station_hand" });
+            _stations.Add(new StationOpt { Key = HammerKey, Token = "$njord_station_hammer" });
 
             var names = new List<string>();
             var seen = new HashSet<string>();
@@ -450,7 +450,7 @@ namespace StorageHub.UI
                 return;
             }
 
-            var token = "$storagehub_station_all";
+            var token = "$njord_station_all";
             for (var i = 0; i < _stations.Count; i++)
             {
                 if (_stations[i].Key == _station)
@@ -756,11 +756,11 @@ namespace StorageHub.UI
 
         private static void OnClicked(RecipeRow view)
         {
-            if (view == null || view.Offer == null || StorageHubPanel.IsDragging())
+            if (view == null || view.Offer == null || NjordWarehouseKeeperPanel.IsDragging())
             {
-                if (StorageHubPanel.IsDragging())
+                if (NjordWarehouseKeeperPanel.IsDragging())
                 {
-                    StorageHubPanel.DepositDragged();
+                    NjordWarehouseKeeperPanel.DepositDragged();
                 }
 
                 return;
@@ -768,14 +768,14 @@ namespace StorageHub.UI
 
             if (view.Offer.Recipe != null)
             {
-                StorageNetwork.WithdrawRecipe(Player.m_localPlayer, StorageHubMarker.OpenHub, view.Offer.Recipe);
+                StorageNetwork.WithdrawRecipe(Player.m_localPlayer, NjordWarehouseKeeperMarker.OpenHub, view.Offer.Recipe);
             }
             else
             {
-                StorageNetwork.WithdrawPiece(Player.m_localPlayer, StorageHubMarker.OpenHub, view.Offer.Piece);
+                StorageNetwork.WithdrawPiece(Player.m_localPlayer, NjordWarehouseKeeperMarker.OpenHub, view.Offer.Piece);
             }
 
-            StorageHubPanel.RefreshAfterRemote();
+            NjordWarehouseKeeperPanel.RefreshAfterRemote();
         }
 
         private sealed class CraftOffer

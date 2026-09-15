@@ -5,10 +5,10 @@ using BepInEx.Logging;
 using HarmonyLib;
 using Jotunn.Managers;
 using Jotunn.Utils;
-using StorageHub.Client;
-using StorageHub.UI;
+using NjordWarehouseKeeper.Client;
+using NjordWarehouseKeeper.UI;
 
-namespace StorageHub
+namespace NjordWarehouseKeeper
 {
     /// <summary>
     /// Adds a buildable warehouse keeper, Njord, who is not storage of his own so much
@@ -27,9 +27,9 @@ namespace StorageHub
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     [BepInDependency(Jotunn.Main.ModGuid)]
     [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
-    public class StorageHubPlugin : BaseUnityPlugin
+    public class NjordWarehouseKeeperPlugin : BaseUnityPlugin
     {
-        public const string PluginGuid = "com.gitmcp.storagehub";
+        public const string PluginGuid = "com.gitmcp.njord";
         public const string PluginName = "Njord, Warehouse Keeper";
         public const string PluginVersion = MyPluginInfo.PLUGIN_VERSION;
 
@@ -48,7 +48,7 @@ namespace StorageHub
             ClientPreferences.Bind(Config);
 
             _harmony = new Harmony(PluginGuid);
-            _harmony.PatchAll(typeof(StorageHubPlugin).Assembly);
+            _harmony.PatchAll(typeof(NjordWarehouseKeeperPlugin).Assembly);
 
             PrefabManager.OnVanillaPrefabsAvailable += RegisterContent;
         }
@@ -60,7 +60,7 @@ namespace StorageHub
                 return;
             }
 
-            if (StorageHubPrefs.TickCapture())
+            if (NjordWarehouseKeeperPrefs.TickCapture())
             {
                 return;
             }
@@ -105,8 +105,8 @@ namespace StorageHub
             PrefabManager.OnVanillaPrefabsAvailable -= RegisterContent;
 
             Localizations.Register();
-            StorageHubAssets.Load();
-            StorageHubPiece.Register();
+            NjordWarehouseKeeperAssets.Load();
+            NjordWarehouseKeeperPiece.Register();
 
             var patched = _harmony.GetPatchedMethods().Count();
             Log.LogInfo($"{PluginName} {PluginVersion} registered its content, {patched} method(s) patched.");
