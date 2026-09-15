@@ -19,8 +19,8 @@ which the assembly carries in its own version string (`1.1.0+e4aa23c…`).
 A black metal chest that lists and moves items across nearby containers. Star
 items as favourites, bind a Deposit+Resupply hotkey, withdraw known-recipe
 ingredients, and Resupply the pack to the counts set in Preferences. The hub
-panel uses Items and Recipes tabs, and Deposit / Resupply / Quick Stack sit
-above the filters.
+panel uses Items and Recipes tabs; Recipes can be filtered by crafting station.
+Deposit / Resupply / Quick Stack sit above the filters.
 
 | File | What it is for |
 | --- | --- |
