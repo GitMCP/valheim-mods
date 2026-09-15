@@ -1,0 +1,10 @@
+{
+  "name": "Rows",
+  "version_number": "0.1.0",
+  "website_url": "https://github.com/GitMCP/valheim-mods",
+  "description": "Passenger seats on boats get oars. Sit down to help the captain go faster.",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2350",
+    "ValheimModding-Jotunn-2.30.0"
+  ]
+}

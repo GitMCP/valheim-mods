@@ -7,9 +7,10 @@ macOS, and Windows and needs no Visual Studio and no local copy of the game.
 | Project | What it is |
 | --- | --- |
 | `src/Bicicreta` | Adds a buildable, rideable bicycle. |
+| `src/Rows` | Puts oars on boat seats so extra players help the ship go faster. |
 | `src/HelloValheim` | A minimal plugin kept as the template for mods that only patch existing behavior. |
 
-Both are verified to load into a running game.
+All three are verified to load into a running game.
 
 ## How the bicycle works
 
@@ -75,6 +76,22 @@ front of the frame's body and a short neck carries the bar back to the hands. Ev
 wooden building piece in the game turns out to be the same unit cube under a different
 scale, which is why a pole and a beam are the same mesh here and any box of wood can be
 had by asking for one of them at a size.
+
+## How the oars work
+
+A Valheim ship already paddles. Slow and Back are the person at the helm sculling with
+the rudder; Half and Full are the sail. The chairs on the deck are ordinary furniture
+that happen to be on a boat, and sitting in one does nothing to the hull.
+
+`src/Rows` does not add a new control. It counts who is already sat down, other than the
+helmsman, and adds the same kind of force the paddle already uses, once per occupied
+seat, on the peer that owns the ship. That peer is the one already integrating the
+rigidbody, so the extra push does not need a second network path.
+
+The oars themselves are scenery. A real oar mesh would need an AssetBundle; until then a
+shaft and a blade are two boxes of the wooden pole every client already has loaded. They
+are not networked objects. Every peer hangs the same ones locally on each passenger
+chair, and they stroke only while that seat is taken and the helm has the ship under way.
 
 ## Requirements
 
