@@ -12,9 +12,9 @@ is built.
 
 ## Gateway Chest 0.1.0
 
-Built from commit `865f4bd` on
+Built from commit `fd41ecd` on
 [`cursor/gateway-chest-020c`](https://github.com/GitMCP/valheim-mods/pull/12),
-which the assembly carries in its own version string (`0.1.0+865f4bd…`).
+which the assembly carries in its own version string (`0.1.0+fd41ecd…`).
 
 A chest that lists and moves items across every nearby container.
 
