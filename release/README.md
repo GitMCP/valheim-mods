@@ -12,9 +12,9 @@ is built.
 
 ## Storage Hub 1.1.0
 
-Built from commit `ac59d13` on
+Built from commit `e4aa23c` on
 [`cursor/storage-hub-favourites-020c`](https://github.com/GitMCP/valheim-mods/pull/14),
-which the assembly carries in its own version string (`1.1.0+ac59d13…`).
+which the assembly carries in its own version string (`1.1.0+e4aa23c…`).
 
 A black metal chest that lists and moves items across nearby containers. Star
 items as favourites, bind a Deposit+Resupply hotkey, withdraw known-recipe
