@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiExplorer", "tools\ApiExp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bicicreta", "src\Bicicreta\Bicicreta.csproj", "{01A1E8E8-9E01-4C0B-B2AC-88E0CE6E70D0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rows", "src\Rows\Rows.csproj", "{A7C4E291-8B3F-4D5A-9E12-6F80C1D4B2A8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TogetherWeRow", "src\TogetherWeRow\TogetherWeRow.csproj", "{A7C4E291-8B3F-4D5A-9E12-6F80C1D4B2A8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

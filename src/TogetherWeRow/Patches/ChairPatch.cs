@@ -1,6 +1,6 @@
 using HarmonyLib;
 
-namespace Rows.Patches
+namespace TogetherWeRow.Patches
 {
     [HarmonyPatch(typeof(Chair), nameof(Chair.GetHoverText))]
     internal static class ChairPatch
@@ -13,7 +13,7 @@ namespace Rows.Patches
             }
 
             var ship = __instance.GetComponentInParent<Ship>();
-            if (ship == null || !RowsCrew.CanRow(ship, __instance.m_attachPoint))
+            if (ship == null || !TogetherWeRowCrew.CanRow(ship, __instance.m_attachPoint))
             {
                 return;
             }
@@ -26,7 +26,7 @@ namespace Rows.Patches
             }
 
             __result = Localization.instance.Localize(
-                __instance.m_name + "\n[<color=yellow><b>$KEY_Use</b></color>] $rows_use");
+                __instance.m_name + "\n[<color=yellow><b>$KEY_Use</b></color>] $togetherwerow_use");
         }
     }
 }

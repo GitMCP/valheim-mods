@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Rows
+namespace TogetherWeRow
 {
     /// <summary>
     /// Who is actually rowing: anyone attached to this ship who can reach the water.
@@ -10,7 +10,7 @@ namespace Rows
     /// A seat on the mast is too far inboard and too high to dip an oar, so it is
     /// not a rowing bench either.
     /// </summary>
-    internal static class RowsCrew
+    internal static class TogetherWeRowCrew
     {
         /// <summary>
         /// Seats closer to the mast than this, in the horizontal plane, sit on the

@@ -5,7 +5,7 @@ using BepInEx.Logging;
 using HarmonyLib;
 using Jotunn.Utils;
 
-namespace Rows
+namespace TogetherWeRow
 {
     /// <summary>
     /// Puts an oar on every passenger seat of a boat, and lets whoever sits there
@@ -32,10 +32,10 @@ namespace Rows
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     [BepInDependency(Jotunn.Main.ModGuid)]
     [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
-    public class RowsPlugin : BaseUnityPlugin
+    public class TogetherWeRowPlugin : BaseUnityPlugin
     {
-        public const string PluginGuid = "com.gitmcp.rows";
-        public const string PluginName = "Rows";
+        public const string PluginGuid = "com.gitmcp.togetherwerow";
+        public const string PluginName = "Together We Row";
         public const string PluginVersion = MyPluginInfo.PLUGIN_VERSION;
 
         internal static ManualLogSource Log;
@@ -49,7 +49,7 @@ namespace Rows
             Log = Logger;
 
             Speed = Config.Bind(
-                "Rows",
+                "TogetherWeRow",
                 "Speed",
                 1f,
                 new ConfigDescription(
@@ -62,7 +62,7 @@ namespace Rows
             Localizations.Register();
 
             _harmony = new Harmony(PluginGuid);
-            _harmony.PatchAll(typeof(RowsPlugin).Assembly);
+            _harmony.PatchAll(typeof(TogetherWeRowPlugin).Assembly);
 
             var patched = _harmony.GetPatchedMethods().Count();
             Log.LogInfo($"{PluginName} {PluginVersion} loaded, {patched} method(s) patched.");

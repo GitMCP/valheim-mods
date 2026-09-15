@@ -2,9 +2,9 @@
 
 ## 1.0.0
 
-First release. Passenger seats on boats get oars. Each occupied gunwale seat adds
-a full copy of the helm's paddle, including while the sail is up. The mast seat
-is left alone.
+First release as Together We Row. Passenger seats on boats get oars. Each occupied
+gunwale seat adds a full copy of the helm's paddle, including while the sail is
+up. The mast seat is left alone.
 
 ## 0.2.0
 

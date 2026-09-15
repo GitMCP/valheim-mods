@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Rows
+namespace TogetherWeRow
 {
     /// <summary>
     /// One ship's worth of oars. Added when the ship wakes, finds every passenger
@@ -9,7 +9,7 @@ namespace Rows
     /// Seats on the mast are skipped. The oars row when that seat is taken and the
     /// helm has the ship under way, sail or no sail; otherwise they rest.
     /// </summary>
-    internal class RowsRig : MonoBehaviour
+    internal class TogetherWeRowRig : MonoBehaviour
     {
         private readonly List<Bench> _benches = new List<Bench>();
         private Ship _ship;
@@ -50,10 +50,10 @@ namespace Rows
                     continue;
                 }
 
-                var rowing = moving && RowsCrew.Occupied(bench.Attach);
+                var rowing = moving && TogetherWeRowCrew.Occupied(bench.Attach);
                 bench.Pivot.localRotation = rowing
-                    ? RowsOars.StrokeAt(bench.Side, time)
-                    : RowsOars.Rest(bench.Side);
+                    ? TogetherWeRowOars.StrokeAt(bench.Side, time)
+                    : TogetherWeRowOars.Rest(bench.Side);
             }
         }
 
@@ -73,14 +73,14 @@ namespace Rows
             var chairs = GetComponentsInChildren<Chair>(true);
             foreach (var chair in chairs)
             {
-                if (!chair.m_inShip || chair.m_attachPoint == null || !RowsCrew.CanRow(_ship, chair.m_attachPoint))
+                if (!chair.m_inShip || chair.m_attachPoint == null || !TogetherWeRowCrew.CanRow(_ship, chair.m_attachPoint))
                 {
                     continue;
                 }
 
                 var local = transform.InverseTransformPoint(chair.m_attachPoint.position);
                 var side = local.x >= 0f ? 1f : -1f;
-                var pivot = RowsOars.Build(transform, chair.m_attachPoint, side);
+                var pivot = TogetherWeRowOars.Build(transform, chair.m_attachPoint, side);
                 _benches.Add(new Bench
                 {
                     Attach = chair.m_attachPoint,
@@ -92,7 +92,7 @@ namespace Rows
             _built = true;
             if (_benches.Count > 0)
             {
-                RowsPlugin.Log.LogInfo($"{_ship.name} gained {_benches.Count} oar(s).");
+                TogetherWeRowPlugin.Log.LogInfo($"{_ship.name} gained {_benches.Count} oar(s).");
             }
         }
 

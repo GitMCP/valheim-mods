@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Jotunn.Managers;
 
-namespace Rows
+namespace TogetherWeRow
 {
     internal static class Localizations
     {
@@ -12,7 +12,7 @@ namespace Rows
                 "English",
                 new Dictionary<string, string>
                 {
-                    { "rows_use", "Row" },
+                    { "togetherwerow_use", "Row" },
                 });
         }
     }

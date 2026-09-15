@@ -1,7 +1,7 @@
 using Jotunn.Managers;
 using UnityEngine;
 
-namespace Rows
+namespace TogetherWeRow
 {
     /// <summary>
     /// An oar assembled from the wooden pole the game already ships.
@@ -16,7 +16,7 @@ namespace Rows
     /// air. In hull space, +X is starboard and +Y is up, and a roll around forward
     /// is what dips the outboard end into the water.
     /// </summary>
-    internal static class RowsOars
+    internal static class TogetherWeRowOars
     {
         private const string WoodSource = "wood_pole";
         private const string WoodPath = "New";
@@ -31,7 +31,7 @@ namespace Rows
 
         internal static Transform Build(Transform ship, Transform attach, float side)
         {
-            var pivot = new GameObject("RowsOar").transform;
+            var pivot = new GameObject("TogetherWeRowOar").transform;
             pivot.SetParent(ship, worldPositionStays: false);
 
             var local = ship.InverseTransformPoint(attach.position);
@@ -64,7 +64,7 @@ namespace Rows
             var mesh = source == null ? null : source.GetComponent<MeshFilter>();
             if (mesh == null || mesh.sharedMesh == null)
             {
-                RowsPlugin.Log.LogWarning($"'{WoodSource}/{WoodPath}' is gone; the oar is missing its {name}.");
+                TogetherWeRowPlugin.Log.LogWarning($"'{WoodSource}/{WoodPath}' is gone; the oar is missing its {name}.");
                 return;
             }
 

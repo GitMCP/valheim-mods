@@ -1,7 +1,7 @@
 using HarmonyLib;
 using UnityEngine;
 
-namespace Rows.Patches
+namespace TogetherWeRow.Patches
 {
     [HarmonyPatch(typeof(Ship))]
     internal static class ShipPatch
@@ -14,9 +14,9 @@ namespace Rows.Patches
         [HarmonyPatch("Start")]
         private static void HangOars(Ship __instance)
         {
-            if (__instance.GetComponent<RowsRig>() == null)
+            if (__instance.GetComponent<TogetherWeRowRig>() == null)
             {
-                __instance.gameObject.AddComponent<RowsRig>();
+                __instance.gameObject.AddComponent<TogetherWeRowRig>();
             }
         }
 
@@ -50,13 +50,13 @@ namespace Rows.Patches
                 return;
             }
 
-            var rowers = RowsCrew.Count(__instance);
+            var rowers = TogetherWeRowCrew.Count(__instance);
             if (rowers == 0)
             {
                 return;
             }
 
-            var amount = rowers * RowsPlugin.Speed.Value;
+            var amount = rowers * TogetherWeRowPlugin.Speed.Value;
             if (amount <= 0f)
             {
                 return;
