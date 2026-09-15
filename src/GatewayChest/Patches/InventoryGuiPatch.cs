@@ -29,8 +29,8 @@ namespace GatewayChest.Patches
 
         /// <summary>
         /// Vanilla turns the container panel back on every frame while the hub is owned.
-        /// Hide that grid so the aggregated list is what the player uses, and keep the
-        /// hub marked in-use so walking away still closes it.
+        /// Hide that grid — the hub panel is parented next to it, in the same slot —
+        /// and keep the hub marked in-use so walking away still closes it.
         /// </summary>
         [HarmonyPostfix]
         [HarmonyPatch("UpdateContainer")]
