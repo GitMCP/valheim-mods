@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>GatewayChest</AssemblyName>
+    <RootNamespace>GatewayChest</RootNamespace>
+    <Version>0.1.0</Version>
+    <Authors>GitMCP</Authors>
+    <Description>A buildable chest that shows and moves items across nearby containers.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- See the Bicicreta project file for why Jotunn's build assets are excluded. -->
+    <PackageReference Include="JotunnLib" Version="2.30.0" ExcludeAssets="build" />
+  </ItemGroup>
+
+</Project>
