@@ -12,13 +12,15 @@ is built.
 
 ## Storage Hub 1.1.0
 
-Built from commit `0095921` on
+Built from commit `ac59d13` on
 [`cursor/storage-hub-favourites-020c`](https://github.com/GitMCP/valheim-mods/pull/14),
-which the assembly carries in its own version string (`1.1.0+0095921…`).
+which the assembly carries in its own version string (`1.1.0+ac59d13…`).
 
 A black metal chest that lists and moves items across nearby containers. Star
 items as favourites, bind a Deposit+Resupply hotkey, withdraw known-recipe
-ingredients, and Resupply the pack to the counts set in Preferences.
+ingredients, and Resupply the pack to the counts set in Preferences. The hub
+panel uses Items and Recipes tabs, and Deposit / Resupply / Quick Stack sit
+above the filters.
 
 | File | What it is for |
 | --- | --- |
