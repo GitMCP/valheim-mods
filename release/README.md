@@ -12,9 +12,10 @@ is built.
 
 ## Together We Row 1.0.0
 
-Built from commit `623ce64` on
-[`cursor/rows-mod-020c`](https://github.com/GitMCP/valheim-mods/pull/9),
-which the assembly carries in its own version string (`1.0.0+623ce64…`).
+Built from commit `b08e1ea` on
+[`cursor/together-we-row-icon-020c`](https://github.com/GitMCP/valheim-mods/pull/11),
+which the assembly carries in its own version string (`1.0.0+b08e1ea…`).
+The Thunderstore icon is the 256×256 longship.
 
 Passenger seats on boats get oars. Sit in one and you help the captain go faster.
 
