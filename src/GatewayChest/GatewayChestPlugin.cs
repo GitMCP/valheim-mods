@@ -91,6 +91,10 @@ namespace GatewayChest
 
             var patched = _harmony.GetPatchedMethods().Count();
             Log.LogInfo($"{PluginName} {PluginVersion} registered its content, {patched} method(s) patched.");
+            foreach (var method in _harmony.GetPatchedMethods())
+            {
+                Log.LogInfo($"  patched {method.DeclaringType?.Name}.{method.Name}");
+            }
         }
 
         private void OnDestroy()

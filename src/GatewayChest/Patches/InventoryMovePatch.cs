@@ -9,17 +9,18 @@ namespace GatewayChest.Patches
     /// network instead of filling the hub's own few slots. If nowhere else will take it,
     /// the original move still runs so the item is not lost.
     /// </summary>
+    [HarmonyPatch(typeof(Inventory))]
     internal static class InventoryMovePatch
     {
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(Inventory), nameof(Inventory.MoveItemToThis), new[] { typeof(Inventory), typeof(ItemDrop.ItemData) })]
+        [HarmonyPatch(nameof(Inventory.MoveItemToThis), typeof(Inventory), typeof(ItemDrop.ItemData))]
         private static bool RouteWhole(Inventory __instance, Inventory fromInventory, ItemDrop.ItemData item)
         {
             return !Handled(__instance, fromInventory, item);
         }
 
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(Inventory), nameof(Inventory.MoveItemToThis), new[] { typeof(Inventory), typeof(ItemDrop.ItemData), typeof(int), typeof(int), typeof(int) })]
+        [HarmonyPatch(nameof(Inventory.MoveItemToThis), typeof(Inventory), typeof(ItemDrop.ItemData), typeof(int), typeof(int), typeof(int))]
         private static bool RoutePlaced(Inventory __instance, Inventory fromInventory, ItemDrop.ItemData item)
         {
             return !Handled(__instance, fromInventory, item);
