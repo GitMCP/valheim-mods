@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0
+
+Click a listed item to pick up one stack and drag it, the same as a chest slot.
+Ctrl-click takes as much of that item as the pack will hold. Several people can
+talk to Njord at the same time; he is not locked to one player.
+
 ## 1.0.0
 
 First release as **Njord, Warehouse Keeper**.

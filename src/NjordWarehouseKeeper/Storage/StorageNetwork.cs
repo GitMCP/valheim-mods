@@ -813,7 +813,7 @@ namespace NjordWarehouseKeeper.Storage
             return Mathf.Max(0, before - after);
         }
 
-        private static void EnsureOwner(Container container)
+        internal static void EnsureOwner(Container container)
         {
             var view = container == null ? null : container.m_nview;
             if (view == null || !view.IsValid())

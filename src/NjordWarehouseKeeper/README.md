@@ -35,7 +35,8 @@ tabs sit under the title; the cog still opens Preferences. Identical items from
 different chests share one row. Hover a row the same way you hover a pack
 slot: keep the cursor still for a moment and the vanilla item tooltip appears.
 
-- **Click a row** to pull that item into your inventory (as much as will fit).
+- **Click a row** to pick up one stack and drag it, the same as a chest slot.
+- **Ctrl-click a row** to take as much of that item as your pack will hold.
 - **Shift-click a row** to pick how many to take.
 - **Click the star** on a row to mark that item as a favourite. The Favourites
   category lists only starred items. The star next to the sort buttons filters
@@ -89,7 +90,9 @@ Njord does not copy those stacks into a fake inventory. He reads the chests that
 are already loaded around him, lists the live `ItemData`, and when you take or
 deposit he calls `Inventory.MoveItemToThis` after `ZNetView.ClaimOwnership`,
 the same claim Take All uses. The item changes chest only once, on the peer that
-now owns that ZDO.
+now owns that ZDO. Talking to him does not lock him to one player, and does not
+steal his ZDO: several people can have the panel open at once. Nearby chests
+that someone already has open in the vanilla GUI are still left out of the scan.
 
 Walking away still closes the panel, because the game still treats talking to
 Njord as having a container open.

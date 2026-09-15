@@ -1452,8 +1452,29 @@ namespace NjordWarehouseKeeper.UI
                 return;
             }
 
-            StorageNetwork.Withdraw(Player.m_localPlayer, view.Stack, view.Stack.Quantity);
-            Refresh();
+            if (IsCtrl())
+            {
+                StorageNetwork.Withdraw(Player.m_localPlayer, view.Stack, view.Stack.Quantity);
+                Refresh();
+                return;
+            }
+
+            BeginDragStack(view.Stack);
+        }
+
+        private static void BeginDragStack(IndexedStack group)
+        {
+            var gui = InventoryGui.instance;
+            var part = group == null ? null : group.FirstLivePart();
+            var item = part == null ? null : part.Live();
+            var inventory = part == null || part.Source == null ? null : part.Source.GetInventory();
+            if (gui == null || item == null || inventory == null)
+            {
+                return;
+            }
+
+            StorageNetwork.EnsureOwner(part.Source);
+            gui.SetupDragItem(item, inventory, item.m_stack);
         }
 
         private static void BeginSplitWithdraw(IndexedStack group)
@@ -1475,7 +1496,16 @@ namespace NjordWarehouseKeeper.UI
 
         private static bool IsShift()
         {
-            return ZInput.GetKey(KeyCode.LeftShift) || ZInput.GetKey(KeyCode.RightShift);
+            return ZInput.GetKey(KeyCode.LeftShift)
+                || ZInput.GetKey(KeyCode.RightShift)
+                || ZInput.GetButton("JoyLTrigger");
+        }
+
+        private static bool IsCtrl()
+        {
+            return ZInput.GetKey(KeyCode.LeftControl)
+                || ZInput.GetKey(KeyCode.RightControl)
+                || ZInput.GetButton("JoyLBumper");
         }
 
         internal static bool IsDragging()

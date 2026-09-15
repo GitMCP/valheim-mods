@@ -20,7 +20,8 @@ namespace NjordWarehouseKeeper
     /// them. Njord does not clone stacks into a fake inventory: withdraw and deposit
     /// call the same <see cref="Inventory.MoveItemToThis"/> the vanilla GUI uses, after
     /// claiming ZDO ownership the same way Take All does, so multiplayer does not
-    /// duplicate or drop items.
+    /// duplicate or drop items. Several people can talk to him at once; the
+    /// exclusive lock that vanilla chests use is skipped for Njord himself.
     ///
     /// Because it adds a piece, it must be installed on the server and on every client.
     /// </summary>

@@ -67,18 +67,23 @@ namespace NjordWarehouseKeeper.Storage
             return ItemKey.Of(SharedName, Quality, Variant, WorldLevel);
         }
 
-        internal ItemDrop.ItemData FirstLive()
+        internal StackPart FirstLivePart()
         {
             for (var i = 0; i < Parts.Count; i++)
             {
-                var item = Parts[i].Live();
-                if (item != null)
+                if (Parts[i].Live() != null)
                 {
-                    return item;
+                    return Parts[i];
                 }
             }
 
             return null;
+        }
+
+        internal ItemDrop.ItemData FirstLive()
+        {
+            var part = FirstLivePart();
+            return part == null ? null : part.Live();
         }
     }
 }
