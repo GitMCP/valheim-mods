@@ -12,9 +12,9 @@ is built.
 
 ## Njord, Warehouse Keeper 1.1.0
 
-Built from commit `91560e6` on
+Built from commit `92059b3` on
 [`cursor/storage-hub-favourites-020c`](https://github.com/GitMCP/valheim-mods/pull/14),
-which the assembly carries in its own version string (`1.1.0+91560e6…`).
+which the assembly carries in its own version string (`1.1.0+92059b3…`).
 
 Thunderstore package name: **NjordWarehouseKeeper**. The plugin dll is still
 `StorageHub.dll`.
