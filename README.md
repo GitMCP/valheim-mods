@@ -8,12 +8,13 @@ macOS, and Windows and needs no Visual Studio and no local copy of the game.
 | --- | --- |
 | [`src/Bicicreta`](src/Bicicreta/README.md) | A buildable, rideable bicycle. |
 | [`src/TogetherWeRow`](src/TogetherWeRow/README.md) | Oars on boat seats so extra players help the ship go faster. |
+| [`src/NjordWarehouseKeeper`](src/NjordWarehouseKeeper/README.md) | Njord, Warehouse Keeper: a buildable NPC who lists and moves items across nearby chests. |
 | [`src/HelloValheim`](src/HelloValheim/README.md) | A minimal plugin kept as the template for mods that only patch existing behavior. |
 
 Each mod's own README has the player-facing description and how that mod works. The rest
 of this file is about the repo: building, packaging, and adding another mod.
 
-All three are verified to load into a running game.
+All four are verified to load into a running game.
 
 ## Requirements
 
@@ -112,6 +113,7 @@ Watch for each mod's own lines:
 ```
 [Info   :HelloValheim] HelloValheim 0.1.0 loaded, 1 method(s) patched.
 [Info   :Together We Row] Together We Row 1.0.0 loaded, 3 method(s) patched.
+[Info   :Njord, Warehouse Keeper] Njord, Warehouse Keeper 1.0.0 registered its content, 11 method(s) patched.
 [Info   :Bicicreta] Hid 3 lox renderer(s) and built a bicycle from 3 'Cart' part(s).
 [Info   :Bicicreta] Silenced 13 lox sound source(s).
 [Info   :Bicicreta] Bicicreta 0.1.0 registered its content, 6 method(s) patched.

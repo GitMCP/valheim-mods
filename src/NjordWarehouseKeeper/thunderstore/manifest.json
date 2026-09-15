@@ -1,0 +1,10 @@
+{
+  "name": "NjordWarehouseKeeper",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/GitMCP/valheim-mods",
+  "description": "Njord, a warehouse keeper who lists and moves items across every nearby chest.",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2350",
+    "ValheimModding-Jotunn-2.30.0"
+  ]
+}
