@@ -403,22 +403,23 @@ namespace GatewayChest.UI
         private static void AddSortButtons(GUIManager gui)
         {
             _sortButtons.Clear();
-            var modes = new[]
+            var modes = new[] { SortMode.Name, SortMode.Quantity, SortMode.Category };
+            var tokens = new[]
             {
-                (SortMode.Name, "$gatewaychest_sort_name"),
-                (SortMode.Quantity, "$gatewaychest_sort_qty"),
-                (SortMode.Category, "$gatewaychest_sort_cat"),
+                "$gatewaychest_sort_name",
+                "$gatewaychest_sort_qty",
+                "$gatewaychest_sort_cat",
             };
 
             var width = 110f;
             var gap = 8f;
             var total = modes.Length * width + (modes.Length - 1) * gap;
             var x = -total / 2f + width / 2f;
-            foreach (var pair in modes)
+            for (var i = 0; i < modes.Length; i++)
             {
-                var captured = pair.Item1;
+                var captured = modes[i];
                 var go = gui.CreateButton(
-                    Localization.instance.Localize(pair.Item2),
+                    Localization.instance.Localize(tokens[i]),
                     _root.transform,
                     new Vector2(0.5f, 1f),
                     new Vector2(0.5f, 1f),
