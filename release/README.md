@@ -10,19 +10,20 @@ two ever disagree, the source is right.
 This branch keeps **only the current package**. Older zips are dropped when a new one
 is built.
 
-## Storage Hub 1.0.0
+## Storage Hub 1.1.0
 
-Built from commit `65350b6` on
-[`cursor/gateway-chest-020c`](https://github.com/GitMCP/valheim-mods/pull/12),
-which the assembly carries in its own version string (`1.0.0+65350b6…`).
+Built from commit `2f7a269` on
+[`cursor/storage-hub-favourites-020c`](https://github.com/GitMCP/valheim-mods/pull/14),
+which the assembly carries in its own version string (`1.1.0+2f7a269…`).
 
-A black metal chest that lists and moves items across every nearby container.
-The item list mouse-wheels at the same pace as crafting-station recipes.
+A black metal chest that lists and moves items across nearby containers. Star
+items as favourites, filter to those, open client preferences with the cog, and
+Resupply the pack to the counts set there.
 
 | File | What it is for |
 | --- | --- |
-| `StorageHub-1.0.0/StorageHub-1.0.0.zip` | The Thunderstore package: upload it, or import it into r2modman or Gale |
-| `StorageHub-1.0.0/StorageHub.dll` | The plugin on its own, for installing by hand |
+| `StorageHub-1.1.0/StorageHub-1.1.0.zip` | The Thunderstore package: upload it, or import it into r2modman or Gale |
+| `StorageHub-1.1.0/StorageHub.dll` | The plugin on its own, for installing by hand |
 
 ### Installing the zip
 
@@ -40,4 +41,4 @@ there already or the plugin will not load.
 ### Everyone needs it
 
 Storage Hub is declared `EveryoneMustHaveMod` with minor-version strictness, so the
-server and every player have to run the same 1.0.x build.
+server and every player have to run the same 1.1.x build.
