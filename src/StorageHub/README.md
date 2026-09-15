@@ -1,15 +1,15 @@
-# Storage Hub
+# Njord, Warehouse Keeper
 
-A black metal chest that is a window onto every container around it. Build one,
-open it, and the items in nearby chests appear together. Take a stack from the
-list and it comes out of the chest it actually sits in. Deposit, and it goes to
-an existing pile of the same thing, or into the first empty slot the network has.
+Njord is a warehouse keeper you place with the hammer. Talk to him, and the
+items in nearby chests appear together. Take a stack from the list and it comes
+out of the chest it actually sits in. Deposit, and it goes to an existing pile
+of the same thing, or into the first empty slot the network has.
 
-The hub keeps a few slots of its own only as overflow: if nowhere else will take
-what you send, it lands in the Storage Hub rather than vanishing.
+He keeps no goods of his own. If nowhere nearby will take what you send, it
+stays in your pack.
 
-Because it adds a piece, it must be installed on the **server and on every client**.
-A client whose version does not match the server's is refused.
+Because he is a buildable piece, the mod must be installed on the **server and
+on every client**. A client whose version does not match the server's is refused.
 
 ## Installation
 
@@ -20,16 +20,18 @@ Requires [Jötunn](https://thunderstore.io/c/valheim/p/ValheimModding/Jotunn/).
 
 | Cost | Where |
 | --- | --- |
-| 10 Fine wood, 2 Iron, 2 Surtling cores | Hammer, Furniture, near a workbench |
+| 200 gold coins | Hammer, Furniture |
 
-The piece uses the vanilla black metal chest model.
+No workbench, and no other materials. Place him like any furniture. He stands
+where you put him, in a leather tunic and pants, and will remark on the stores
+now and then the way a vendor does.
 
 ## Using it
 
 Walk up and press use. Your inventory stays on the left and crafting on the
-right. The hub panel opens in the center, between them. **Items** and **Recipes**
+right. Njord's panel opens in the center, between them. **Items** and **Recipes**
 tabs sit under the title; the cog still opens Preferences. Identical items from
-different chests share one row. Hover a hub row the same way you hover a pack
+different chests share one row. Hover a row the same way you hover a pack
 slot: keep the cursor still for a moment and the vanilla item tooltip appears.
 
 - **Click a row** to pull that item into your inventory (as much as will fit).
@@ -37,27 +39,26 @@ slot: keep the cursor still for a moment and the vanilla item tooltip appears.
 - **Click the star** on a row to mark that item as a favourite. The Favourites
   category lists only starred items. The star next to the sort buttons filters
   the current category the same way.
-- **Click an item in your inventory**, then click the hub panel (or a row) to
+- **Click an item in your inventory**, then click the panel (or a row) to
   store it. Dropping on a row stores the dragged item; it does not withdraw.
 - **Shift-click** an item in your inventory, or press **Deposit**, to send it
   into the network. The hotbar is left alone unless you turn that on in config.
-- **Resupply** fills your pack from the hub up to the counts set in Preferences.
+- **Resupply** fills your pack from nearby chests up to the counts set in Preferences.
 - **Quick Stack** deposits and then resupplies in one click.
 - **Recipes** lists crafts you know, filtered by crafting station (All,
-  Handcraft, Hammer, and every station in the game). Rows the hub cannot
-  afford are greyed out. Click a row to pull that recipe's ingredients into
-  your pack.
+  Handcraft, Hammer, and every station in the game). Rows the nearby chests
+  cannot afford are greyed out. Click a row to pull that recipe's ingredients
+  into your pack.
 - **The cog** opens client Preferences: skip favourites on Deposit, bind a
   Deposit+Resupply hotkey, and choose which items Resupply should keep, with a
   quantity for each. The resupply list is titled Resupply.
-- While in range of a hub (the same radius as the network), the hotkey deposits
-  and then resupplies without opening the chest.
+- While in range of Njord (the same radius as the network), the hotkey deposits
+  and then resupplies without talking to him.
 - Click the search box to type. It keeps focus, so E does not close the panel.
-- Hold use on the chest, the same as a vanilla chest, to stack everything that
-  will fit.
+- Hold use, the same as a vanilla chest, to stack everything that will fit.
 
 Chests behind a ward you cannot pass, private chests that are not yours, chests
-someone else already has open, other Storage Hubs, and incinerators are left
+someone else already has open, other keepers, and incinerators are left
 out of the scan.
 
 ## Configuration
@@ -69,27 +70,25 @@ are synced to clients. Favourites, Resupply, and the deposit-skip toggle are
 
 | Setting | Default | Description |
 | --- | --- | --- |
-| `StorageHub / Radius` | `15` | How far, in metres, a container is still part of the network. |
-| `StorageHub / RequireLineOfSight` | `false` | Only include chests the hub can see. Off so a chest in the next room still counts. |
+| `StorageHub / Radius` | `15` | How far, in metres, a container is still part of Njord's network. |
+| `StorageHub / RequireLineOfSight` | `false` | Only include chests he can see. Off so a chest in the next room still counts. |
 | `StorageHub / DepositHotbar` | `false` | Also deposit the first inventory row. |
-| `Client / DepositSkipFavourites` | `false` | Deposit leaves starred items in the pack. Also set from the hub cog. |
-| `Client / RestockHotkey` | *(none)* | In range of a hub, Deposit then Resupply. Bound from the hub cog. |
-| `Client / Favourites` | *(empty)* | Starred item keys. Edited from the hub list. |
-| `Client / Resupply` | *(empty)* | Item keys and counts for the Resupply button. Edited from the hub cog. |
+| `Client / DepositSkipFavourites` | `false` | Deposit leaves starred items in the pack. Also set from the cog. |
+| `Client / RestockHotkey` | *(none)* | In range of Njord, Deposit then Resupply. Bound from the cog. |
+| `Client / Favourites` | *(empty)* | Starred item keys. Edited from the item list. |
+| `Client / Resupply` | *(empty)* | Item keys and counts for the Resupply button. Edited from the cog. |
 
-## How the hub works
+## How it works
 
 Valheim chests already sync through a ZDO: the owner writes the inventory blob,
 everyone else loads it. Opening a chest is an RPC that hands ownership to the
 player, which is why two people cannot rummage the same box at once.
 
-The Storage Hub does not copy those stacks into a fake inventory. It reads the
-chests that are already loaded around it, lists the live `ItemData`, and when you
-take or deposit it calls `Inventory.MoveItemToThis` after `ZNetView.ClaimOwnership`,
+Njord does not copy those stacks into a fake inventory. He reads the chests that
+are already loaded around him, lists the live `ItemData`, and when you take or
+deposit he calls `Inventory.MoveItemToThis` after `ZNetView.ClaimOwnership`,
 the same claim Take All uses. The item changes chest only once, on the peer that
 now owns that ZDO.
 
-The vanilla container grid is hidden while the hub is open so you are not looking
-at the hub's own overflow slots and thinking that is the whole network. Walking
-away still closes it, because the game still thinks that Storage Hub is the
-open container.
+Walking away still closes the panel, because the game still treats talking to
+Njord as having a container open.

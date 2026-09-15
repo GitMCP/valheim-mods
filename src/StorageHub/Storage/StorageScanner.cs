@@ -5,7 +5,7 @@ namespace StorageHub.Storage
 {
     /// <summary>
     /// Every <see cref="Container"/> close enough to the hub that the player is allowed
-    /// to open. Other Storage Hubs are skipped so two hubs in one room do not nest.
+    /// to open. Other keepers are skipped so two in one room do not nest.
     /// Incinerators (auto-destroy-empty) are skipped so a deposit cannot feed a fire.
     /// </summary>
     internal static class StorageScanner

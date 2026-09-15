@@ -325,7 +325,7 @@ namespace StorageHub.UI
 
             _title = MakeText(
                 gui,
-                Localization.instance.Localize("$storage_hub_name"),
+                Localization.instance.Localize("$storagehub_npc"),
                 new Vector2(0f, -28f),
                 22,
                 gui.ValheimOrange,
@@ -688,7 +688,7 @@ namespace StorageHub.UI
 
             if (_title != null)
             {
-                var token = prefs ? "$storagehub_preferences" : "$storage_hub_name";
+                var token = prefs ? "$storagehub_preferences" : "$storagehub_npc";
                 _title.text = Localization.instance.Localize(token);
             }
 
@@ -778,8 +778,13 @@ namespace StorageHub.UI
                 var labelRt = label.rectTransform;
                 labelRt.anchorMin = Vector2.zero;
                 labelRt.anchorMax = Vector2.one;
-                labelRt.offsetMin = new Vector2(38f, 2f);
+                labelRt.offsetMin = new Vector2(28f, 2f);
                 labelRt.offsetMax = new Vector2(-8f, -2f);
+            }
+
+            if (go.GetComponent<RectMask2D>() == null)
+            {
+                go.AddComponent<RectMask2D>();
             }
 
             var iconGo = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -788,14 +793,15 @@ namespace StorageHub.UI
             image.sprite = icon;
             image.preserveAspect = true;
             image.raycastTarget = false;
+            image.maskable = true;
             image.enabled = icon != null;
             image.color = Color.white;
             var iconRt = image.rectTransform;
             iconRt.anchorMin = new Vector2(0f, 0.5f);
             iconRt.anchorMax = new Vector2(0f, 0.5f);
             iconRt.pivot = new Vector2(0.5f, 0.5f);
-            iconRt.sizeDelta = new Vector2(32f, 32f);
-            iconRt.anchoredPosition = new Vector2(20f, 0f);
+            iconRt.sizeDelta = new Vector2(18f, 18f);
+            iconRt.anchoredPosition = new Vector2(14f, 0f);
             return go;
         }
 
@@ -1079,7 +1085,7 @@ namespace StorageHub.UI
 
             if (_title != null && !_prefsOpen)
             {
-                _title.text = Localization.instance.Localize("$storage_hub_name");
+                _title.text = Localization.instance.Localize("$storagehub_npc");
             }
 
             var snapshot = StorageNetwork.Snapshot(hub);
@@ -1496,7 +1502,7 @@ namespace StorageHub.UI
                 return;
             }
 
-            StorageNetwork.RouteAmount(from, item, gui.m_dragAmount, hub, allowHub: true);
+            StorageNetwork.RouteAmount(from, item, gui.m_dragAmount, hub, allowHub: false);
             gui.SetupDragItem(null, null, 1);
             Refresh();
         }

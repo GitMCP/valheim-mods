@@ -29,9 +29,9 @@ namespace StorageHub.Patches
         }
 
         /// <summary>
-        /// Vanilla turns the container panel back on every frame while the hub is owned.
-        /// Hide that grid — the hub panel sits in the gap between backpack and craft —
-        /// and keep the hub marked in-use so walking away still closes it.
+        /// Vanilla turns the container panel back on every frame while Njord is in use.
+        /// Hide that dummy grid — the panel sits in the gap between backpack and craft —
+        /// and keep him marked in-use so walking away still closes it.
         /// </summary>
         [HarmonyPostfix]
         [HarmonyPatch("UpdateContainer")]

@@ -5,9 +5,8 @@ namespace StorageHub.Patches
 {
     /// <summary>
     /// Shift-click and drag-onto-container both end in <see cref="Inventory.MoveItemToThis"/>
-    /// with the hub inventory as the destination. Catch that and send the stack into the
-    /// network instead of filling the hub's own few slots. If nowhere else will take it,
-    /// the original move still runs so the item is not lost.
+    /// with Njord's dummy inventory as the destination. Catch that and send the stack
+    /// into nearby chests instead. Njord never keeps the item himself.
     /// </summary>
     [HarmonyPatch(typeof(Inventory))]
     internal static class InventoryMovePatch
@@ -34,7 +33,8 @@ namespace StorageHub.Patches
                 return false;
             }
 
-            return StorageNetwork.Route(from, item, hub, allowHub: false);
+            StorageNetwork.Route(from, item, hub, allowHub: false);
+            return true;
         }
     }
 

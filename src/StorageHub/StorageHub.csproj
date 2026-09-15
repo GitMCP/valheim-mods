@@ -5,7 +5,7 @@
     <RootNamespace>StorageHub</RootNamespace>
     <Version>1.1.0</Version>
     <Authors>GitMCP</Authors>
-    <Description>A black metal chest that shows and moves items across nearby containers.</Description>
+    <Description>Njord, a warehouse keeper who lists and moves items across nearby containers.</Description>
   </PropertyGroup>
 
   <ItemGroup>

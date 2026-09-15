@@ -25,21 +25,12 @@ namespace StorageHub.Storage
                 AddFrom(listed, hub, chest);
             }
 
-            AddFrom(listed, hub, hub);
             return listed;
         }
 
         internal static StorageScanner.Network Snapshot(Container hub)
         {
-            var network = StorageScanner.Scan(hub);
-            var own = hub == null ? null : hub.GetInventory();
-            if (own != null)
-            {
-                network.UsedSlots += own.NrOfItems();
-                network.TotalSlots += own.GetWidth() * own.GetHeight();
-            }
-
-            return network;
+            return StorageScanner.Scan(hub);
         }
 
         /// <summary>
@@ -134,7 +125,7 @@ namespace StorageHub.Storage
                     continue;
                 }
 
-                if (Route(inventory, item, hub, allowHub: true))
+                if (Route(inventory, item, hub, allowHub: false))
                 {
                     routed++;
                 }

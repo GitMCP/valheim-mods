@@ -45,7 +45,7 @@ namespace StorageHub.Client
                 "Client",
                 "RestockHotkey",
                 KeyboardShortcut.Empty,
-                "While in range of a Storage Hub, press this to Deposit and then Resupply without opening it.");
+                "While in range of Njord, press this to Deposit and then Resupply without opening the panel.");
 
             FavouritesRaw.SettingChanged += OnTextChanged;
             ResupplyRaw.SettingChanged += OnTextChanged;

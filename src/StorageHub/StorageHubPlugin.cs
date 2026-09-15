@@ -11,9 +11,9 @@ using StorageHub.UI;
 namespace StorageHub
 {
     /// <summary>
-    /// Adds a buildable black metal chest that is not storage of its own so much as a
-    /// window onto every container around it. Opening it scans nearby chests, lists
-    /// their contents together, and routes deposits into an existing stack or the
+    /// Adds a buildable warehouse keeper, Njord, who is not storage of his own so much
+    /// as a window onto every container around him. Talking to him scans nearby chests,
+    /// lists their contents together, and routes deposits into an existing stack or the
     /// first empty slot.
     ///
     /// Items never leave the chest they already sit in until someone takes or moves
@@ -30,7 +30,7 @@ namespace StorageHub
     public class StorageHubPlugin : BaseUnityPlugin
     {
         public const string PluginGuid = "com.gitmcp.storagehub";
-        public const string PluginName = "Storage Hub";
+        public const string PluginName = "Njord, Warehouse Keeper";
         public const string PluginVersion = MyPluginInfo.PLUGIN_VERSION;
 
         internal static ManualLogSource Log;
