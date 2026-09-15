@@ -209,9 +209,7 @@ namespace StorageHub.UI
             var scrollView = scroll.GetComponentInChildren<ScrollRect>(true);
             if (scrollView != null)
             {
-                scrollView.horizontal = false;
-                scrollView.movementType = ScrollRect.MovementType.Clamped;
-                scrollView.scrollSensitivity = 60f;
+                StorageHubPanel.FitScrollView(scrollView, StorageHubPanel.ListScrollSensitivity());
                 _rowParent = scrollView.content;
                 var content = _rowParent as RectTransform;
                 if (content != null)

@@ -297,13 +297,56 @@ namespace StorageHub.Storage
 
         internal static bool CanAffordRecipe(List<IndexedStack> listed, Recipe recipe)
         {
-            var needs = RecipeNeeds(recipe);
+            if (recipe == null)
+            {
+                return false;
+            }
+
+            return CanAffordNeeds(listed, RequirementNeeds(recipe.m_resources), recipe.m_requireOnlyOneIngredient);
+        }
+
+        internal static bool CanAffordPiece(List<IndexedStack> listed, Piece piece)
+        {
+            if (piece == null)
+            {
+                return false;
+            }
+
+            return CanAffordNeeds(listed, RequirementNeeds(piece.m_resources), onlyOne: false);
+        }
+
+        internal static bool WithdrawRecipe(Player player, Container hub, Recipe recipe)
+        {
+            if (player == null || hub == null || recipe == null)
+            {
+                return false;
+            }
+
+            return WithdrawNeeds(
+                player,
+                hub,
+                RequirementNeeds(recipe.m_resources),
+                recipe.m_requireOnlyOneIngredient);
+        }
+
+        internal static bool WithdrawPiece(Player player, Container hub, Piece piece)
+        {
+            if (player == null || hub == null || piece == null)
+            {
+                return false;
+            }
+
+            return WithdrawNeeds(player, hub, RequirementNeeds(piece.m_resources), onlyOne: false);
+        }
+
+        private static bool CanAffordNeeds(List<IndexedStack> listed, List<Need> needs, bool onlyOne)
+        {
             if (needs.Count == 0)
             {
                 return false;
             }
 
-            if (recipe.m_requireOnlyOneIngredient)
+            if (onlyOne)
             {
                 for (var i = 0; i < needs.Count; i++)
                 {
@@ -327,22 +370,16 @@ namespace StorageHub.Storage
             return true;
         }
 
-        internal static bool WithdrawRecipe(Player player, Container hub, Recipe recipe)
+        private static bool WithdrawNeeds(Player player, Container hub, List<Need> needs, bool onlyOne)
         {
-            if (player == null || hub == null || recipe == null)
-            {
-                return false;
-            }
-
             var listed = ListItems(hub);
-            if (!CanAffordRecipe(listed, recipe))
+            if (!CanAffordNeeds(listed, needs, onlyOne))
             {
                 player.Message(MessageHud.MessageType.Center, "$storagehub_recipe_missing");
                 return false;
             }
 
-            var needs = RecipeNeeds(recipe);
-            if (recipe.m_requireOnlyOneIngredient)
+            if (onlyOne)
             {
                 Need pick = null;
                 for (var i = 0; i < needs.Count; i++)
@@ -443,17 +480,17 @@ namespace StorageHub.Storage
             return null;
         }
 
-        private static List<Need> RecipeNeeds(Recipe recipe)
+        private static List<Need> RequirementNeeds(Piece.Requirement[] resources)
         {
             var needs = new List<Need>();
-            if (recipe?.m_resources == null)
+            if (resources == null)
             {
                 return needs;
             }
 
-            for (var i = 0; i < recipe.m_resources.Length; i++)
+            for (var i = 0; i < resources.Length; i++)
             {
-                var req = recipe.m_resources[i];
+                var req = resources[i];
                 if (req == null || req.m_resItem == null || req.m_resItem.m_itemData == null)
                 {
                     continue;

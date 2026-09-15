@@ -43,6 +43,7 @@ namespace StorageHub.UI
         private const float CatRow2Y = 234f;
         private const float SortY = 268f;
         private const float ListTop = 300f;
+        private const float ListBottom = 28f;
 
         /// <summary>
         /// Top inset for the preferences and recipes overlays, just below search.
@@ -317,6 +318,10 @@ namespace StorageHub.UI
                 PanelHeight,
                 draggable: false);
             _root.name = "StorageHubPanel";
+            if (_root.GetComponent<RectMask2D>() == null)
+            {
+                _root.AddComponent<RectMask2D>();
+            }
 
             _title = MakeText(
                 gui,
@@ -407,14 +412,12 @@ namespace StorageHub.UI
                 480f,
                 400f);
             _scrollRect = scroll.GetComponent<RectTransform>();
-            PlaceFillBottom(_scrollRect, top: ListTop, bottom: 18f, inset: 16f);
+            PlaceFillBottom(_scrollRect, top: ListTop, bottom: ListBottom, inset: 16f);
 
             var scrollView = scroll.GetComponentInChildren<ScrollRect>(true);
             if (scrollView != null)
             {
-                scrollView.horizontal = false;
-                scrollView.movementType = ScrollRect.MovementType.Clamped;
-                scrollView.scrollSensitivity = RecipeMatchedScrollSensitivity();
+                FitScrollView(scrollView, ListScrollSensitivity());
                 scrollView.onValueChanged.AddListener(_ => HubItemHover.Hide());
                 _rowParent = scrollView.content;
                 StretchContent(_rowParent as RectTransform);
@@ -461,6 +464,73 @@ namespace StorageHub.UI
             StorageHubPrefs.Build(_root.transform, gui);
             StorageHubRecipes.Build(_root.transform, gui);
             _root.SetActive(false);
+        }
+
+        /// <summary>
+        /// Same wheel-notch distance, in rows, as the vanilla crafting recipe list.
+        /// </summary>
+        internal static float ListScrollSensitivity()
+        {
+            return RecipeMatchedScrollSensitivity();
+        }
+
+        internal static void FitScrollView(ScrollRect scrollView, float sensitivity)
+        {
+            if (scrollView == null)
+            {
+                return;
+            }
+
+            scrollView.horizontal = false;
+            scrollView.movementType = ScrollRect.MovementType.Clamped;
+            scrollView.scrollSensitivity = sensitivity;
+
+            var viewport = scrollView.viewport;
+            if (viewport == null)
+            {
+                var found = scrollView.transform.Find("Viewport");
+                viewport = found as RectTransform;
+                scrollView.viewport = viewport;
+            }
+
+            if (viewport != null)
+            {
+                viewport.anchorMin = Vector2.zero;
+                viewport.anchorMax = Vector2.one;
+                viewport.pivot = new Vector2(0.5f, 0.5f);
+                viewport.offsetMin = Vector2.zero;
+                viewport.offsetMax = new Vector2(-16f, 0f);
+                if (viewport.GetComponent<RectMask2D>() == null)
+                {
+                    viewport.gameObject.AddComponent<RectMask2D>();
+                }
+
+                var mask = viewport.GetComponent<Mask>();
+                if (mask != null)
+                {
+                    mask.enabled = false;
+                }
+
+                var image = viewport.GetComponent<Image>();
+                if (image != null)
+                {
+                    image.raycastTarget = true;
+                }
+            }
+
+            var bar = scrollView.verticalScrollbar;
+            if (bar != null)
+            {
+                var barRt = bar.transform as RectTransform;
+                if (barRt != null)
+                {
+                    barRt.anchorMin = new Vector2(1f, 0f);
+                    barRt.anchorMax = new Vector2(1f, 1f);
+                    barRt.pivot = new Vector2(1f, 0.5f);
+                    barRt.sizeDelta = new Vector2(10f, 0f);
+                    barRt.anchoredPosition = new Vector2(-4f, 0f);
+                }
+            }
         }
 
         /// <summary>
@@ -708,7 +778,7 @@ namespace StorageHub.UI
                 var labelRt = label.rectTransform;
                 labelRt.anchorMin = Vector2.zero;
                 labelRt.anchorMax = Vector2.one;
-                labelRt.offsetMin = new Vector2(30f, 2f);
+                labelRt.offsetMin = new Vector2(38f, 2f);
                 labelRt.offsetMax = new Vector2(-8f, -2f);
             }
 
@@ -718,13 +788,14 @@ namespace StorageHub.UI
             image.sprite = icon;
             image.preserveAspect = true;
             image.raycastTarget = false;
-            image.color = new Color(1f, 0.9f, 0.7f, 1f);
+            image.enabled = icon != null;
+            image.color = Color.white;
             var iconRt = image.rectTransform;
             iconRt.anchorMin = new Vector2(0f, 0.5f);
             iconRt.anchorMax = new Vector2(0f, 0.5f);
             iconRt.pivot = new Vector2(0.5f, 0.5f);
-            iconRt.sizeDelta = new Vector2(22f, 22f);
-            iconRt.anchoredPosition = new Vector2(16f, 0f);
+            iconRt.sizeDelta = new Vector2(32f, 32f);
+            iconRt.anchoredPosition = new Vector2(20f, 0f);
             return go;
         }
 

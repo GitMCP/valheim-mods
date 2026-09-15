@@ -3,9 +3,8 @@ using UnityEngine;
 namespace StorageHub.UI
 {
     /// <summary>
-    /// Tiny UI sprites drawn in code so the hub does not need extra image files
-    /// for stars, the preferences cog, and the Deposit / Resupply / Quick Stack
-    /// action icons.
+    /// Stars and the preferences cog are drawn in code. Deposit, Resupply, and
+    /// Quick Stack use the painted wood-tile icons shipped in Assets.
     /// </summary>
     internal static class HubSprites
     {
@@ -26,9 +25,9 @@ namespace StorageHub.UI
             StarFilled = MakeSprite(DrawStar(filled: true), "hub_star_filled");
             StarEmpty = MakeSprite(DrawStar(filled: false), "hub_star_empty");
             Cog = MakeSprite(DrawCog(), "hub_cog");
-            Deposit = MakeSprite(DrawArrowBox(up: false), "hub_deposit");
-            Resupply = MakeSprite(DrawArrowBox(up: true), "hub_resupply");
-            QuickStack = MakeSprite(DrawSwapArrows(), "hub_quickstack");
+            Deposit = StorageHubAssets.LoadSprite("StorageHub.Assets.hub_deposit.png");
+            Resupply = StorageHubAssets.LoadSprite("StorageHub.Assets.hub_resupply.png");
+            QuickStack = StorageHubAssets.LoadSprite("StorageHub.Assets.hub_quickstack.png");
         }
 
         private static Sprite MakeSprite(Texture2D texture, string name)
@@ -111,98 +110,6 @@ namespace StorageHub.UI
                             {
                                 a = Mathf.Clamp01(r - inner);
                             }
-                        }
-                    }
-
-                    tex.SetPixel(x, y, new Color(1f, 1f, 1f, a));
-                }
-            }
-
-            tex.Apply(false, true);
-            return tex;
-        }
-
-        private static Texture2D DrawArrowBox(bool up)
-        {
-            const int size = 48;
-            var tex = new Texture2D(size, size, TextureFormat.ARGB32, false);
-            var c = new Vector2(size * 0.5f, size * 0.5f);
-            for (var y = 0; y < size; y++)
-            {
-                for (var x = 0; x < size; x++)
-                {
-                    var p = new Vector2(x + 0.5f, y + 0.5f);
-                    var local = p - c;
-                    if (!up)
-                    {
-                        local.y = -local.y;
-                    }
-
-                    float a = 0f;
-                    if (local.y > 2f && local.y < 16f && Mathf.Abs(local.x) < 3.2f)
-                    {
-                        a = 1f;
-                    }
-
-                    var tip = local.y + 4f;
-                    if (tip >= -10f && tip <= 4f && Mathf.Abs(local.x) <= (4f - tip) * 0.85f + 3.2f)
-                    {
-                        a = 1f;
-                    }
-
-                    if (local.y < -12f && local.y > -20f && Mathf.Abs(local.x) < 14f)
-                    {
-                        a = 1f;
-                    }
-
-                    if (local.y < -6f && local.y > -20f && Mathf.Abs(Mathf.Abs(local.x) - 14f) < 2.2f)
-                    {
-                        a = 1f;
-                    }
-
-                    tex.SetPixel(x, y, new Color(1f, 1f, 1f, a));
-                }
-            }
-
-            tex.Apply(false, true);
-            return tex;
-        }
-
-        private static Texture2D DrawSwapArrows()
-        {
-            const int size = 48;
-            var tex = new Texture2D(size, size, TextureFormat.ARGB32, false);
-            var c = new Vector2(size * 0.5f, size * 0.5f);
-            for (var y = 0; y < size; y++)
-            {
-                for (var x = 0; x < size; x++)
-                {
-                    var p = new Vector2(x + 0.5f, y + 0.5f) - c;
-                    float a = 0f;
-                    if (p.x < -2f)
-                    {
-                        var q = new Vector2(p.x + 8f, p.y);
-                        if (q.y > -2f && q.y < 14f && Mathf.Abs(q.x) < 2.6f)
-                        {
-                            a = 1f;
-                        }
-
-                        if (q.y >= 8f && q.y <= 16f && Mathf.Abs(q.x) <= (16f - q.y) + 2.6f)
-                        {
-                            a = 1f;
-                        }
-                    }
-                    else if (p.x > 2f)
-                    {
-                        var q = new Vector2(p.x - 8f, -p.y);
-                        if (q.y > -2f && q.y < 14f && Mathf.Abs(q.x) < 2.6f)
-                        {
-                            a = 1f;
-                        }
-
-                        if (q.y >= 8f && q.y <= 16f && Mathf.Abs(q.x) <= (16f - q.y) + 2.6f)
-                        {
-                            a = 1f;
                         }
                     }
 

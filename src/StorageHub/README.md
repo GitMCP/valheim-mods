@@ -43,8 +43,10 @@ slot: keep the cursor still for a moment and the vanilla item tooltip appears.
   into the network. The hotbar is left alone unless you turn that on in config.
 - **Resupply** fills your pack from the hub up to the counts set in Preferences.
 - **Quick Stack** deposits and then resupplies in one click.
-- **Recipes** lists crafts you know. Rows the hub cannot afford are greyed out.
-  Click a row to pull that recipe's ingredients into your pack.
+- **Recipes** lists crafts you know, filtered by crafting station (All,
+  Handcraft, Hammer, and every station in the game). Rows the hub cannot
+  afford are greyed out. Click a row to pull that recipe's ingredients into
+  your pack.
 - **The cog** opens client Preferences: skip favourites on Deposit, bind a
   Deposit+Resupply hotkey, and choose which items Resupply should keep, with a
   quantity for each. The resupply list is titled Resupply.
