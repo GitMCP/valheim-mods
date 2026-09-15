@@ -12,12 +12,13 @@ is built.
 
 ## Njord, Warehouse Keeper 1.0.0
 
-Built from commit `4a44b52` on
+Built from commit `931377b` on
 [`cursor/storage-hub-favourites-020c`](https://github.com/GitMCP/valheim-mods/pull/14),
-which the assembly carries in its own version string (`1.0.0+4a44b52…`).
+which the assembly carries in its own version string (`1.0.0+931377b…`).
 
 Thunderstore package name: **NjordWarehouseKeeper**. Plugin dll:
 `NjordWarehouseKeeper.dll`. Tag: `njordwarehousekeeper-v1.0.0`.
+Source lives in `src/NjordWarehouseKeeper`. GUID: `com.gitmcp.njord`.
 
 Njord is a warehouse keeper you place with the hammer for 200 gold coins. He
 uses the player mesh in a leather tunic and pants, stays where you put him, and
@@ -43,8 +44,6 @@ dependencies, so
 [Jötunn 2.30.0](https://thunderstore.io/c/valheim/p/ValheimModding/Jotunn/) have to be
 there already or the plugin will not load.
 
-If you previously tested a `StorageHub.dll` build, remove that file first.
-
 ### Everyone needs it
 
 The mod is declared `EveryoneMustHaveMod` with minor-version strictness, so the
@@ -52,5 +51,5 @@ server and every player have to run the same 1.0.x build.
 
 ### Checksums
 
-    SHA-256  NjordWarehouseKeeper.dll         2499b69dd776875b3a082192ad34848a764b3d5bfe0d95ffad2ebf5b09e9cc25
-    SHA-256  NjordWarehouseKeeper-1.0.0.zip   fe489a40c37e534c10e0ff7bba188338a8eec6b095a11cf007b46b406982363e
+    SHA-256  NjordWarehouseKeeper.dll         6c453296d933eca673059504320466c684cf03f079f4b260f35356cc60028bf3
+    SHA-256  NjordWarehouseKeeper-1.0.0.zip   19def9bfd72c179b7b19a9eb354dc69955b52f9ea83dab85b854720668e71349
