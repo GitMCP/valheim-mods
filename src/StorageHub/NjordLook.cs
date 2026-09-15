@@ -266,8 +266,6 @@ namespace StorageHub
         private static readonly string[] IdleEmotes =
         {
             "wave",
-            "cheer",
-            "flex",
         };
 
         private GameObject _host;
@@ -282,7 +280,7 @@ namespace StorageHub
             _lookAt = GetComponent<LookAt>();
             WireAndDress();
             IdlePose();
-            _nextEmote = Time.time + Random.Range(12f, 20f);
+            _nextEmote = Time.time + Random.Range(22f, 36f);
         }
 
         internal void Wave()
@@ -315,7 +313,7 @@ namespace StorageHub
             WatchPlayer();
             if (Time.time >= _nextEmote)
             {
-                _nextEmote = Time.time + Random.Range(16f, 28f);
+                _nextEmote = Time.time + Random.Range(22f, 36f);
                 if (PlayerNearby(12f))
                 {
                     PlayEmote(IdleEmotes[Random.Range(0, IdleEmotes.Length)]);
