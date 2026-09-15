@@ -10,18 +10,18 @@ two ever disagree, the source is right.
 This branch keeps **only the current package**. Older zips are dropped when a new one
 is built.
 
-## Gateway Chest 0.1.0
+## Storage Hub 1.0.0
 
-Built from commit `5689e00` on
+Built from commit `6b44ede` on
 [`cursor/gateway-chest-020c`](https://github.com/GitMCP/valheim-mods/pull/12),
-which the assembly carries in its own version string (`0.1.0+5689e00…`).
+which the assembly carries in its own version string (`1.0.0+6b44ede…`).
 
-A chest that lists and moves items across every nearby container.
+A black metal chest that lists and moves items across every nearby container.
 
 | File | What it is for |
 | --- | --- |
-| `GatewayChest-0.1.0/GatewayChest-0.1.0.zip` | The Thunderstore package: upload it, or import it into r2modman or Gale |
-| `GatewayChest-0.1.0/GatewayChest.dll` | The plugin on its own, for installing by hand |
+| `StorageHub-1.0.0/StorageHub-1.0.0.zip` | The Thunderstore package: upload it, or import it into r2modman or Gale |
+| `StorageHub-1.0.0/StorageHub.dll` | The plugin on its own, for installing by hand |
 
 ### Installing the zip
 
@@ -30,7 +30,7 @@ dependency list, so BepInEx and Jötunn come along with it.
 
 ### Installing the DLL
 
-Drop `GatewayChest.dll` into `BepInEx/plugins`. Doing it this way installs no
+Drop `StorageHub.dll` into `BepInEx/plugins`. Doing it this way installs no
 dependencies, so
 [BepInEx](https://thunderstore.io/c/valheim/p/denikson/BepInExPack_Valheim/) and
 [Jötunn 2.30.0](https://thunderstore.io/c/valheim/p/ValheimModding/Jotunn/) have to be
@@ -38,5 +38,5 @@ there already or the plugin will not load.
 
 ### Everyone needs it
 
-Gateway Chest is declared `EveryoneMustHaveMod` with minor-version strictness, so the
-server and every player have to run the same 0.1.x build.
+Storage Hub is declared `EveryoneMustHaveMod` with minor-version strictness, so the
+server and every player have to run the same 1.0.x build.
