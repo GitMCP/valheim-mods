@@ -12,9 +12,9 @@ is built.
 
 ## Njord, Warehouse Keeper 1.1.0
 
-Built from commit `92059b3` on
+Built from commit `983c9d2` on
 [`cursor/storage-hub-favourites-020c`](https://github.com/GitMCP/valheim-mods/pull/14),
-which the assembly carries in its own version string (`1.1.0+92059b3…`).
+which the assembly carries in its own version string (`1.1.0+983c9d2…`).
 
 Thunderstore package name: **NjordWarehouseKeeper**. The plugin dll is still
 `StorageHub.dll`.
@@ -22,7 +22,8 @@ Thunderstore package name: **NjordWarehouseKeeper**. The plugin dll is still
 Njord is a warehouse keeper you place with the hammer for 200 gold coins. He
 uses the player mesh in a leather tunic and pants, stays where you put him, and
 lists items across nearby chests. He has no storage of his own. He greets,
-remarks, and nods goodbye the way a vendor does.
+remarks, and nods goodbye the way a vendor does. Look at his torso or head to
+talk to him — the hover collider matches a standing person, not the old chest.
 
 | File | What it is for |
 | --- | --- |
