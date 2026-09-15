@@ -45,8 +45,14 @@ namespace Rows
                 }
             }
 
-            return rowers;
+            return rowers + Dummies;
         }
+
+        /// <summary>
+        /// Temporary console pretence. No models, no seats taken, just extra
+        /// copies of the paddle so a solo helm can feel the speed.
+        /// </summary>
+        internal static int Dummies;
 
         internal static bool Occupied(Transform attachPoint)
         {

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1
+
+Temporary F5 command `rows [n]` pretends that many extra people are rowing, with
+no models, so the speed can be tried from a single client.
+
 ## 0.2.0
 
 Each helper now adds a full copy of the helm's paddle, so one extra rower doubles
