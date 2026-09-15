@@ -25,6 +25,7 @@ namespace StorageHub.UI
         private const float PanelWidth = 520f;
         private const float PanelHeight = 640f;
         private const float RowHeight = 42f;
+        private const float RowSpacing = 3f;
         private const float IconSize = 32f;
 
         private static GameObject _root;
@@ -327,6 +328,7 @@ namespace StorageHub.UI
             {
                 scrollView.horizontal = false;
                 scrollView.movementType = ScrollRect.MovementType.Clamped;
+                scrollView.scrollSensitivity = RecipeMatchedScrollSensitivity();
                 _rowParent = scrollView.content;
                 StretchContent(_rowParent as RectTransform);
 
@@ -341,7 +343,7 @@ namespace StorageHub.UI
                 layout.childForceExpandWidth = true;
                 layout.childControlHeight = true;
                 layout.childControlWidth = true;
-                layout.spacing = 3f;
+                layout.spacing = RowSpacing;
                 layout.padding = new RectOffset(6, 20, 4, 8);
 
                 var fitter = _rowParent.gameObject.GetComponent<ContentSizeFitter>();
@@ -365,6 +367,37 @@ namespace StorageHub.UI
             _empty.alignment = TextAnchor.MiddleCenter;
 
             _root.SetActive(false);
+        }
+
+        /// <summary>
+        /// Jötunn's CreateScrollView uses 35px per wheel notch. Crafting recipes sit
+        /// 30px apart, so a notch moves a bit more than one recipe. Hub rows are
+        /// taller, so scale the same notch to the same number of lines.
+        /// </summary>
+        private static float RecipeMatchedScrollSensitivity()
+        {
+            const float valheimStyle = 40f;
+            var recipePitch = 30f;
+            var recipeSensitivity = valheimStyle;
+
+            var inv = InventoryGui.instance;
+            if (inv != null)
+            {
+                if (inv.m_recipeListSpace > 1f)
+                {
+                    recipePitch = inv.m_recipeListSpace;
+                }
+
+                var recipeScroll = inv.m_recipeEnsureVisible != null
+                    ? inv.m_recipeEnsureVisible.GetComponent<ScrollRect>()
+                    : null;
+                if (recipeScroll != null && recipeScroll.scrollSensitivity > 0f)
+                {
+                    recipeSensitivity = recipeScroll.scrollSensitivity;
+                }
+            }
+
+            return recipeSensitivity * ((RowHeight + RowSpacing) / recipePitch);
         }
 
         private static Text MakeText(
