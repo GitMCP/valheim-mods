@@ -6,12 +6,13 @@ using HarmonyLib;
 using Jotunn.Managers;
 using Jotunn.Utils;
 
-namespace GatewayChest
+namespace StorageHub
 {
     /// <summary>
-    /// Adds a buildable chest that is not storage of its own so much as a window onto
-    /// every container around it. Opening it scans nearby chests, lists their contents
-    /// together, and routes deposits into an existing stack or the first empty slot.
+    /// Adds a buildable black metal chest that is not storage of its own so much as a
+    /// window onto every container around it. Opening it scans nearby chests, lists
+    /// their contents together, and routes deposits into an existing stack or the
+    /// first empty slot.
     ///
     /// Items never leave the chest they already sit in until someone takes or moves
     /// them. The hub does not clone stacks into a fake inventory: withdraw and deposit
@@ -24,10 +25,10 @@ namespace GatewayChest
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     [BepInDependency(Jotunn.Main.ModGuid)]
     [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
-    public class GatewayChestPlugin : BaseUnityPlugin
+    public class StorageHubPlugin : BaseUnityPlugin
     {
-        public const string PluginGuid = "com.gitmcp.gatewaychest";
-        public const string PluginName = "Gateway Chest";
+        public const string PluginGuid = "com.gitmcp.storagehub";
+        public const string PluginName = "Storage Hub";
         public const string PluginVersion = MyPluginInfo.PLUGIN_VERSION;
 
         internal static ManualLogSource Log;
@@ -44,7 +45,7 @@ namespace GatewayChest
             BindConfig();
 
             _harmony = new Harmony(PluginGuid);
-            _harmony.PatchAll(typeof(GatewayChestPlugin).Assembly);
+            _harmony.PatchAll(typeof(StorageHubPlugin).Assembly);
 
             PrefabManager.OnVanillaPrefabsAvailable += RegisterContent;
         }
@@ -52,7 +53,7 @@ namespace GatewayChest
         private void BindConfig()
         {
             Radius = Config.Bind(
-                "GatewayChest",
+                "StorageHub",
                 "Radius",
                 15f,
                 new ConfigDescription(
@@ -61,7 +62,7 @@ namespace GatewayChest
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
 
             RequireLineOfSight = Config.Bind(
-                "GatewayChest",
+                "StorageHub",
                 "RequireLineOfSight",
                 false,
                 new ConfigDescription(
@@ -71,7 +72,7 @@ namespace GatewayChest
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
 
             DepositHotbar = Config.Bind(
-                "GatewayChest",
+                "StorageHub",
                 "DepositHotbar",
                 false,
                 new ConfigDescription(
@@ -86,8 +87,8 @@ namespace GatewayChest
             PrefabManager.OnVanillaPrefabsAvailable -= RegisterContent;
 
             Localizations.Register();
-            GatewayChestAssets.Load();
-            GatewayChestPiece.Register();
+            StorageHubAssets.Load();
+            StorageHubPiece.Register();
 
             var patched = _harmony.GetPatchedMethods().Count();
             Log.LogInfo($"{PluginName} {PluginVersion} registered its content, {patched} method(s) patched.");

@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <AssemblyName>GatewayChest</AssemblyName>
-    <RootNamespace>GatewayChest</RootNamespace>
-    <Version>0.1.0</Version>
+    <AssemblyName>StorageHub</AssemblyName>
+    <RootNamespace>StorageHub</RootNamespace>
+    <Version>1.0.0</Version>
     <Authors>GitMCP</Authors>
-    <Description>A buildable chest that shows and moves items across nearby containers.</Description>
+    <Description>A black metal chest that shows and moves items across nearby containers.</Description>
   </PropertyGroup>
 
   <ItemGroup>

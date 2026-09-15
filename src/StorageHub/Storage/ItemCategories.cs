@@ -1,4 +1,4 @@
-namespace GatewayChest.Storage
+namespace StorageHub.Storage
 {
     internal enum ItemCategory
     {
@@ -57,19 +57,19 @@ namespace GatewayChest.Storage
             switch (category)
             {
                 case ItemCategory.Weapons:
-                    return "gatewaychest_cat_weapons";
+                    return "storagehub_cat_weapons";
                 case ItemCategory.Armor:
-                    return "gatewaychest_cat_armor";
+                    return "storagehub_cat_armor";
                 case ItemCategory.Food:
-                    return "gatewaychest_cat_food";
+                    return "storagehub_cat_food";
                 case ItemCategory.Materials:
-                    return "gatewaychest_cat_materials";
+                    return "storagehub_cat_materials";
                 case ItemCategory.Trophies:
-                    return "gatewaychest_cat_trophies";
+                    return "storagehub_cat_trophies";
                 case ItemCategory.Misc:
-                    return "gatewaychest_cat_misc";
+                    return "storagehub_cat_misc";
                 default:
-                    return "gatewaychest_cat_all";
+                    return "storagehub_cat_all";
             }
         }
     }

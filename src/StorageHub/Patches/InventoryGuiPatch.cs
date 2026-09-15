@@ -1,8 +1,8 @@
-using GatewayChest.UI;
+using StorageHub.UI;
 using HarmonyLib;
 using UnityEngine;
 
-namespace GatewayChest.Patches
+namespace StorageHub.Patches
 {
     [HarmonyPatch(typeof(InventoryGui))]
     internal static class InventoryGuiPatch
@@ -11,13 +11,13 @@ namespace GatewayChest.Patches
         [HarmonyPatch(nameof(InventoryGui.Show))]
         private static void ShowHub(Container container)
         {
-            if (GatewayChestHub.IsHub(container))
+            if (StorageHubMarker.IsHub(container))
             {
-                GatewayPanel.Open(container);
+                StorageHubPanel.Open(container);
             }
             else
             {
-                GatewayPanel.Close();
+                StorageHubPanel.Close();
             }
         }
 
@@ -25,7 +25,7 @@ namespace GatewayChest.Patches
         [HarmonyPatch(nameof(InventoryGui.Hide))]
         private static void HideHub()
         {
-            GatewayPanel.Close();
+            StorageHubPanel.Close();
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace GatewayChest.Patches
         [HarmonyPatch("UpdateContainer")]
         private static void HideVanillaContainer(InventoryGui __instance)
         {
-            if (GatewayChestHub.OpenHub == null || __instance.m_currentContainer != GatewayChestHub.OpenHub)
+            if (StorageHubMarker.OpenHub == null || __instance.m_currentContainer != StorageHubMarker.OpenHub)
             {
                 return;
             }
@@ -47,35 +47,35 @@ namespace GatewayChest.Patches
                 __instance.m_container.gameObject.SetActive(false);
             }
 
-            GatewayPanel.Tick();
+            StorageHubPanel.Tick();
         }
 
         [HarmonyPrefix]
         [HarmonyPatch("OnDropOutside")]
         private static bool DepositDragOnPanel()
         {
-            return !GatewayPanel.TryDepositDrag();
+            return !StorageHubPanel.TryDepositDrag();
         }
 
         [HarmonyPrefix]
         [HarmonyPatch("OnSplitOk")]
         private static bool HubSplitOk()
         {
-            return !GatewayPanel.HandleSplitOk();
+            return !StorageHubPanel.HandleSplitOk();
         }
 
         [HarmonyPostfix]
         [HarmonyPatch("OnSplitCancel")]
         private static void HubSplitCancel()
         {
-            GatewayPanel.ClearSplit();
+            StorageHubPanel.ClearSplit();
         }
 
         [HarmonyPrefix]
         [HarmonyPatch("Update")]
         private static void KeepOpenWhileSearching()
         {
-            if (!GatewayPanel.SearchHasFocus())
+            if (!StorageHubPanel.SearchHasFocus())
             {
                 return;
             }
@@ -96,7 +96,7 @@ namespace GatewayChest.Patches
     {
         private static void Postfix(ref bool __result)
         {
-            if (GatewayPanel.SearchHasFocus())
+            if (StorageHubPanel.SearchHasFocus())
             {
                 __result = true;
             }

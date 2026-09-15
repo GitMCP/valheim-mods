@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GatewayChest.Storage
+namespace StorageHub.Storage
 {
     /// <summary>
     /// Every <see cref="Container"/> close enough to the hub that the player is allowed
-    /// to open. Other Gateway Chests are skipped so two hubs in one room do not nest.
+    /// to open. Other Storage Hubs are skipped so two hubs in one room do not nest.
     /// Incinerators (auto-destroy-empty) are skipped so a deposit cannot feed a fire.
     /// </summary>
     internal static class StorageScanner
@@ -32,7 +32,7 @@ namespace GatewayChest.Storage
             }
 
             var origin = hub.transform.position;
-            var radius = GatewayChestPlugin.Radius.Value;
+            var radius = StorageHubPlugin.Radius.Value;
             var playerId = Game.instance != null && Game.instance.GetPlayerProfile() != null
                 ? Game.instance.GetPlayerProfile().GetPlayerID()
                 : 0L;
@@ -69,7 +69,7 @@ namespace GatewayChest.Storage
                 return false;
             }
 
-            if (container.GetComponent<GatewayChestHub>() != null)
+            if (container.GetComponent<StorageHubMarker>() != null)
             {
                 return false;
             }
@@ -105,7 +105,7 @@ namespace GatewayChest.Storage
                 return false;
             }
 
-            if (GatewayChestPlugin.RequireLineOfSight.Value && !HasLineOfSight(origin, container))
+            if (StorageHubPlugin.RequireLineOfSight.Value && !HasLineOfSight(origin, container))
             {
                 return false;
             }

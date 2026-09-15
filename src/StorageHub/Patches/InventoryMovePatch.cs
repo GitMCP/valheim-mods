@@ -1,7 +1,7 @@
-using GatewayChest.Storage;
+using StorageHub.Storage;
 using HarmonyLib;
 
-namespace GatewayChest.Patches
+namespace StorageHub.Patches
 {
     /// <summary>
     /// Shift-click and drag-onto-container both end in <see cref="Inventory.MoveItemToThis"/>
@@ -28,7 +28,7 @@ namespace GatewayChest.Patches
 
         private static bool Handled(Inventory destination, Inventory from, ItemDrop.ItemData item)
         {
-            var hub = GatewayChestHub.OpenHub;
+            var hub = StorageHubMarker.OpenHub;
             if (hub == null || destination == null || destination != hub.GetInventory())
             {
                 return false;
@@ -43,7 +43,7 @@ namespace GatewayChest.Patches
     {
         private static bool Prefix(Container __instance)
         {
-            if (!GatewayChestHub.IsHub(__instance) || Player.m_localPlayer == null)
+            if (!StorageHubMarker.IsHub(__instance) || Player.m_localPlayer == null)
             {
                 return true;
             }

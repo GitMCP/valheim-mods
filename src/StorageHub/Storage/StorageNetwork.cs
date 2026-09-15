@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GatewayChest.Storage
+namespace StorageHub.Storage
 {
     /// <summary>
     /// Moves items between the player and the scanned chests.
@@ -117,7 +117,7 @@ namespace GatewayChest.Storage
                     continue;
                 }
 
-                if (!GatewayChestPlugin.DepositHotbar.Value && item.m_gridPos.y == 0)
+                if (!StorageHubPlugin.DepositHotbar.Value && item.m_gridPos.y == 0)
                 {
                     continue;
                 }
@@ -130,7 +130,7 @@ namespace GatewayChest.Storage
 
             if (routed == 0)
             {
-                player.Message(MessageHud.MessageType.Center, "$gatewaychest_nospace");
+                player.Message(MessageHud.MessageType.Center, "$storagehub_nospace");
             }
         }
 
@@ -151,7 +151,7 @@ namespace GatewayChest.Storage
             var take = HowManyFit(dest, sample, amount);
             if (take <= 0)
             {
-                player.Message(MessageHud.MessageType.Center, "$gatewaychest_playerfull");
+                player.Message(MessageHud.MessageType.Center, "$storagehub_playerfull");
                 return false;
             }
 

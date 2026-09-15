@@ -4,11 +4,11 @@ using System.Reflection;
 using Jotunn.Utils;
 using UnityEngine;
 
-namespace GatewayChest
+namespace StorageHub
 {
-    internal static class GatewayChestAssets
+    internal static class StorageHubAssets
     {
-        private const string IconResourceName = "GatewayChest.Assets.gateway_chest_icon.png";
+        private const string IconResourceName = "StorageHub.Assets.storage_hub_icon.png";
 
         internal static Sprite Icon { get; private set; }
 
@@ -23,7 +23,7 @@ namespace GatewayChest
             {
                 if (stream == null)
                 {
-                    GatewayChestPlugin.Log.LogWarning(
+                    StorageHubPlugin.Log.LogWarning(
                         $"Embedded sprite '{resourceName}' missing; the piece will use its clone source's icon.");
                     return null;
                 }
@@ -34,7 +34,7 @@ namespace GatewayChest
                     var texture = new Texture2D(2, 2);
                     if (!AssetUtils.LoadImage(texture, buffer.ToArray()))
                     {
-                        GatewayChestPlugin.Log.LogWarning($"Could not decode '{resourceName}'.");
+                        StorageHubPlugin.Log.LogWarning($"Could not decode '{resourceName}'.");
                         return null;
                     }
 

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GatewayChest.Storage
+namespace StorageHub.Storage
 {
     /// <summary>
     /// One slot in a real chest that currently holds part of a grouped row.

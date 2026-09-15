@@ -1,19 +1,19 @@
 using System;
 using System.Collections.Generic;
-using GatewayChest.Storage;
+using StorageHub.Storage;
 using Jotunn.Managers;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-namespace GatewayChest.UI
+namespace StorageHub.UI
 {
     /// <summary>
     /// Sits in the gap between the backpack and the crafting column and lists the
     /// nearby chests as full-width rows.
     /// </summary>
-    internal static class GatewayPanel
+    internal static class StorageHubPanel
     {
         private enum SortMode
         {
@@ -54,7 +54,7 @@ namespace GatewayChest.UI
                 return;
             }
 
-            GatewayChestHub.OpenHub = hub;
+            StorageHubMarker.OpenHub = hub;
             if (GUIManager.Instance == null || GUIManager.CustomGUIFront == null)
             {
                 _pending = hub;
@@ -78,7 +78,7 @@ namespace GatewayChest.UI
 
         internal static void Close()
         {
-            GatewayChestHub.OpenHub = null;
+            StorageHubMarker.OpenHub = null;
             _pending = null;
             _splitGroup = null;
             UnfocusSearch();
@@ -90,7 +90,7 @@ namespace GatewayChest.UI
 
         internal static void Tick()
         {
-            if (GatewayChestHub.OpenHub == null || _root == null || !_root.activeSelf)
+            if (StorageHubMarker.OpenHub == null || _root == null || !_root.activeSelf)
             {
                 return;
             }
@@ -255,11 +255,11 @@ namespace GatewayChest.UI
                 PanelWidth,
                 PanelHeight,
                 draggable: false);
-            _root.name = "GatewayChestPanel";
+            _root.name = "StorageHubPanel";
 
             _title = MakeText(
                 gui,
-                Localization.instance.Localize("$gateway_chest_name"),
+                Localization.instance.Localize("$storage_hub_name"),
                 new Vector2(0f, -28f),
                 22,
                 gui.ValheimOrange,
@@ -283,7 +283,7 @@ namespace GatewayChest.UI
                 mid,
                 new Vector2(-70f, 230f),
                 InputField.ContentType.Standard,
-                Localization.instance.Localize("$gatewaychest_search"),
+                Localization.instance.Localize("$storagehub_search"),
                 16,
                 320f,
                 30f).GetComponent<InputField>();
@@ -295,7 +295,7 @@ namespace GatewayChest.UI
             WirePanelDrop();
 
             var depositGo = gui.CreateButton(
-                Localization.instance.Localize("$gatewaychest_deposit"),
+                Localization.instance.Localize("$storagehub_deposit"),
                 _root.transform,
                 mid,
                 mid,
@@ -356,7 +356,7 @@ namespace GatewayChest.UI
 
             _empty = MakeText(
                 gui,
-                Localization.instance.Localize("$gatewaychest_empty"),
+                Localization.instance.Localize("$storagehub_empty"),
                 new Vector2(0f, -80f),
                 16,
                 Color.white,
@@ -511,9 +511,9 @@ namespace GatewayChest.UI
             var modes = new[] { SortMode.Name, SortMode.Quantity, SortMode.Category };
             var tokens = new[]
             {
-                "$gatewaychest_sort_name",
-                "$gatewaychest_sort_qty",
-                "$gatewaychest_sort_cat",
+                "$storagehub_sort_name",
+                "$storagehub_sort_qty",
+                "$storagehub_sort_cat",
             };
 
             var width = 110f;
@@ -570,7 +570,7 @@ namespace GatewayChest.UI
                 return;
             }
 
-            StorageNetwork.DepositAll(Player.m_localPlayer, GatewayChestHub.OpenHub);
+            StorageNetwork.DepositAll(Player.m_localPlayer, StorageHubMarker.OpenHub);
             var gui = InventoryGui.instance;
             if (gui != null && gui.m_dragGo != null)
             {
@@ -583,7 +583,7 @@ namespace GatewayChest.UI
         private static void Refresh()
         {
             _nextRefresh = Time.time + 0.6f;
-            var hub = GatewayChestHub.OpenHub;
+            var hub = StorageHubMarker.OpenHub;
             if (hub == null || _rowParent == null)
             {
                 return;
@@ -591,18 +591,18 @@ namespace GatewayChest.UI
 
             if (_title != null)
             {
-                _title.text = Localization.instance.Localize("$gateway_chest_name");
+                _title.text = Localization.instance.Localize("$storage_hub_name");
             }
 
             var snapshot = StorageNetwork.Snapshot(hub);
             if (_capacity != null)
             {
                 _capacity.text =
-                    Localization.instance.Localize("$gatewaychest_capacity")
+                    Localization.instance.Localize("$storagehub_capacity")
                         .Replace("{0}", snapshot.UsedSlots.ToString())
                         .Replace("{1}", snapshot.TotalSlots.ToString())
                     + "   ·   " +
-                    Localization.instance.Localize("$gatewaychest_chests")
+                    Localization.instance.Localize("$storagehub_chests")
                         .Replace("{0}", snapshot.Chests.Count.ToString());
             }
 
@@ -896,7 +896,7 @@ namespace GatewayChest.UI
         {
             var gui = InventoryGui.instance;
             var player = Player.m_localPlayer;
-            var hub = GatewayChestHub.OpenHub;
+            var hub = StorageHubMarker.OpenHub;
             if (gui == null || player == null || hub == null || gui.m_dragItem == null || gui.m_dragInventory == null)
             {
                 return;
