@@ -10,25 +10,25 @@ two ever disagree, the source is right.
 This branch keeps **only the current package**. Older zips are dropped when a new one
 is built.
 
-## Njord, Warehouse Keeper 1.1.0
+## Njord, Warehouse Keeper 1.0.0
 
-Built from commit `983c9d2` on
+Built from commit `4a44b52` on
 [`cursor/storage-hub-favourites-020c`](https://github.com/GitMCP/valheim-mods/pull/14),
-which the assembly carries in its own version string (`1.1.0+983c9d2…`).
+which the assembly carries in its own version string (`1.0.0+4a44b52…`).
 
-Thunderstore package name: **NjordWarehouseKeeper**. The plugin dll is still
-`StorageHub.dll`.
+Thunderstore package name: **NjordWarehouseKeeper**. Plugin dll:
+`NjordWarehouseKeeper.dll`. Tag: `njordwarehousekeeper-v1.0.0`.
 
 Njord is a warehouse keeper you place with the hammer for 200 gold coins. He
 uses the player mesh in a leather tunic and pants, stays where you put him, and
 lists items across nearby chests. He has no storage of his own. He greets,
 remarks, and nods goodbye the way a vendor does. Look at his torso or head to
-talk to him — the hover collider matches a standing person, not the old chest.
+talk to him.
 
 | File | What it is for |
 | --- | --- |
-| `StorageHub-1.1.0/StorageHub-1.1.0.zip` | The Thunderstore package: upload it, or import it into r2modman or Gale |
-| `StorageHub-1.1.0/StorageHub.dll` | The plugin on its own, for installing by hand |
+| `NjordWarehouseKeeper-1.0.0/NjordWarehouseKeeper-1.0.0.zip` | The Thunderstore package: upload it, or import it into r2modman or Gale |
+| `NjordWarehouseKeeper-1.0.0/NjordWarehouseKeeper.dll` | The plugin on its own, for installing by hand |
 
 ### Installing the zip
 
@@ -37,13 +37,20 @@ dependency list, so BepInEx and Jötunn come along with it.
 
 ### Installing the DLL
 
-Drop `StorageHub.dll` into `BepInEx/plugins`. Doing it this way installs no
+Drop `NjordWarehouseKeeper.dll` into `BepInEx/plugins`. Doing it this way installs no
 dependencies, so
 [BepInEx](https://thunderstore.io/c/valheim/p/denikson/BepInExPack_Valheim/) and
 [Jötunn 2.30.0](https://thunderstore.io/c/valheim/p/ValheimModding/Jotunn/) have to be
 there already or the plugin will not load.
 
+If you previously tested a `StorageHub.dll` build, remove that file first.
+
 ### Everyone needs it
 
 The mod is declared `EveryoneMustHaveMod` with minor-version strictness, so the
-server and every player have to run the same 1.1.x build.
+server and every player have to run the same 1.0.x build.
+
+### Checksums
+
+    SHA-256  NjordWarehouseKeeper.dll         2499b69dd776875b3a082192ad34848a764b3d5bfe0d95ffad2ebf5b09e9cc25
+    SHA-256  NjordWarehouseKeeper-1.0.0.zip   fe489a40c37e534c10e0ff7bba188338a8eec6b095a11cf007b46b406982363e
