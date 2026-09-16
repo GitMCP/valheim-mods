@@ -49,8 +49,9 @@ slot: keep the cursor still for a moment and the vanilla item tooltip appears.
 - **Quick Stack** deposits and then resupplies in one click.
 - **Recipes** lists crafts you know, filtered by crafting station (All,
   Handcraft, Hammer, and every station in the game). Rows the nearby chests
-  cannot afford are greyed out. Click a row to pull that recipe's ingredients
-  into your pack.
+  cannot fully afford are greyed out. Hover a row to see each ingredient with
+  how many are in the stores and how many the craft needs. Click a row to pull
+  those ingredients into your pack; a greyed row still takes whatever is there.
 - **The cog** opens client Preferences: skip favourites on Deposit, bind a
   Deposit+Resupply hotkey, and choose which items Resupply should keep, with a
   quantity for each. The resupply list is titled Resupply.

@@ -4,7 +4,9 @@
 
 Click a listed item to pick up one stack and drag it, the same as a chest slot.
 Ctrl-click takes as much of that item as the pack will hold. Several people can
-talk to Njord at the same time; he is not locked to one player.
+talk to Njord at the same time; he is not locked to one player. On the Recipes
+tab, hover a craft to see each ingredient with have / need. Click a greyed-out
+row to take whatever of those ingredients the stores have.
 
 ## 1.0.0
 

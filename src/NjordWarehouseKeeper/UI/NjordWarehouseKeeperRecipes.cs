@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using NjordWarehouseKeeper.Storage;
 using Jotunn.Managers;
 using UnityEngine;
@@ -8,8 +9,9 @@ using UnityEngine.UI;
 namespace NjordWarehouseKeeper.UI
 {
     /// <summary>
-    /// Known crafting recipes and hammer pieces. Rows the hub cannot afford are
-    /// greyed out; a clickable row pulls that craft's ingredients into the pack.
+    /// Known crafting recipes and hammer pieces. Rows the hub cannot fully afford
+    /// are greyed out; a click still pulls whatever of those ingredients is in
+    /// the nearby chests. Hover shows each ingredient with have / need.
     /// </summary>
     internal static class NjordWarehouseKeeperRecipes
     {
@@ -67,6 +69,7 @@ namespace NjordWarehouseKeeper.UI
             if (scrollView != null)
             {
                 NjordWarehouseKeeperPanel.FitScrollView(scrollView, NjordWarehouseKeeperPanel.ListScrollSensitivity());
+                scrollView.onValueChanged.AddListener(_ => HubItemHover.Hide());
                 _rowParent = scrollView.content;
                 var content = _rowParent as RectTransform;
                 if (content != null)
@@ -117,6 +120,10 @@ namespace NjordWarehouseKeeper.UI
             if (on)
             {
                 Refresh();
+            }
+            else
+            {
+                HubItemHover.Hide();
             }
         }
 
@@ -711,6 +718,7 @@ namespace NjordWarehouseKeeper.UI
                 Button = row.GetComponent<Button>(),
                 Icon = icon,
                 Name = name,
+                Hover = row.AddComponent<HubItemHover>(),
             };
             view.Button.onClick.AddListener(() => OnClicked(view));
             return view;
@@ -733,7 +741,7 @@ namespace NjordWarehouseKeeper.UI
             var can = offer.Recipe != null
                 ? StorageNetwork.CanAffordRecipe(listed, offer.Recipe)
                 : StorageNetwork.CanAffordPiece(listed, offer.Piece);
-            view.Button.interactable = can;
+            view.Button.interactable = true;
             var dim = can ? Color.white : new Color(0.45f, 0.45f, 0.45f, 1f);
             if (view.Icon != null)
             {
@@ -749,9 +757,56 @@ namespace NjordWarehouseKeeper.UI
 
             var colors = view.Button.colors;
             colors.normalColor = can ? Color.white : new Color(0.4f, 0.4f, 0.4f, 1f);
-            colors.highlightedColor = can ? new Color(1f, 0.9f, 0.7f, 1f) : colors.normalColor;
+            colors.highlightedColor = can
+                ? new Color(1f, 0.9f, 0.7f, 1f)
+                : new Color(0.52f, 0.52f, 0.52f, 1f);
+            colors.pressedColor = colors.highlightedColor;
             colors.disabledColor = new Color(0.35f, 0.35f, 0.35f, 0.8f);
             view.Button.colors = colors;
+
+            if (view.Hover != null)
+            {
+                view.Hover.BindText(offer.Name, IngredientTooltip(offer, listed));
+            }
+        }
+
+        private static string IngredientTooltip(CraftOffer offer, List<IndexedStack> listed)
+        {
+            var lines = offer.Recipe != null
+                ? StorageNetwork.RecipeIngredients(offer.Recipe, listed)
+                : StorageNetwork.PieceIngredients(offer.Piece, listed);
+            if (lines.Count == 0)
+            {
+                return "";
+            }
+
+            var text = new StringBuilder();
+            for (var i = 0; i < lines.Count; i++)
+            {
+                if (i > 0)
+                {
+                    text.Append('\n');
+                }
+
+                var line = lines[i];
+                text.Append(line.DisplayName);
+                text.Append('\n');
+                if (line.Have < line.Need)
+                {
+                    text.Append("<color=red>");
+                    text.Append(line.Have);
+                    text.Append("</color>");
+                }
+                else
+                {
+                    text.Append(line.Have);
+                }
+
+                text.Append(" / ");
+                text.Append(line.Need);
+            }
+
+            return text.ToString();
         }
 
         private static void OnClicked(RecipeRow view)
@@ -798,6 +853,7 @@ namespace NjordWarehouseKeeper.UI
             internal Button Button;
             internal Image Icon;
             internal Text Name;
+            internal HubItemHover Hover;
             internal CraftOffer Offer;
         }
     }

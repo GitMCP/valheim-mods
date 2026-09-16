@@ -97,14 +97,23 @@ namespace NjordWarehouseKeeper.UI
         {
             if (item?.m_shared == null)
             {
-                Topic = "";
-                Body = "";
+                BindText("", "");
+                return;
+            }
+
+            BindText(item.m_shared.m_name, item.GetTooltip());
+        }
+
+        internal void BindText(string topic, string body)
+        {
+            Topic = topic ?? "";
+            Body = body ?? "";
+            if (string.IsNullOrEmpty(Topic) && string.IsNullOrEmpty(Body))
+            {
                 HideMine();
                 return;
             }
 
-            Topic = item.m_shared.m_name;
-            Body = item.GetTooltip();
             if (Owner == this && Shown != null)
             {
                 ApplyText(Shown);
