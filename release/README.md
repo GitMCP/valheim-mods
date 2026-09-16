@@ -12,9 +12,9 @@ is built.
 
 ## Njord, Warehouse Keeper 1.1.0
 
-Built from commit `42201f4` on
+Built from commit `1bafab5` on
 [`cursor/njord-click-drag-020c`](https://github.com/GitMCP/valheim-mods/pull/15),
-which the assembly carries in its own version string (`1.1.0+42201f4…`).
+which the assembly carries in its own version string (`1.1.0+1bafab5…`).
 
 Thunderstore package name: **NjordWarehouseKeeper**. Plugin dll:
 `NjordWarehouseKeeper.dll`. Source lives in `src/NjordWarehouseKeeper`. GUID:
@@ -22,7 +22,8 @@ Thunderstore package name: **NjordWarehouseKeeper**. Plugin dll:
 
 Click a listed item to pick up one stack and drag it, the same as a chest slot.
 Ctrl-click takes as much of that item as the pack will hold. Several people can
-talk to Njord at the same time; he is not locked to one player.
+talk to Njord at the same time. On Recipes, hover a craft for have / need of
+each ingredient; a greyed-out row still takes whatever the stores have.
 
 | File | What it is for |
 | --- | --- |
@@ -49,5 +50,5 @@ server and every player have to run the same 1.1.x build.
 
 ### Checksums
 
-    SHA-256  NjordWarehouseKeeper.dll         4aca1040ee40a1e8753640f5629ee771359f8926949ee63a5c94c47e77fe8f2d
-    SHA-256  NjordWarehouseKeeper-1.1.0.zip   05a69f13d0db729e9f481b2b8f51685c6f6a967d6f79f87a2282810da414c0f2
+    SHA-256  NjordWarehouseKeeper.dll         2f2de396c973db15be123c102c8681fe94ca654a336a17b42ac6d67366a2ba58
+    SHA-256  NjordWarehouseKeeper-1.1.0.zip   1e29cb4942254e1080ae4dc563947207b6f748756618c74a5edc5bcf7b05c0aa
