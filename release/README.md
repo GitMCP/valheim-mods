@@ -10,25 +10,26 @@ two ever disagree, the source is right.
 This branch keeps **only the current package**. Older zips are dropped when a new one
 is built.
 
-## Njord, Warehouse Keeper 1.1.0
+## Njord, Warehouse Keeper 1.1.1
 
-Built from commit `1bafab5` on
+Built from commit `91e664b` on
 [`cursor/njord-click-drag-020c`](https://github.com/GitMCP/valheim-mods/pull/15),
-which the assembly carries in its own version string (`1.1.0+1bafab5…`).
+which the assembly carries in its own version string (`1.1.1+91e664b…`).
 
 Thunderstore package name: **NjordWarehouseKeeper**. Plugin dll:
 `NjordWarehouseKeeper.dll`. Source lives in `src/NjordWarehouseKeeper`. GUID:
 `com.gitmcp.njord`.
 
-Click a listed item to pick up one stack and drag it, the same as a chest slot.
-Ctrl-click takes as much of that item as the pack will hold. Several people can
-talk to Njord at the same time. On Recipes, hover a craft for have / need of
-each ingredient; a greyed-out row still takes whatever the stores have.
+Fixes deposit on Valheim 1.0.14 (`FindFreeStackItem` now takes whether a stack
+is cheated). Click a listed item to pick up one stack and drag it. Ctrl-click
+takes as much as the pack will hold. Several people can talk to Njord at once.
+Hover a recipe for have / need; a greyed-out row still takes whatever the
+stores have.
 
 | File | What it is for |
 | --- | --- |
-| `NjordWarehouseKeeper-1.1.0/NjordWarehouseKeeper-1.1.0.zip` | The Thunderstore package: upload it, or import it into r2modman or Gale |
-| `NjordWarehouseKeeper-1.1.0/NjordWarehouseKeeper.dll` | The plugin on its own, for installing by hand |
+| `NjordWarehouseKeeper-1.1.1/NjordWarehouseKeeper-1.1.1.zip` | The Thunderstore package: upload it, or import it into r2modman or Gale |
+| `NjordWarehouseKeeper-1.1.1/NjordWarehouseKeeper.dll` | The plugin on its own, for installing by hand |
 
 ### Installing the zip
 
@@ -50,5 +51,5 @@ server and every player have to run the same 1.1.x build.
 
 ### Checksums
 
-    SHA-256  NjordWarehouseKeeper.dll         2f2de396c973db15be123c102c8681fe94ca654a336a17b42ac6d67366a2ba58
-    SHA-256  NjordWarehouseKeeper-1.1.0.zip   1e29cb4942254e1080ae4dc563947207b6f748756618c74a5edc5bcf7b05c0aa
+    SHA-256  NjordWarehouseKeeper.dll         6bf8006eb39880644958c040d6bdbf5980d2872c38dc4357ecdef4ef0bf19961
+    SHA-256  NjordWarehouseKeeper-1.1.1.zip   478370a719cfbb80b28bfdf682af720560a3ff526ca0c33b7bb642d59d451f71
