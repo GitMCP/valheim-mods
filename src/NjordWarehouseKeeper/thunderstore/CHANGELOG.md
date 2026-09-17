@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.1
+
+Deposit works again on Valheim 1.0.14. The game now refuses to merge cheated
+stacks with regular ones, and `FindFreeStackItem` gained that extra argument.
+
 ## 1.1.0
 
 Click a listed item to pick up one stack and drag it, the same as a chest slot.
