@@ -25,11 +25,14 @@ namespace NjordWarehouseKeeper.Patches
             if (_hideCraft)
             {
                 NjordWarehouseKeeperRecipes.HideVanillaCrafting();
+                return;
             }
-            else
-            {
-                NjordWarehouseKeeperRecipes.RestoreVanillaCrafting();
-            }
+
+            // Close first so HubIsOpen is false before SetupCrafting. Tab
+            // Show(null) can run while the Njord panel is still up.
+            _hideCraft = false;
+            NjordWarehouseKeeperPanel.Close();
+            NjordWarehouseKeeperRecipes.RestoreVanillaCrafting();
         }
 
         [HarmonyPostfix]
