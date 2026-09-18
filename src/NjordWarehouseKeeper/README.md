@@ -56,12 +56,13 @@ slot: keep the cursor still for a moment and the vanilla item tooltip appears.
 - **Quick Stack** deposits and then resupplies in one click.
 - **Recipes** sit in the right-hand panel, in place of vanilla crafting. A
   dropdown at the top picks a station (All, Handcraft, Hammer, and every
-  crafting bench in the game). Known crafts are listed like the vanilla recipe
-  list: compact rows, orange when selected, greyed and at the bottom when the
-  nearby chests cannot fully afford them. The right side shows the item, its
-  tooltip, and the ingredient slots. **Withdraw** pulls those ingredients into
-  your pack; a greyed recipe still takes whatever is there. Hover an ingredient
-  to see have / need.
+  crafting bench in the game). The list is the same Craft tab that bench would
+  show: known crafts, upgrade-only recipes skipped, missing requirements greyed
+  and at the bottom. Hammer pieces stay under Hammer. The right side shows the
+  item, its tooltip, and the ingredient slots. **Withdraw** pulls those
+  ingredients into your pack; a greyed recipe still takes whatever is there.
+  Hover an ingredient to see have / need. Vanilla crafting comes back when you
+  leave Njord, including Tab inventory, handcraft, and every workbench.
 - **The cog** opens client Preferences: skip favourites on Deposit, bind a
   Deposit+Resupply hotkey, **Reorganize** to tidy leftover stacks now, and
   choose which items Resupply should keep, with a quantity for each. The

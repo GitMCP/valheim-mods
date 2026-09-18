@@ -112,6 +112,7 @@ namespace NjordWarehouseKeeper.UI
             HubItemHover.Hide();
             SetPrefsOpen(false);
             NjordWarehouseKeeperRecipes.Close();
+            Patches.InventoryGuiPatch.HubClosed();
             if (_root != null)
             {
                 _root.SetActive(false);

@@ -2,19 +2,26 @@
 
 ## 1.2.0
 
-While talking to Njord, vanilla crafting is hidden. A craft-style panel sits in
-that slot: pick a station from a dropdown, browse known recipes the same way as
-the Forge list (missing ingredients greyed and at the bottom), and Withdraw
-their materials. Greyed recipes still take whatever the stores have. The center
-panel is items only; the Items / Recipes tabs are gone.
+Talking to Njord no longer shows the vanilla crafting column. A wood panel sits in that slot instead, listing the same Craft-tab recipes each bench would, so Withdraw pulls those ingredients.
 
-Clicking an item row drags a complete stack when the nearby chests have enough
-to fill one, instead of whatever leftover pile sits in the first chest scanned.
+**Recipe panel (right)**
+- Station dropdown in place of CRAFT / UPGRADE (All, Handcraft, Hammer, and every crafting bench)
+- Known recipes listed like the Forge: compact rows, orange when selected, missing ingredients greyed and at the bottom
+- Each row is that item's craft recipe at the chosen station (upgrade-only recipes are skipped; hammer pieces stay under Hammer)
+- Detail view with icon, name, tooltip, and ingredient slots
+- **Withdraw** pulls those ingredients into the pack; greyed recipes still take whatever the stores have
 
-From time to time Njord tidies the stores: leftover piles of the same item are
-merged so they occupy as few slots as they can. On by default, every 60 seconds,
-and both settings are in config. Preferences has a Reorganize button that runs
-the same tidy immediately.
+**Items panel (center)**
+- Items list only; the Items / Recipes tab buttons are gone
+- Click-to-drag picks a **complete stack** when nearby chests have enough to fill one, instead of the leftover pile in the first chest scanned
+
+**Auto-reorganize**
+- On a timer, Njord merges leftover piles of the same item so they occupy as few chest slots as possible
+- Full stacks and chests someone already has open are left alone
+- Config: `Njord / Reorganize` (default on) and `Njord / ReorganizeInterval` (default 60s)
+- Preferences has a **Reorganize** button that runs the same tidy immediately
+
+Vanilla crafting is hidden only while talking to Njord. Closing the talk, walking away, or opening inventory with Tab restores the default craft panel for handcraft and every bench.
 
 ## 1.1.1
 

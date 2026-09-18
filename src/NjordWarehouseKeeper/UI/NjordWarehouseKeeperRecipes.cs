@@ -10,8 +10,8 @@ namespace NjordWarehouseKeeper.UI
 {
     /// <summary>
     /// Craft-column panel opened while talking to Njord. Vanilla crafting is hidden
-    /// and this wood panel sits in its place: a station dropdown, a compact recipe
-    /// list (unaffordable rows greyed and at the bottom), item detail, and Withdraw.
+    /// only for that talk and this wood panel sits in its place: a station dropdown,
+    /// the same Craft-tab recipes that bench would list, item detail, and Withdraw.
     /// Greyed recipes still pull whatever of those ingredients is in nearby chests.
     /// </summary>
     internal static class NjordWarehouseKeeperRecipes
@@ -116,6 +116,8 @@ namespace NjordWarehouseKeeper.UI
             {
                 _root.SetActive(false);
             }
+
+            RestoreVanillaCrafting();
         }
 
         internal static void Tick()
@@ -237,6 +239,20 @@ namespace NjordWarehouseKeeper.UI
             if (gui != null && gui.m_crafting != null)
             {
                 gui.m_crafting.gameObject.SetActive(false);
+            }
+        }
+
+        /// <summary>
+        /// Vanilla only enables <c>m_crafting</c> in Awake. After we hide it for
+        /// Njord it stays off until something turns it back on, so Tab, handcraft,
+        /// and every bench go blank.
+        /// </summary>
+        internal static void RestoreVanillaCrafting()
+        {
+            var gui = InventoryGui.instance;
+            if (gui != null && gui.m_crafting != null)
+            {
+                gui.m_crafting.gameObject.SetActive(true);
             }
         }
 
@@ -719,7 +735,7 @@ namespace NjordWarehouseKeeper.UI
 
             _stations.Clear();
             _stations.Add(new StationOpt { Key = AllKey, Token = "$njord_station_all", Icon = HammerIcon() });
-            _stations.Add(new StationOpt { Key = HandKey, Token = "$njord_station_hand" });
+            _stations.Add(new StationOpt { Key = HandKey, Token = "$njord_station_hand", ShowsBasic = true });
             _stations.Add(new StationOpt { Key = HammerKey, Token = "$njord_station_hammer", Icon = HammerIcon() });
 
             var extra = new List<StationOpt>();
@@ -773,7 +789,7 @@ namespace NjordWarehouseKeeper.UI
 
         private static void AddStation(CraftingStation station, List<StationOpt> names, HashSet<string> seen)
         {
-            if (station == null || string.IsNullOrEmpty(station.m_name) || !seen.Add(station.m_name))
+            if (!station || string.IsNullOrEmpty(station.m_name) || !seen.Add(station.m_name))
             {
                 return;
             }
@@ -783,6 +799,7 @@ namespace NjordWarehouseKeeper.UI
                 Key = station.m_name,
                 Token = station.m_name,
                 Icon = station.m_icon,
+                ShowsBasic = station.m_showBasicRecipies,
             });
         }
 
@@ -899,7 +916,7 @@ namespace NjordWarehouseKeeper.UI
                 AddRecipes(result, seen);
             }
 
-            if (_station == AllKey || _station == HammerKey)
+            if (_station == HammerKey)
             {
                 AddHammerPieces(result, seen);
             }
@@ -916,6 +933,13 @@ namespace NjordWarehouseKeeper.UI
             return result;
         }
 
+        /// <summary>
+        /// Same recipes the vanilla Craft tab would list at the selected station:
+        /// enabled (or in-season) known crafts, not upgrade-only, matched by
+        /// <see cref="Recipe.m_craftingStation"/>. Each recipe asset is kept —
+        /// collapsing by item name picks the first ObjectDB row, which is often
+        /// an upgrade recipe or a different bench.
+        /// </summary>
         private static void AddRecipes(List<CraftOffer> result, HashSet<string> seen)
         {
             var player = Player.m_localPlayer;
@@ -925,10 +949,28 @@ namespace NjordWarehouseKeeper.UI
                 return;
             }
 
+            var allUnlocked = player.m_noPlacementCost
+                || (ZoneSystem.instance != null
+                    && ZoneSystem.instance.GetGlobalKey(GlobalKeys.AllRecipesUnlocked));
+            var season = player.CurrentSeason;
+
             for (var i = 0; i < db.m_recipes.Count; i++)
             {
                 var recipe = db.m_recipes[i];
-                if (recipe == null || !recipe.m_enabled || recipe.m_item == null)
+                if (!recipe)
+                {
+                    continue;
+                }
+
+                var seasonal = season != null
+                    && season.Recipes != null
+                    && season.Recipes.Contains(recipe);
+                if ((!recipe.m_enabled && !seasonal) || !recipe.m_item)
+                {
+                    continue;
+                }
+
+                if (recipe.m_noCraftOnlyUpgrade)
                 {
                     continue;
                 }
@@ -945,7 +987,7 @@ namespace NjordWarehouseKeeper.UI
                 }
 
                 var shared = data.m_shared.m_name;
-                if (!player.IsRecipeKnown(shared) || !seen.Add("item:" + shared))
+                if (!allUnlocked && !player.IsRecipeKnown(shared))
                 {
                     continue;
                 }
@@ -953,6 +995,16 @@ namespace NjordWarehouseKeeper.UI
                 if (data.m_shared.m_dlc.Length > 0 &&
                     DLCMan.instance != null &&
                     !DLCMan.instance.IsDLCInstalled(data.m_shared.m_dlc))
+                {
+                    continue;
+                }
+
+                if (!seen.Add(OfferKeyForRecipe(recipe)))
+                {
+                    continue;
+                }
+
+                if (!HasRequirements(recipe.m_resources))
                 {
                     continue;
                 }
@@ -973,6 +1025,12 @@ namespace NjordWarehouseKeeper.UI
             }
         }
 
+        /// <summary>
+        /// Craft-tab station filter as if the player stood at the dropdown
+        /// choice: handcraft when the recipe has no station, that bench's
+        /// recipes when a bench is picked, plus handcraft on benches that
+        /// show basic recipes. Unity fake-null, not C# null.
+        /// </summary>
         private static bool StationMatches(CraftingStation station)
         {
             if (_station == AllKey)
@@ -980,17 +1038,28 @@ namespace NjordWarehouseKeeper.UI
                 return true;
             }
 
-            if (_station == HandKey)
-            {
-                return station == null;
-            }
-
             if (_station == HammerKey)
             {
                 return false;
             }
 
-            return station != null && station.m_name == _station;
+            if (_station == HandKey)
+            {
+                return !station;
+            }
+
+            if (station && station.m_name == _station)
+            {
+                return true;
+            }
+
+            return !station && CurrentStationShowsBasic();
+        }
+
+        private static bool CurrentStationShowsBasic()
+        {
+            var opt = CurrentStation();
+            return opt != null && opt.ShowsBasic;
         }
 
         private static void AddHammerPieces(List<CraftOffer> result, HashSet<string> seen)
@@ -1048,7 +1117,7 @@ namespace NjordWarehouseKeeper.UI
             for (var i = 0; i < resources.Length; i++)
             {
                 var req = resources[i];
-                if (req != null && req.m_resItem != null && req.GetAmount(1) > 0)
+                if (req != null && req.m_resItem && !req.m_upgraderResource && req.GetAmount(1) > 0)
                 {
                     return true;
                 }
@@ -1332,9 +1401,9 @@ namespace NjordWarehouseKeeper.UI
                 return null;
             }
 
-            if (offer.Recipe != null && offer.Recipe.m_item != null && offer.Recipe.m_item.m_itemData?.m_shared != null)
+            if (offer.Recipe != null)
             {
-                return "item:" + offer.Recipe.m_item.m_itemData.m_shared.m_name;
+                return OfferKeyForRecipe(offer.Recipe);
             }
 
             if (offer.Piece != null)
@@ -1343,6 +1412,23 @@ namespace NjordWarehouseKeeper.UI
             }
 
             return offer.Name;
+        }
+
+        private static string OfferKeyForRecipe(Recipe recipe)
+        {
+            if (recipe == null)
+            {
+                return "recipe:";
+            }
+
+            var item = "";
+            if (recipe.m_item && recipe.m_item.m_itemData?.m_shared != null)
+            {
+                item = recipe.m_item.m_itemData.m_shared.m_name;
+            }
+
+            var station = recipe.m_craftingStation ? recipe.m_craftingStation.m_name : HandKey;
+            return "recipe:" + recipe.name + "|" + item + "|" + station + "|" + recipe.m_minStationLevel + "|" + recipe.m_amount;
         }
 
         private static float RecipeScrollSensitivity()
@@ -1443,6 +1529,7 @@ namespace NjordWarehouseKeeper.UI
             internal string Key;
             internal string Token;
             internal Sprite Icon;
+            internal bool ShowsBasic;
         }
 
         private sealed class RecipeRow

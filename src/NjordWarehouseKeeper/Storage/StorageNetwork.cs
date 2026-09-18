@@ -789,7 +789,12 @@ namespace NjordWarehouseKeeper.Storage
             for (var i = 0; i < resources.Length; i++)
             {
                 var req = resources[i];
-                if (req == null || req.m_resItem == null || req.m_resItem.m_itemData == null)
+                if (req == null || !req.m_resItem || req.m_resItem.m_itemData == null)
+                {
+                    continue;
+                }
+
+                if (req.m_upgraderResource)
                 {
                     continue;
                 }
