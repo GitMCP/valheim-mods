@@ -76,6 +76,9 @@ namespace NjordWarehouseKeeper
                     { "njord_pref_hotkey_none", "None" },
                     { "njord_pref_hotkey_listen", "Press a key…" },
                     { "njord_pref_resupply_hint", "Tick items to keep in your pack. Resupply pulls that many from nearby chests." },
+                    { "njord_reorganize", "Reorganize" },
+                    { "njord_reorganize_ok", "Tidied the stores. Freed {0} slots." },
+                    { "njord_reorganize_none", "The stores are already tidy." },
                 });
         }
     }

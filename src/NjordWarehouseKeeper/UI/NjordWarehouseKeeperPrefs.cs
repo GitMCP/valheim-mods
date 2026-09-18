@@ -160,6 +160,30 @@ namespace NjordWarehouseKeeper.UI
             _hotkeyButton.onClick.AddListener(BeginCaptureHotkey);
             PaintHotkeyButton();
 
+            var reorgGo = gui.CreateButton(
+                Localization.instance.Localize("$njord_reorganize"),
+                _root.transform,
+                new Vector2(0.5f, 1f),
+                new Vector2(0.5f, 1f),
+                Vector2.zero,
+                0f,
+                32f);
+            var reorgRt = reorgGo.GetComponent<RectTransform>();
+            reorgRt.anchorMin = new Vector2(0f, 1f);
+            reorgRt.anchorMax = new Vector2(1f, 1f);
+            reorgRt.pivot = new Vector2(0.5f, 1f);
+            reorgRt.anchoredPosition = new Vector2(0f, -66f);
+            reorgRt.sizeDelta = new Vector2(-8f, 32f);
+            var reorgButton = reorgGo.GetComponent<Button>();
+            gui.ApplyButtonStyle(reorgButton, 15);
+            reorgButton.onClick.AddListener(OnReorganize);
+            var reorgLabel = reorgGo.GetComponentInChildren<Text>();
+            if (reorgLabel != null)
+            {
+                reorgLabel.text = Localization.instance.Localize("$njord_reorganize");
+                reorgLabel.alignment = TextAnchor.MiddleCenter;
+            }
+
             var title = MakeLabel(
                 gui,
                 _root.transform,
@@ -171,7 +195,7 @@ namespace NjordWarehouseKeeper.UI
             titleRt.anchorMin = new Vector2(0f, 1f);
             titleRt.anchorMax = new Vector2(1f, 1f);
             titleRt.pivot = new Vector2(0f, 1f);
-            titleRt.anchoredPosition = new Vector2(4f, -66f);
+            titleRt.anchoredPosition = new Vector2(4f, -104f);
             titleRt.sizeDelta = new Vector2(-8f, 24f);
 
             var hint = MakeLabel(
@@ -185,7 +209,7 @@ namespace NjordWarehouseKeeper.UI
             hintRt.anchorMin = new Vector2(0f, 1f);
             hintRt.anchorMax = new Vector2(1f, 1f);
             hintRt.pivot = new Vector2(0f, 1f);
-            hintRt.anchoredPosition = new Vector2(4f, -90f);
+            hintRt.anchoredPosition = new Vector2(4f, -128f);
             hintRt.sizeDelta = new Vector2(-8f, 32f);
             hint.horizontalOverflow = HorizontalWrapMode.Wrap;
             hint.verticalOverflow = VerticalWrapMode.Overflow;
@@ -204,7 +228,7 @@ namespace NjordWarehouseKeeper.UI
             scrollRt.anchorMin = new Vector2(0f, 0f);
             scrollRt.anchorMax = new Vector2(1f, 1f);
             scrollRt.offsetMin = new Vector2(0f, 0f);
-            scrollRt.offsetMax = new Vector2(0f, -124f);
+            scrollRt.offsetMax = new Vector2(0f, -162f);
 
             var scrollView = scroll.GetComponentInChildren<ScrollRect>(true);
             if (scrollView != null)
@@ -337,6 +361,34 @@ namespace NjordWarehouseKeeper.UI
             }
 
             ClientPreferences.DepositSkipFavourites.Value = on;
+        }
+
+        private static void OnReorganize()
+        {
+            if (NjordWarehouseKeeperPanel.IsDragging())
+            {
+                NjordWarehouseKeeperPanel.DepositDragged();
+            }
+
+            var hub = NjordWarehouseKeeperMarker.OpenHub;
+            var player = Player.m_localPlayer;
+            if (hub == null)
+            {
+                return;
+            }
+
+            var freed = StorageNetwork.ReorganizeNow(hub);
+            if (player != null)
+            {
+                player.Message(
+                    MessageHud.MessageType.Center,
+                    freed > 0
+                        ? Localization.instance.Localize("$njord_reorganize_ok").Replace("{0}", freed.ToString())
+                        : Localization.instance.Localize("$njord_reorganize_none"));
+            }
+
+            NjordWarehouseKeeperPanel.RefreshAfterRemote();
+            Refresh();
         }
 
         private static List<IndexedStack> Candidates(string query)

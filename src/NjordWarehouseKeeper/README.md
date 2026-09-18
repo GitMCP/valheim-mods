@@ -63,15 +63,17 @@ slot: keep the cursor still for a moment and the vanilla item tooltip appears.
   your pack; a greyed recipe still takes whatever is there. Hover an ingredient
   to see have / need.
 - **The cog** opens client Preferences: skip favourites on Deposit, bind a
-  Deposit+Resupply hotkey, and choose which items Resupply should keep, with a
-  quantity for each. The resupply list is titled Resupply.
+  Deposit+Resupply hotkey, **Reorganize** to tidy leftover stacks now, and
+  choose which items Resupply should keep, with a quantity for each. The
+  resupply list is titled Resupply.
 - While in range of Njord (the same radius as the network), the hotkey deposits
   and then resupplies without talking to him.
 - Click the search box to type. It keeps focus, so E does not close the panel.
 - Hold use, the same as a vanilla chest, to stack everything that will fit.
 - **From time to time** Njord merges leftover piles of the same item in nearby
   chests so they occupy as few slots as they can. Full stacks stay put. Chests
-  someone already has open are left alone. The interval is in config.
+  someone already has open are left alone. The interval is in config, and a
+  **Reorganize** button in Preferences runs the same tidy immediately.
 
 Chests behind a ward you cannot pass, private chests that are not yours, chests
 someone else already has open, other keepers, and incinerators are left

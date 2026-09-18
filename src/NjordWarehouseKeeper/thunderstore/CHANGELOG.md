@@ -13,7 +13,8 @@ to fill one, instead of whatever leftover pile sits in the first chest scanned.
 
 From time to time Njord tidies the stores: leftover piles of the same item are
 merged so they occupy as few slots as they can. On by default, every 60 seconds,
-and both settings are in config.
+and both settings are in config. Preferences has a Reorganize button that runs
+the same tidy immediately.
 
 ## 1.1.1
 

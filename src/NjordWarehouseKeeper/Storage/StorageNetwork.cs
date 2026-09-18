@@ -209,26 +209,49 @@ namespace NjordWarehouseKeeper.Storage
         /// </summary>
         internal static int Reorganize(Container hub)
         {
-            if (hub == null)
+            return Reorganize(hub, 48, passes: 1);
+        }
+
+        /// <summary>
+        /// Same as <see cref="Reorganize"/> but keeps going until nothing more
+        /// will merge, for the Preferences button.
+        /// </summary>
+        internal static int ReorganizeNow(Container hub)
+        {
+            return Reorganize(hub, 64, passes: 16);
+        }
+
+        private static int Reorganize(Container hub, int budget, int passes)
+        {
+            if (hub == null || budget <= 0 || passes <= 0)
             {
                 return 0;
             }
 
-            var before = Snapshot(hub).UsedSlots;
-            var listed = ListItems(hub);
-            var budget = 48;
-            var used = 0;
-            for (var i = 0; i < listed.Count && used < budget; i++)
+            var freed = 0;
+            for (var n = 0; n < passes; n++)
             {
-                used += CompactGroup(listed[i], budget - used);
+                var before = Snapshot(hub).UsedSlots;
+                var listed = ListItems(hub);
+                var used = 0;
+                for (var i = 0; i < listed.Count && used < budget; i++)
+                {
+                    used += CompactGroup(listed[i], budget - used);
+                }
+
+                if (used <= 0)
+                {
+                    break;
+                }
+
+                freed += Mathf.Max(0, before - Snapshot(hub).UsedSlots);
+                if (used < budget)
+                {
+                    break;
+                }
             }
 
-            if (used <= 0)
-            {
-                return 0;
-            }
-
-            return Mathf.Max(0, before - Snapshot(hub).UsedSlots);
+            return freed;
         }
 
         private static int CompactGroup(IndexedStack group, int budget)
