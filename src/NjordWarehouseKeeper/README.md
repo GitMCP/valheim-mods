@@ -16,6 +16,11 @@ on every client**. A client whose version does not match the server's is refused
 Drop `NjordWarehouseKeeper.dll` into `BepInEx/plugins`, or install the zip with a
 mod manager. Requires [Jötunn](https://thunderstore.io/c/valheim/p/ValheimModding/Jotunn/).
 
+## Source
+
+The source is on [GitHub](https://github.com/GitMCP/valheim-mods). The mod is
+open: if you want to fix something, change how it works, or help maintain it,
+open a pull request or an issue. You do not need to ask first.
 
 ## Building one
 

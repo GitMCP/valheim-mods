@@ -14,6 +14,9 @@ macOS, and Windows and needs no Visual Studio and no local copy of the game.
 Each mod's own README has the player-facing description and how that mod works. The rest
 of this file is about the repo: building, packaging, and adding another mod.
 
+The repository is open. Pull requests and issues are welcome: a fix, a change to a mod
+that is already here, or a new one. You do not need to ask first.
+
 All four are verified to load into a running game.
 
 ## Requirements
