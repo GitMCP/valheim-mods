@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.0
+
+While talking to Njord, vanilla crafting is hidden. A craft-style panel sits in
+that slot: pick a station from a dropdown, browse known recipes the same way as
+the Forge list (missing ingredients greyed and at the bottom), and Withdraw
+their materials. Greyed recipes still take whatever the stores have. The center
+panel is items only; the Items / Recipes tabs are gone.
+
 ## 1.1.1
 
 Deposit works again on Valheim 1.0.14. The game now refuses to merge cheated

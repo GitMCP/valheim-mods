@@ -7,12 +7,27 @@ namespace NjordWarehouseKeeper.Patches
     [HarmonyPatch(typeof(InventoryGui))]
     internal static class InventoryGuiPatch
     {
+        private static bool _openingHub;
+
+        [HarmonyPrefix]
+        [HarmonyPatch(nameof(InventoryGui.Show))]
+        private static void ShowHubPrefix(InventoryGui __instance, Container container)
+        {
+            _openingHub = NjordWarehouseKeeperMarker.IsHub(container);
+            if (_openingHub)
+            {
+                NjordWarehouseKeeperRecipes.HideVanillaCrafting();
+            }
+        }
+
         [HarmonyPostfix]
         [HarmonyPatch(nameof(InventoryGui.Show))]
-        private static void ShowHub(Container container)
+        private static void ShowHub(InventoryGui __instance, Container container)
         {
+            _openingHub = false;
             if (NjordWarehouseKeeperMarker.IsHub(container))
             {
+                NjordWarehouseKeeperRecipes.HideVanillaCrafting();
                 NjordWarehouseKeeperPanel.Open(container);
             }
             else
@@ -21,10 +36,57 @@ namespace NjordWarehouseKeeper.Patches
             }
         }
 
+        [HarmonyPrefix]
+        [HarmonyPatch("SetupCrafting")]
+        private static bool SkipSetupCrafting(InventoryGui __instance)
+        {
+            if (!HubIsOpen(__instance))
+            {
+                return true;
+            }
+
+            NjordWarehouseKeeperRecipes.HideVanillaCrafting();
+            return false;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch("UpdateCraftingPanel")]
+        private static bool SkipCraftingPanel(InventoryGui __instance)
+        {
+            if (!HubIsOpen(__instance))
+            {
+                return true;
+            }
+
+            NjordWarehouseKeeperRecipes.HideVanillaCrafting();
+            return false;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch("UpdateRecipe")]
+        private static bool SkipRecipe(InventoryGui __instance)
+        {
+            return !HubIsOpen(__instance);
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch("UpdateRepair")]
+        private static bool SkipRepair(InventoryGui __instance)
+        {
+            return !HubIsOpen(__instance);
+        }
+
+        private static bool HubIsOpen(InventoryGui gui)
+        {
+            return _openingHub
+                || (gui != null && NjordWarehouseKeeperMarker.IsHub(gui.m_currentContainer));
+        }
+
         [HarmonyPostfix]
         [HarmonyPatch(nameof(InventoryGui.Hide))]
         private static void HideHub()
         {
+            _openingHub = false;
             NjordWarehouseKeeperPanel.Close();
         }
 
@@ -114,8 +176,13 @@ namespace NjordWarehouseKeeper.Patches
 
         [HarmonyPrefix]
         [HarmonyPatch("Update")]
-        private static void KeepOpenWhileSearching()
+        private static void KeepOpenWhileSearching(InventoryGui __instance)
         {
+            if (HubIsOpen(__instance))
+            {
+                NjordWarehouseKeeperRecipes.HideVanillaCrafting();
+            }
+
             if (!NjordWarehouseKeeperPanel.SearchHasFocus())
             {
                 return;

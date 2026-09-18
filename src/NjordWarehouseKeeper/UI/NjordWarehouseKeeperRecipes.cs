@@ -9,66 +9,364 @@ using UnityEngine.UI;
 namespace NjordWarehouseKeeper.UI
 {
     /// <summary>
-    /// Known crafting recipes and hammer pieces. Rows the hub cannot fully afford
-    /// are greyed out; a click still pulls whatever of those ingredients is in
-    /// the nearby chests. Hover shows each ingredient with have / need.
+    /// Craft-column panel opened while talking to Njord. Vanilla crafting is hidden
+    /// and this wood panel sits in its place: a station dropdown, a compact recipe
+    /// list (unaffordable rows greyed and at the bottom), item detail, and Withdraw.
+    /// Greyed recipes still pull whatever of those ingredients is in nearby chests.
     /// </summary>
     internal static class NjordWarehouseKeeperRecipes
     {
-        private const float RowHeight = 52f;
+        private const float PanelWidth = 520f;
+        private const float PanelHeight = 640f;
+        private const float RowHeight = 32f;
+        private const float HeaderHeight = 58f;
+        private const float DropdownHeight = 32f;
+        private const float BodyTop = 102f;
+        private const float ListWidth = 210f;
+        private const float WithdrawHeight = 52f;
+        private const float IngredientSize = 64f;
+        private const int IngredientSlots = 4;
         private const string AllKey = "all";
         private const string HandKey = "hand";
         private const string HammerKey = "hammer";
 
         private static GameObject _root;
+        private static Image _stationIcon;
+        private static Text _title;
         private static Transform _rowParent;
         private static Button _stationButton;
         private static Text _stationLabel;
         private static GameObject _stationMenu;
         private static GameObject _stationCatcher;
         private static Transform _stationMenuParent;
+        private static Image _detailIcon;
+        private static Text _detailName;
+        private static Text _detailBody;
+        private static Button _withdraw;
+        private static Text _withdrawLabel;
+        private static Text _empty;
+        private static readonly List<IngredientSlot> _ingredients = new List<IngredientSlot>();
         private static string _station = AllKey;
         private static readonly List<RecipeRow> _rows = new List<RecipeRow>();
         private static readonly List<StationOpt> _stations = new List<StationOpt>();
+        private static string _selectedKey;
+        private static CraftOffer _selected;
+        private static float _nextRefresh;
+        private static float _nextSnap;
+        private static Container _pending;
 
         internal static bool IsOpen
         {
             get { return _root != null && _root.activeSelf; }
         }
 
-        internal static void Build(Transform parent, GUIManager gui)
+        internal static RectTransform RootRect
         {
-            _root = new GameObject("Recipes", typeof(RectTransform));
-            _root.transform.SetParent(parent, false);
-            var rootRt = _root.GetComponent<RectTransform>();
-            rootRt.anchorMin = new Vector2(0f, 0f);
-            rootRt.anchorMax = new Vector2(1f, 1f);
-            rootRt.offsetMin = new Vector2(16f, 18f);
-            rootRt.offsetMax = new Vector2(-16f, -NjordWarehouseKeeperPanel.ContentTop);
+            get { return _root != null ? _root.GetComponent<RectTransform>() : null; }
+        }
+
+        internal static void Open()
+        {
+            if (GUIManager.IsHeadless())
+            {
+                return;
+            }
+
+            if (GUIManager.Instance == null || GUIManager.CustomGUIFront == null)
+            {
+                _pending = NjordWarehouseKeeperMarker.OpenHub;
+                GUIManager.OnCustomGUIAvailable -= BuildPending;
+                GUIManager.OnCustomGUIAvailable += BuildPending;
+                return;
+            }
+
+            EnsureBuilt();
+            if (_root == null)
+            {
+                return;
+            }
+
+            HideVanillaCrafting();
+            _nextSnap = 0f;
+            SnapToCrafting();
+            _root.SetActive(true);
+            _nextRefresh = 0f;
+            Refresh();
+        }
+
+        internal static void SetOpen(bool on)
+        {
+            if (!on)
+            {
+                Close();
+                return;
+            }
+
+            Open();
+        }
+
+        internal static void Close()
+        {
+            _pending = null;
+            _selected = null;
+            _selectedKey = null;
+            SetMenuOpen(false);
+            HubItemHover.Hide();
+            if (_root != null)
+            {
+                _root.SetActive(false);
+            }
+        }
+
+        internal static void Tick()
+        {
+            if (!IsOpen)
+            {
+                return;
+            }
+
+            HideVanillaCrafting();
+            if (Time.time >= _nextSnap)
+            {
+                SnapToCrafting();
+            }
+
+            if (Time.time >= _nextRefresh)
+            {
+                Refresh();
+            }
+        }
+
+        internal static void EnsureBuilt()
+        {
+            if (_root != null)
+            {
+                return;
+            }
+
+            var gui = GUIManager.Instance;
+            if (gui == null || GUIManager.CustomGUIFront == null)
+            {
+                return;
+            }
+
+            var parent = GUIManager.CustomGUIFront.transform;
+            var mid = new Vector2(0.5f, 0.5f);
+            _root = gui.CreateWoodpanel(
+                parent,
+                mid,
+                mid,
+                Vector2.zero,
+                PanelWidth,
+                PanelHeight,
+                draggable: false);
+            _root.name = "NjordWarehouseKeeperRecipes";
+            if (_root.GetComponent<RectMask2D>() == null)
+            {
+                _root.AddComponent<RectMask2D>();
+            }
+
+            var iconGo = new GameObject("StationIcon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            iconGo.transform.SetParent(_root.transform, false);
+            _stationIcon = iconGo.GetComponent<Image>();
+            _stationIcon.preserveAspect = true;
+            _stationIcon.raycastTarget = false;
+            var iconRt = _stationIcon.rectTransform;
+            iconRt.anchorMin = new Vector2(0f, 1f);
+            iconRt.anchorMax = new Vector2(0f, 1f);
+            iconRt.pivot = new Vector2(0f, 1f);
+            iconRt.sizeDelta = new Vector2(40f, 40f);
+            iconRt.anchoredPosition = new Vector2(18f, -12f);
+
+            _title = MakeText(
+                gui,
+                _root.transform,
+                Localization.instance.Localize("$njord_recipes"),
+                22,
+                gui.ValheimOrange,
+                TextAnchor.MiddleCenter);
+            Place(_title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), 0f, -14f, 360f, 32f);
 
             _stationButton = MakeStationButton(gui);
             BuildStationMenu(gui);
 
+            var listRt = MakeFill(
+                "RecipeList",
+                new Vector2(0f, 0f),
+                new Vector2(0f, 1f),
+                new Vector2(16f, 16f),
+                new Vector2(16f + ListWidth, -BodyTop));
+            BuildRecipeList(gui, listRt);
+
+            var divider = new GameObject("Divider", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            divider.transform.SetParent(_root.transform, false);
+            var divImage = divider.GetComponent<Image>();
+            divImage.color = new Color(0.22f, 0.16f, 0.1f, 0.9f);
+            divImage.raycastTarget = false;
+            Place(
+                divider.GetComponent<RectTransform>(),
+                new Vector2(0f, 0f),
+                new Vector2(0f, 1f),
+                new Vector2(0.5f, 0.5f),
+                16f + ListWidth + 4f,
+                0f,
+                2f,
+                0f);
+            var divRt = divider.GetComponent<RectTransform>();
+            divRt.offsetMin = new Vector2(16f + ListWidth + 3f, 16f);
+            divRt.offsetMax = new Vector2(16f + ListWidth + 5f, -BodyTop);
+            divRt.sizeDelta = Vector2.zero;
+
+            BuildDetail(gui);
+            _root.SetActive(false);
+        }
+
+        private static void BuildPending()
+        {
+            GUIManager.OnCustomGUIAvailable -= BuildPending;
+            if (_pending != null || NjordWarehouseKeeperMarker.OpenHub != null)
+            {
+                Open();
+                _pending = null;
+            }
+        }
+
+        internal static void HideVanillaCrafting()
+        {
+            var gui = InventoryGui.instance;
+            if (gui != null && gui.m_crafting != null)
+            {
+                gui.m_crafting.gameObject.SetActive(false);
+            }
+        }
+
+        /// <summary>
+        /// Occupy the same slot as the vanilla crafting column.
+        /// </summary>
+        private static void SnapToCrafting()
+        {
+            var gui = InventoryGui.instance;
+            if (gui == null || gui.m_crafting == null || _root == null)
+            {
+                _nextSnap = Time.time + 0.35f;
+                return;
+            }
+
+            var craft = gui.m_crafting;
+            var ours = _root.GetComponent<RectTransform>();
+            var parent = craft.parent as RectTransform;
+            if (parent == null)
+            {
+                return;
+            }
+
+            if (ours.parent != parent)
+            {
+                ours.SetParent(parent, false);
+            }
+
+            ours.SetAsLastSibling();
+            ours.anchorMin = craft.anchorMin;
+            ours.anchorMax = craft.anchorMax;
+            ours.pivot = craft.pivot;
+            ours.offsetMin = craft.offsetMin;
+            ours.offsetMax = craft.offsetMax;
+            ours.localScale = craft.localScale;
+            ours.localRotation = craft.localRotation;
+            _nextSnap = Time.time + 0.35f;
+        }
+
+        internal static void Refresh()
+        {
+            if (!IsOpen || _rowParent == null)
+            {
+                return;
+            }
+
+            _nextRefresh = Time.time + 0.6f;
+            RebuildStations();
+            PaintStationChrome();
+
+            var listed = NjordWarehouseKeeperMarker.OpenHub != null
+                ? StorageNetwork.ListItems(NjordWarehouseKeeperMarker.OpenHub)
+                : new List<IndexedStack>();
+            var visible = KnownCrafts(listed);
+            while (_rows.Count > visible.Count)
+            {
+                var extra = _rows[_rows.Count - 1];
+                _rows.RemoveAt(_rows.Count - 1);
+                if (extra.Go != null)
+                {
+                    UnityEngine.Object.Destroy(extra.Go);
+                }
+            }
+
+            while (_rows.Count < visible.Count)
+            {
+                _rows.Add(MakeRow());
+            }
+
+            var selectedIndex = -1;
+            for (var i = 0; i < visible.Count; i++)
+            {
+                BindRow(_rows[i], visible[i], false);
+                if (_selectedKey != null && OfferKey(visible[i]) == _selectedKey)
+                {
+                    selectedIndex = i;
+                }
+            }
+
+            if (visible.Count == 0)
+            {
+                _selected = null;
+                _selectedKey = null;
+            }
+            else if (selectedIndex < 0)
+            {
+                selectedIndex = 0;
+                _selected = visible[0];
+                _selectedKey = OfferKey(_selected);
+            }
+            else
+            {
+                _selected = visible[selectedIndex];
+            }
+
+            for (var i = 0; i < visible.Count; i++)
+            {
+                PaintRow(_rows[i], i == selectedIndex);
+            }
+
+            if (_empty != null)
+            {
+                _empty.gameObject.SetActive(visible.Count == 0);
+            }
+
+            BindDetail(_selected, listed);
+        }
+
+        private static void BuildRecipeList(GUIManager gui, RectTransform host)
+        {
             var scroll = gui.CreateScrollView(
-                _root.transform,
+                host,
                 false,
                 true,
                 10f,
                 3f,
                 GUIManager.Instance.ValheimScrollbarHandleColorBlock,
                 new Color(0f, 0f, 0f, 0.35f),
-                480f,
-                300f);
+                ListWidth,
+                400f);
             var scrollRt = scroll.GetComponent<RectTransform>();
-            scrollRt.anchorMin = new Vector2(0f, 0f);
-            scrollRt.anchorMax = new Vector2(1f, 1f);
-            scrollRt.offsetMin = new Vector2(0f, 0f);
-            scrollRt.offsetMax = new Vector2(0f, -40f);
+            scrollRt.anchorMin = Vector2.zero;
+            scrollRt.anchorMax = Vector2.one;
+            scrollRt.offsetMin = Vector2.zero;
+            scrollRt.offsetMax = Vector2.zero;
 
             var scrollView = scroll.GetComponentInChildren<ScrollRect>(true);
             if (scrollView != null)
             {
-                NjordWarehouseKeeperPanel.FitScrollView(scrollView, NjordWarehouseKeeperPanel.ListScrollSensitivity());
+                NjordWarehouseKeeperPanel.FitScrollView(scrollView, RecipeScrollSensitivity());
                 scrollView.onValueChanged.AddListener(_ => HubItemHover.Hide());
                 _rowParent = scrollView.content;
                 var content = _rowParent as RectTransform;
@@ -87,13 +385,13 @@ namespace NjordWarehouseKeeper.UI
                     layout = _rowParent.gameObject.AddComponent<VerticalLayoutGroup>();
                 }
 
-                layout.childAlignment = TextAnchor.UpperCenter;
+                layout.childAlignment = TextAnchor.UpperLeft;
                 layout.childForceExpandHeight = false;
                 layout.childForceExpandWidth = true;
                 layout.childControlHeight = true;
                 layout.childControlWidth = true;
-                layout.spacing = 3f;
-                layout.padding = new RectOffset(4, 18, 4, 8);
+                layout.spacing = 1f;
+                layout.padding = new RectOffset(2, 14, 2, 4);
 
                 var fitter = _rowParent.gameObject.GetComponent<ContentSizeFitter>();
                 if (fitter == null)
@@ -105,60 +403,153 @@ namespace NjordWarehouseKeeper.UI
                 fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             }
 
-            _root.SetActive(false);
+            _empty = MakeText(
+                gui,
+                host,
+                Localization.instance.Localize("$njord_recipes_empty"),
+                14,
+                Color.white,
+                TextAnchor.MiddleCenter);
+            Place(_empty.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), 0f, 0f, 180f, 48f);
+            _empty.gameObject.SetActive(false);
         }
 
-        internal static void SetOpen(bool on)
+        private static void BuildDetail(GUIManager gui)
         {
-            if (_root == null)
+            var detail = MakeFill(
+                "Detail",
+                new Vector2(0f, 0f),
+                new Vector2(1f, 1f),
+                new Vector2(16f + ListWidth + 14f, 16f),
+                new Vector2(-16f, -BodyTop));
+
+            var iconGo = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            iconGo.transform.SetParent(detail, false);
+            _detailIcon = iconGo.GetComponent<Image>();
+            _detailIcon.preserveAspect = true;
+            _detailIcon.raycastTarget = false;
+            Place(_detailIcon.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), 0f, 0f, 40f, 40f);
+
+            _detailName = MakeText(gui, detail, "", 20, gui.ValheimOrange, TextAnchor.MiddleLeft);
+            Place(_detailName.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, 1f), 48f, 0f, 0f, 40f);
+            _detailName.rectTransform.offsetMin = new Vector2(48f, -40f);
+            _detailName.rectTransform.offsetMax = new Vector2(0f, 0f);
+            _detailName.horizontalOverflow = HorizontalWrapMode.Wrap;
+            _detailName.resizeTextForBestFit = true;
+            _detailName.resizeTextMinSize = 13;
+            _detailName.resizeTextMaxSize = 20;
+
+            var bodyHost = MakeFill(
+                "Body",
+                new Vector2(0f, 0f),
+                new Vector2(1f, 1f),
+                new Vector2(0f, 16f + WithdrawHeight + 12f + IngredientSize + 18f),
+                new Vector2(0f, -48f));
+            bodyHost.SetParent(detail, false);
+            if (bodyHost.GetComponent<RectMask2D>() == null)
             {
-                return;
+                bodyHost.gameObject.AddComponent<RectMask2D>();
             }
 
-            _root.SetActive(on);
-            SetMenuOpen(false);
-            if (on)
+            _detailBody = MakeText(gui, bodyHost, "", 15, Color.white, TextAnchor.UpperLeft);
+            var bodyRt = _detailBody.rectTransform;
+            bodyRt.anchorMin = Vector2.zero;
+            bodyRt.anchorMax = Vector2.one;
+            bodyRt.offsetMin = Vector2.zero;
+            bodyRt.offsetMax = Vector2.zero;
+            _detailBody.horizontalOverflow = HorizontalWrapMode.Wrap;
+            _detailBody.verticalOverflow = VerticalWrapMode.Overflow;
+            _detailBody.supportRichText = true;
+
+            BuildIngredientRow(gui, detail);
+            BuildWithdraw(gui, detail);
+        }
+
+        private static void BuildIngredientRow(GUIManager gui, RectTransform detail)
+        {
+            var row = MakeFill(
+                "Ingredients",
+                new Vector2(0f, 0f),
+                new Vector2(1f, 0f),
+                new Vector2(0f, 16f + WithdrawHeight + 8f),
+                new Vector2(0f, 16f + WithdrawHeight + 8f + IngredientSize + 16f));
+            row.SetParent(detail, false);
+
+            var width = IngredientSize;
+            var gap = 8f;
+            var total = IngredientSlots * width + (IngredientSlots - 1) * gap;
+            for (var i = 0; i < IngredientSlots; i++)
             {
-                Refresh();
-            }
-            else
-            {
-                HubItemHover.Hide();
+                var x = -total / 2f + width / 2f + i * (width + gap);
+                _ingredients.Add(MakeIngredientSlot(gui, row, x));
             }
         }
 
-        internal static void Refresh()
+        private static IngredientSlot MakeIngredientSlot(GUIManager gui, RectTransform parent, float x)
         {
-            if (!IsOpen || _rowParent == null)
-            {
-                return;
-            }
+            var go = new GameObject("Ing", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            go.transform.SetParent(parent, false);
+            var bg = go.GetComponent<Image>();
+            bg.color = new Color(0f, 0f, 0f, 0.45f);
+            var rt = go.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0.5f, 0.5f);
+            rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.sizeDelta = new Vector2(IngredientSize, IngredientSize);
+            rt.anchoredPosition = new Vector2(x, -6f);
 
-            RebuildStations();
-            PaintStationButton();
+            var label = MakeText(gui, go.transform, "", 11, Color.white, TextAnchor.LowerCenter);
+            Place(label.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 0f), 0f, 2f, IngredientSize + 8f, 16f);
 
-            var visible = KnownCrafts(NjordWarehouseKeeperPanel.SearchQuery);
-            while (_rows.Count > visible.Count)
-            {
-                var extra = _rows[_rows.Count - 1];
-                _rows.RemoveAt(_rows.Count - 1);
-                if (extra.Go != null)
-                {
-                    UnityEngine.Object.Destroy(extra.Go);
-                }
-            }
+            var iconGo = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            iconGo.transform.SetParent(go.transform, false);
+            var icon = iconGo.GetComponent<Image>();
+            icon.preserveAspect = true;
+            icon.raycastTarget = false;
+            Place(icon.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), 0f, 4f, 36f, 36f);
 
-            while (_rows.Count < visible.Count)
-            {
-                _rows.Add(MakeRow());
-            }
+            var amount = MakeText(gui, go.transform, "", 14, gui.ValheimOrange, TextAnchor.LowerRight);
+            Place(amount.rectTransform, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0f), -4f, 2f, 40f, 18f);
 
-            var listed = NjordWarehouseKeeperMarker.OpenHub != null
-                ? StorageNetwork.ListItems(NjordWarehouseKeeperMarker.OpenHub)
-                : new List<IndexedStack>();
-            for (var i = 0; i < visible.Count; i++)
+            var hover = go.AddComponent<HubItemHover>();
+            return new IngredientSlot
             {
-                BindRow(_rows[i], visible[i], listed);
+                Go = go,
+                Icon = icon,
+                Amount = amount,
+                Label = label,
+                Hover = hover,
+            };
+        }
+
+        private static void BuildWithdraw(GUIManager gui, RectTransform detail)
+        {
+            var go = gui.CreateButton(
+                Localization.instance.Localize("$njord_withdraw"),
+                detail,
+                new Vector2(0.5f, 0f),
+                new Vector2(0.5f, 0f),
+                Vector2.zero,
+                0f,
+                WithdrawHeight);
+            var rt = go.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0f, 0f);
+            rt.anchorMax = new Vector2(1f, 0f);
+            rt.pivot = new Vector2(0.5f, 0f);
+            rt.offsetMin = new Vector2(0f, 0f);
+            rt.offsetMax = new Vector2(0f, WithdrawHeight);
+            rt.anchoredPosition = Vector2.zero;
+            _withdraw = go.GetComponent<Button>();
+            gui.ApplyButtonStyle(_withdraw, 22);
+            _withdraw.onClick.AddListener(OnWithdraw);
+            _withdrawLabel = go.GetComponentInChildren<Text>();
+            if (_withdrawLabel != null)
+            {
+                _withdrawLabel.text = Localization.instance.Localize("$njord_withdraw");
+                _withdrawLabel.alignment = TextAnchor.MiddleCenter;
+                _withdrawLabel.resizeTextForBestFit = true;
+                _withdrawLabel.resizeTextMinSize = 16;
+                _withdrawLabel.resizeTextMaxSize = 24;
             }
         }
 
@@ -171,14 +562,14 @@ namespace NjordWarehouseKeeper.UI
                 new Vector2(1f, 1f),
                 Vector2.zero,
                 0f,
-                32f);
+                DropdownHeight);
             var rt = go.GetComponent<RectTransform>();
             rt.anchorMin = new Vector2(0f, 1f);
             rt.anchorMax = new Vector2(1f, 1f);
             rt.pivot = new Vector2(0.5f, 1f);
             rt.anchoredPosition = Vector2.zero;
-            rt.offsetMin = new Vector2(0f, -32f);
-            rt.offsetMax = Vector2.zero;
+            rt.offsetMin = new Vector2(16f, -BodyTop + 8f);
+            rt.offsetMax = new Vector2(-16f, -(HeaderHeight + 4f));
             var button = go.GetComponent<Button>();
             gui.ApplyButtonStyle(button, 14);
             button.onClick.AddListener(ToggleMenu);
@@ -217,8 +608,9 @@ namespace NjordWarehouseKeeper.UI
             menuRt.anchorMin = new Vector2(0f, 1f);
             menuRt.anchorMax = new Vector2(1f, 1f);
             menuRt.pivot = new Vector2(0.5f, 1f);
-            menuRt.anchoredPosition = new Vector2(0f, -34f);
-            menuRt.sizeDelta = new Vector2(0f, 220f);
+            menuRt.anchoredPosition = Vector2.zero;
+            menuRt.offsetMin = new Vector2(16f, -BodyTop + 8f - 240f);
+            menuRt.offsetMax = new Vector2(-16f, -BodyTop + 6f);
             var menuImage = _stationMenu.GetComponent<Image>();
             menuImage.color = new Color(0.12f, 0.09f, 0.07f, 0.96f);
             menuImage.raycastTarget = true;
@@ -296,10 +688,6 @@ namespace NjordWarehouseKeeper.UI
             if (_stationMenu != null)
             {
                 _stationMenu.SetActive(on);
-                if (on)
-                {
-                    _stationMenu.transform.SetAsLastSibling();
-                }
             }
 
             if (_stationCatcher != null)
@@ -314,6 +702,10 @@ namespace NjordWarehouseKeeper.UI
                     }
                 }
             }
+            else if (on && _stationMenu != null)
+            {
+                _stationMenu.transform.SetAsLastSibling();
+            }
         }
 
         private static void RebuildStations()
@@ -326,23 +718,27 @@ namespace NjordWarehouseKeeper.UI
             }
 
             _stations.Clear();
-            _stations.Add(new StationOpt { Key = AllKey, Token = "$njord_station_all" });
+            _stations.Add(new StationOpt { Key = AllKey, Token = "$njord_station_all", Icon = HammerIcon() });
             _stations.Add(new StationOpt { Key = HandKey, Token = "$njord_station_hand" });
-            _stations.Add(new StationOpt { Key = HammerKey, Token = "$njord_station_hammer" });
+            _stations.Add(new StationOpt { Key = HammerKey, Token = "$njord_station_hammer", Icon = HammerIcon() });
 
-            var names = new List<string>();
+            var extra = new List<StationOpt>();
             var seen = new HashSet<string>();
-            CollectStations(names, seen);
-            names.Sort(CompareLocalized);
-            for (var i = 0; i < names.Count; i++)
-            {
-                _stations.Add(new StationOpt { Key = names[i], Token = names[i] });
-            }
-
+            CollectStations(extra, seen);
+            extra.Sort((a, b) => CompareLocalized(a.Token, b.Token));
+            _stations.AddRange(extra);
             RebuildStationButtons();
         }
 
-        private static void CollectStations(List<string> names, HashSet<string> seen)
+        private static Sprite HammerIcon()
+        {
+            var db = ObjectDB.instance;
+            var prefab = db != null ? db.GetItemPrefab("Hammer") : null;
+            var drop = prefab != null ? prefab.GetComponent<ItemDrop>() : null;
+            return drop != null && drop.m_itemData != null ? drop.m_itemData.GetIcon() : null;
+        }
+
+        private static void CollectStations(List<StationOpt> names, HashSet<string> seen)
         {
             var db = ObjectDB.instance;
             if (db?.m_recipes != null)
@@ -375,14 +771,19 @@ namespace NjordWarehouseKeeper.UI
             }
         }
 
-        private static void AddStation(CraftingStation station, List<string> names, HashSet<string> seen)
+        private static void AddStation(CraftingStation station, List<StationOpt> names, HashSet<string> seen)
         {
             if (station == null || string.IsNullOrEmpty(station.m_name) || !seen.Add(station.m_name))
             {
                 return;
             }
 
-            names.Add(station.m_name);
+            names.Add(new StationOpt
+            {
+                Key = station.m_name,
+                Token = station.m_name,
+                Icon = station.m_icon,
+            });
         }
 
         private static int CompareLocalized(string a, string b)
@@ -446,50 +847,76 @@ namespace NjordWarehouseKeeper.UI
         private static void SelectStation(string key)
         {
             _station = key ?? AllKey;
+            _selected = null;
+            _selectedKey = null;
             SetMenuOpen(false);
             Refresh();
         }
 
-        private static void PaintStationButton()
+        private static void PaintStationChrome()
         {
-            if (_stationLabel == null)
+            var opt = CurrentStation();
+            var name = Localization.instance.Localize(opt != null ? opt.Token : "$njord_recipes");
+            if (_stationLabel != null)
             {
-                return;
+                _stationLabel.text = name + "  ▾";
             }
 
-            var token = "$njord_station_all";
+            if (_title != null)
+            {
+                _title.text = _station == AllKey
+                    ? Localization.instance.Localize("$njord_recipes")
+                    : name;
+            }
+
+            if (_stationIcon != null)
+            {
+                var icon = opt != null ? opt.Icon : null;
+                _stationIcon.sprite = icon;
+                _stationIcon.enabled = icon != null;
+            }
+        }
+
+        private static StationOpt CurrentStation()
+        {
             for (var i = 0; i < _stations.Count; i++)
             {
                 if (_stations[i].Key == _station)
                 {
-                    token = _stations[i].Token;
-                    break;
+                    return _stations[i];
                 }
             }
 
-            _stationLabel.text = Localization.instance.Localize(token) + "  ▾";
+            return null;
         }
 
-        private static List<CraftOffer> KnownCrafts(string query)
+        private static List<CraftOffer> KnownCrafts(List<IndexedStack> listed)
         {
-            query = query == null ? "" : query.Trim();
             var result = new List<CraftOffer>();
             var seen = new HashSet<string>();
             if (_station != HammerKey)
             {
-                AddRecipes(result, seen, query);
+                AddRecipes(result, seen);
             }
 
             if (_station == AllKey || _station == HammerKey)
             {
-                AddHammerPieces(result, seen, query);
+                AddHammerPieces(result, seen);
+            }
+
+            for (var i = 0; i < result.Count; i++)
+            {
+                var offer = result[i];
+                offer.Affordable = offer.Recipe != null
+                    ? StorageNetwork.CanAffordRecipe(listed, offer.Recipe)
+                    : StorageNetwork.CanAffordPiece(listed, offer.Piece);
             }
 
             result.Sort(CompareOffers);
             return result;
         }
 
-        private static void AddRecipes(List<CraftOffer> result, HashSet<string> seen, string query)
+        private static void AddRecipes(List<CraftOffer> result, HashSet<string> seen)
         {
             var player = Player.m_localPlayer;
             var db = ObjectDB.instance;
@@ -531,9 +958,9 @@ namespace NjordWarehouseKeeper.UI
                 }
 
                 var name = Localization.instance.Localize(shared);
-                if (query.Length > 0 && name.IndexOf(query, StringComparison.OrdinalIgnoreCase) < 0)
+                if (recipe.m_amount > 1)
                 {
-                    continue;
+                    name += " x" + recipe.m_amount;
                 }
 
                 result.Add(new CraftOffer
@@ -541,6 +968,7 @@ namespace NjordWarehouseKeeper.UI
                     Name = name,
                     Icon = data.GetIcon(),
                     Recipe = recipe,
+                    Tooltip = Localization.instance.Localize(data.GetTooltip()),
                 });
             }
         }
@@ -565,7 +993,7 @@ namespace NjordWarehouseKeeper.UI
             return station != null && station.m_name == _station;
         }
 
-        private static void AddHammerPieces(List<CraftOffer> result, HashSet<string> seen, string query)
+        private static void AddHammerPieces(List<CraftOffer> result, HashSet<string> seen)
         {
             var player = Player.m_localPlayer;
             var table = HammerTable();
@@ -600,17 +1028,12 @@ namespace NjordWarehouseKeeper.UI
                     continue;
                 }
 
-                var name = Localization.instance.Localize(piece.m_name);
-                if (query.Length > 0 && name.IndexOf(query, StringComparison.OrdinalIgnoreCase) < 0)
-                {
-                    continue;
-                }
-
                 result.Add(new CraftOffer
                 {
-                    Name = name,
+                    Name = Localization.instance.Localize(piece.m_name),
                     Icon = piece.m_icon,
                     Piece = piece,
+                    Tooltip = Localization.instance.Localize(piece.m_description ?? ""),
                 });
             }
         }
@@ -651,80 +1074,72 @@ namespace NjordWarehouseKeeper.UI
 
         private static int CompareOffers(CraftOffer a, CraftOffer b)
         {
+            if (a.Affordable != b.Affordable)
+            {
+                return a.Affordable ? -1 : 1;
+            }
+
             return string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase);
         }
 
         private static RecipeRow MakeRow()
         {
-            var gui = GUIManager.Instance;
-            var row = gui.CreateButton(
-                "",
-                _rowParent,
-                new Vector2(0f, 1f),
-                new Vector2(1f, 1f),
-                Vector2.zero,
-                0f,
-                RowHeight);
-            gui.ApplyButtonStyle(row.GetComponent<Button>(), 16);
-            var layout = row.GetComponent<LayoutElement>();
-            if (layout == null)
-            {
-                layout = row.AddComponent<LayoutElement>();
-            }
-
+            var go = new GameObject(
+                "RecipeRow",
+                typeof(RectTransform),
+                typeof(CanvasRenderer),
+                typeof(Image),
+                typeof(Button),
+                typeof(LayoutElement));
+            go.transform.SetParent(_rowParent, false);
+            var layout = go.GetComponent<LayoutElement>();
             layout.minHeight = RowHeight;
             layout.preferredHeight = RowHeight;
             layout.flexibleWidth = 1f;
+            var bg = go.GetComponent<Image>();
+            bg.color = new Color(1f, 1f, 1f, 0.04f);
+            var button = go.GetComponent<Button>();
+            button.targetGraphic = bg;
+            button.transition = Selectable.Transition.ColorTint;
+            button.navigation = new Navigation { mode = Navigation.Mode.None };
+            var colors = button.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(1f, 0.9f, 0.7f, 1f);
+            colors.pressedColor = new Color(1f, 0.78f, 0.35f, 1f);
+            colors.selectedColor = new Color(1f, 0.78f, 0.35f, 1f);
+            colors.colorMultiplier = 1f;
+            button.colors = colors;
 
             var iconGo = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            iconGo.transform.SetParent(row.transform, false);
+            iconGo.transform.SetParent(go.transform, false);
             var icon = iconGo.GetComponent<Image>();
             icon.preserveAspect = true;
             icon.raycastTarget = false;
-            var iconRt = icon.rectTransform;
-            iconRt.anchorMin = new Vector2(0f, 0.5f);
-            iconRt.anchorMax = new Vector2(0f, 0.5f);
-            iconRt.pivot = new Vector2(0f, 0.5f);
-            iconRt.sizeDelta = new Vector2(40f, 40f);
-            iconRt.anchoredPosition = new Vector2(8f, 0f);
+            Place(icon.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), 4f, 0f, 24f, 24f);
 
-            var nameGo = gui.CreateText(
-                "",
-                row.transform,
-                new Vector2(0f, 0.5f),
-                new Vector2(1f, 0.5f),
-                Vector2.zero,
-                gui.AveriaSerifBold,
-                16,
-                gui.ValheimOrange,
-                true,
-                Color.black,
-                0f,
-                28f,
-                false);
-            var nameRt = nameGo.GetComponent<RectTransform>();
+            var gui = GUIManager.Instance;
+            var name = MakeText(gui, go.transform, "", 14, gui.ValheimOrange, TextAnchor.MiddleLeft);
+            var nameRt = name.rectTransform;
             nameRt.anchorMin = new Vector2(0f, 0f);
             nameRt.anchorMax = new Vector2(1f, 1f);
-            nameRt.offsetMin = new Vector2(56f, 4f);
-            nameRt.offsetMax = new Vector2(-12f, -4f);
-            var name = nameGo.GetComponent<Text>();
-            name.alignment = TextAnchor.MiddleLeft;
+            nameRt.offsetMin = new Vector2(32f, 0f);
+            nameRt.offsetMax = new Vector2(-4f, 0f);
             name.horizontalOverflow = HorizontalWrapMode.Overflow;
             name.raycastTarget = false;
 
             var view = new RecipeRow
             {
-                Go = row,
-                Button = row.GetComponent<Button>(),
+                Go = go,
+                Button = button,
+                Background = bg,
                 Icon = icon,
                 Name = name,
-                Hover = row.AddComponent<HubItemHover>(),
             };
-            view.Button.onClick.AddListener(() => OnClicked(view));
+            button.onClick.AddListener(() => OnClicked(view));
             return view;
         }
 
-        private static void BindRow(RecipeRow view, CraftOffer offer, List<IndexedStack> listed)
+        private static void BindRow(RecipeRow view, CraftOffer offer, bool selected)
         {
             view.Offer = offer;
             if (view.Icon != null)
@@ -738,11 +1153,19 @@ namespace NjordWarehouseKeeper.UI
                 view.Name.text = offer.Name;
             }
 
-            var can = offer.Recipe != null
-                ? StorageNetwork.CanAffordRecipe(listed, offer.Recipe)
-                : StorageNetwork.CanAffordPiece(listed, offer.Piece);
-            view.Button.interactable = true;
-            var dim = can ? Color.white : new Color(0.45f, 0.45f, 0.45f, 1f);
+            PaintRow(view, selected);
+        }
+
+        private static void PaintRow(RecipeRow view, bool selected)
+        {
+            var offer = view.Offer;
+            if (offer == null)
+            {
+                return;
+            }
+
+            var can = offer.Affordable;
+            var dim = can ? Color.white : new Color(0.5f, 0.5f, 0.5f, 1f);
             if (view.Icon != null)
             {
                 view.Icon.color = dim;
@@ -751,86 +1174,258 @@ namespace NjordWarehouseKeeper.UI
             if (view.Name != null)
             {
                 view.Name.color = can
-                    ? GUIManager.Instance.ValheimOrange
+                    ? (selected ? GUIManager.Instance.ValheimOrange : new Color(0.92f, 0.88f, 0.78f, 1f))
                     : new Color(0.55f, 0.55f, 0.55f, 1f);
             }
 
-            var colors = view.Button.colors;
-            colors.normalColor = can ? Color.white : new Color(0.4f, 0.4f, 0.4f, 1f);
-            colors.highlightedColor = can
-                ? new Color(1f, 0.9f, 0.7f, 1f)
-                : new Color(0.52f, 0.52f, 0.52f, 1f);
-            colors.pressedColor = colors.highlightedColor;
-            colors.disabledColor = new Color(0.35f, 0.35f, 0.35f, 0.8f);
-            view.Button.colors = colors;
-
-            if (view.Hover != null)
+            if (view.Background != null)
             {
-                view.Hover.BindText(offer.Name, IngredientTooltip(offer, listed));
+                view.Background.color = selected
+                    ? (can ? new Color(0.85f, 0.5f, 0.12f, 0.85f) : new Color(0.45f, 0.3f, 0.12f, 0.7f))
+                    : new Color(1f, 1f, 1f, 0.03f);
             }
         }
 
-        private static string IngredientTooltip(CraftOffer offer, List<IndexedStack> listed)
+        private static void BindDetail(CraftOffer offer, List<IndexedStack> listed)
         {
-            var lines = offer.Recipe != null
-                ? StorageNetwork.RecipeIngredients(offer.Recipe, listed)
-                : StorageNetwork.PieceIngredients(offer.Piece, listed);
-            if (lines.Count == 0)
+            var has = offer != null;
+            if (_detailIcon != null)
             {
-                return "";
+                _detailIcon.enabled = has && offer.Icon != null;
+                _detailIcon.sprite = has ? offer.Icon : null;
             }
 
-            var text = new StringBuilder();
-            for (var i = 0; i < lines.Count; i++)
+            if (_detailName != null)
             {
-                if (i > 0)
-                {
-                    text.Append('\n');
-                }
+                _detailName.text = has ? offer.Name : "";
+            }
 
-                var line = lines[i];
-                text.Append(line.DisplayName);
-                text.Append('\n');
-                if (line.Have < line.Need)
+            if (_detailBody != null)
+            {
+                _detailBody.text = has ? (offer.Tooltip ?? "") : "";
+            }
+
+            if (_withdraw != null)
+            {
+                _withdraw.interactable = has;
+            }
+
+            var lines = has
+                ? (offer.Recipe != null
+                    ? StorageNetwork.RecipeIngredients(offer.Recipe, listed)
+                    : StorageNetwork.PieceIngredients(offer.Piece, listed))
+                : new List<StorageNetwork.IngredientLine>();
+            for (var i = 0; i < _ingredients.Count; i++)
+            {
+                BindIngredient(_ingredients[i], i < lines.Count ? lines[i] : (StorageNetwork.IngredientLine?)null);
+            }
+        }
+
+        private static void BindIngredient(IngredientSlot slot, StorageNetwork.IngredientLine? line)
+        {
+            var has = line.HasValue && line.Value.Need > 0;
+            slot.Go.SetActive(has);
+            if (!has)
+            {
+                return;
+            }
+
+            var ing = line.Value;
+            var enough = ing.Have >= ing.Need;
+            if (slot.Icon != null)
+            {
+                slot.Icon.sprite = ing.Icon;
+                slot.Icon.enabled = ing.Icon != null;
+                slot.Icon.color = enough ? Color.white : new Color(0.5f, 0.5f, 0.5f, 1f);
+            }
+
+            if (slot.Label != null)
+            {
+                slot.Label.text = ing.DisplayName;
+                slot.Label.color = enough ? Color.white : new Color(0.65f, 0.65f, 0.65f, 1f);
+            }
+
+            if (slot.Amount != null)
+            {
+                slot.Amount.text = ing.Need.ToString();
+                slot.Amount.color = enough
+                    ? GUIManager.Instance.ValheimOrange
+                    : new Color(0.85f, 0.25f, 0.2f, 1f);
+            }
+
+            if (slot.Hover != null)
+            {
+                var body = new StringBuilder();
+                if (ing.Have < ing.Need)
                 {
-                    text.Append("<color=red>");
-                    text.Append(line.Have);
-                    text.Append("</color>");
+                    body.Append("<color=red>");
+                    body.Append(ing.Have);
+                    body.Append("</color>");
                 }
                 else
                 {
-                    text.Append(line.Have);
+                    body.Append(ing.Have);
                 }
 
-                text.Append(" / ");
-                text.Append(line.Need);
+                body.Append(" / ");
+                body.Append(ing.Need);
+                slot.Hover.BindText(ing.DisplayName, body.ToString());
             }
-
-            return text.ToString();
         }
 
         private static void OnClicked(RecipeRow view)
         {
-            if (view == null || view.Offer == null || NjordWarehouseKeeperPanel.IsDragging())
+            if (view == null || view.Offer == null)
             {
-                if (NjordWarehouseKeeperPanel.IsDragging())
-                {
-                    NjordWarehouseKeeperPanel.DepositDragged();
-                }
-
                 return;
             }
 
-            if (view.Offer.Recipe != null)
+            if (NjordWarehouseKeeperPanel.IsDragging())
             {
-                StorageNetwork.WithdrawRecipe(Player.m_localPlayer, NjordWarehouseKeeperMarker.OpenHub, view.Offer.Recipe);
+                NjordWarehouseKeeperPanel.DepositDragged();
+                return;
+            }
+
+            _selected = view.Offer;
+            _selectedKey = OfferKey(view.Offer);
+            for (var i = 0; i < _rows.Count; i++)
+            {
+                PaintRow(_rows[i], _rows[i].Offer != null && OfferKey(_rows[i].Offer) == _selectedKey);
+            }
+
+            var listed = NjordWarehouseKeeperMarker.OpenHub != null
+                ? StorageNetwork.ListItems(NjordWarehouseKeeperMarker.OpenHub)
+                : new List<IndexedStack>();
+            BindDetail(_selected, listed);
+        }
+
+        private static void OnWithdraw()
+        {
+            if (NjordWarehouseKeeperPanel.IsDragging())
+            {
+                NjordWarehouseKeeperPanel.DepositDragged();
+                return;
+            }
+
+            var offer = _selected;
+            if (offer == null)
+            {
+                return;
+            }
+
+            if (offer.Recipe != null)
+            {
+                StorageNetwork.WithdrawRecipe(Player.m_localPlayer, NjordWarehouseKeeperMarker.OpenHub, offer.Recipe);
             }
             else
             {
-                StorageNetwork.WithdrawPiece(Player.m_localPlayer, NjordWarehouseKeeperMarker.OpenHub, view.Offer.Piece);
+                StorageNetwork.WithdrawPiece(Player.m_localPlayer, NjordWarehouseKeeperMarker.OpenHub, offer.Piece);
             }
 
             NjordWarehouseKeeperPanel.RefreshAfterRemote();
+        }
+
+        private static string OfferKey(CraftOffer offer)
+        {
+            if (offer == null)
+            {
+                return null;
+            }
+
+            if (offer.Recipe != null && offer.Recipe.m_item != null && offer.Recipe.m_item.m_itemData?.m_shared != null)
+            {
+                return "item:" + offer.Recipe.m_item.m_itemData.m_shared.m_name;
+            }
+
+            if (offer.Piece != null)
+            {
+                return "piece:" + offer.Piece.m_name;
+            }
+
+            return offer.Name;
+        }
+
+        private static float RecipeScrollSensitivity()
+        {
+            const float valheimStyle = 40f;
+            var recipePitch = 30f;
+            var recipeSensitivity = valheimStyle;
+            var inv = InventoryGui.instance;
+            if (inv != null)
+            {
+                if (inv.m_recipeListSpace > 1f)
+                {
+                    recipePitch = inv.m_recipeListSpace;
+                }
+
+                var recipeScroll = inv.m_recipeEnsureVisible != null
+                    ? inv.m_recipeEnsureVisible.GetComponent<ScrollRect>()
+                    : null;
+                if (recipeScroll != null && recipeScroll.scrollSensitivity > 0f)
+                {
+                    recipeSensitivity = recipeScroll.scrollSensitivity;
+                }
+            }
+
+            return recipeSensitivity * (RowHeight / recipePitch);
+        }
+
+        private static RectTransform MakeFill(string name, Vector2 anchorMin, Vector2 anchorMax, Vector2 offsetMin, Vector2 offsetMax)
+        {
+            var go = new GameObject(name, typeof(RectTransform));
+            go.transform.SetParent(_root.transform, false);
+            var rt = go.GetComponent<RectTransform>();
+            rt.anchorMin = anchorMin;
+            rt.anchorMax = anchorMax;
+            rt.offsetMin = offsetMin;
+            rt.offsetMax = offsetMax;
+            return rt;
+        }
+
+        private static Text MakeText(
+            GUIManager gui,
+            Transform parent,
+            string text,
+            int size,
+            Color color,
+            TextAnchor align)
+        {
+            var mid = new Vector2(0.5f, 0.5f);
+            var go = gui.CreateText(
+                text,
+                parent,
+                mid,
+                mid,
+                Vector2.zero,
+                gui.AveriaSerifBold,
+                size,
+                color,
+                true,
+                Color.black,
+                100f,
+                24f,
+                false);
+            var label = go.GetComponent<Text>();
+            label.alignment = align;
+            label.raycastTarget = false;
+            return label;
+        }
+
+        private static void Place(
+            RectTransform rt,
+            Vector2 anchorMin,
+            Vector2 anchorMax,
+            Vector2 pivot,
+            float x,
+            float y,
+            float width,
+            float height)
+        {
+            rt.anchorMin = anchorMin;
+            rt.anchorMax = anchorMax;
+            rt.pivot = pivot;
+            rt.anchoredPosition = new Vector2(x, y);
+            rt.sizeDelta = new Vector2(width, height);
         }
 
         private sealed class CraftOffer
@@ -839,22 +1434,34 @@ namespace NjordWarehouseKeeper.UI
             internal Sprite Icon;
             internal Recipe Recipe;
             internal Piece Piece;
+            internal string Tooltip;
+            internal bool Affordable;
         }
 
         private sealed class StationOpt
         {
             internal string Key;
             internal string Token;
+            internal Sprite Icon;
         }
 
         private sealed class RecipeRow
         {
             internal GameObject Go;
             internal Button Button;
+            internal Image Background;
             internal Image Icon;
             internal Text Name;
-            internal HubItemHover Hover;
             internal CraftOffer Offer;
+        }
+
+        private sealed class IngredientSlot
+        {
+            internal GameObject Go;
+            internal Image Icon;
+            internal Text Amount;
+            internal Text Label;
+            internal HubItemHover Hover;
         }
     }
 }

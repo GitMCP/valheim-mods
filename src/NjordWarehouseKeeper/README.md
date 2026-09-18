@@ -34,9 +34,9 @@ now and then the way a vendor does.
 
 ## Using it
 
-Walk up and press use. Your inventory stays on the left and crafting on the
-right. Njord's panel opens in the center, between them. **Items** and **Recipes**
-tabs sit under the title; the cog still opens Preferences. Identical items from
+Walk up and press use. Your inventory stays on the left. Vanilla crafting on the
+right is hidden; Njord's recipe panel opens in that slot, and his item list
+opens in the center. The cog still opens Preferences. Identical items from
 different chests share one row. Hover a row the same way you hover a pack
 slot: keep the cursor still for a moment and the vanilla item tooltip appears.
 
@@ -52,11 +52,14 @@ slot: keep the cursor still for a moment and the vanilla item tooltip appears.
   into the network. The hotbar is left alone unless you turn that on in config.
 - **Resupply** fills your pack from nearby chests up to the counts set in Preferences.
 - **Quick Stack** deposits and then resupplies in one click.
-- **Recipes** lists crafts you know, filtered by crafting station (All,
-  Handcraft, Hammer, and every station in the game). Rows the nearby chests
-  cannot fully afford are greyed out. Hover a row to see each ingredient with
-  how many are in the stores and how many the craft needs. Click a row to pull
-  those ingredients into your pack; a greyed row still takes whatever is there.
+- **Recipes** sit in the right-hand panel, in place of vanilla crafting. A
+  dropdown at the top picks a station (All, Handcraft, Hammer, and every
+  crafting bench in the game). Known crafts are listed like the vanilla recipe
+  list: compact rows, orange when selected, greyed and at the bottom when the
+  nearby chests cannot fully afford them. The right side shows the item, its
+  tooltip, and the ingredient slots. **Withdraw** pulls those ingredients into
+  your pack; a greyed recipe still takes whatever is there. Hover an ingredient
+  to see have / need.
 - **The cog** opens client Preferences: skip favourites on Deposit, bind a
   Deposit+Resupply hotkey, and choose which items Resupply should keep, with a
   quantity for each. The resupply list is titled Resupply.

@@ -342,16 +342,18 @@ namespace NjordWarehouseKeeper.Storage
 
         internal readonly struct IngredientLine
         {
-            internal IngredientLine(string displayName, int need, int have)
+            internal IngredientLine(string displayName, int need, int have, Sprite icon)
             {
                 DisplayName = displayName;
                 Need = need;
                 Have = have;
+                Icon = icon;
             }
 
             internal readonly string DisplayName;
             internal readonly int Need;
             internal readonly int Have;
+            internal readonly Sprite Icon;
         }
 
         private static bool CanAffordNeeds(List<IndexedStack> listed, List<Need> needs, bool onlyOne)
@@ -473,7 +475,8 @@ namespace NjordWarehouseKeeper.Storage
                 lines.Add(new IngredientLine(
                     needs[i].DisplayName,
                     needs[i].Amount,
-                    CountBySharedName(listed, needs[i].SharedName)));
+                    CountBySharedName(listed, needs[i].SharedName),
+                    needs[i].Icon));
             }
 
             return lines;
@@ -565,12 +568,14 @@ namespace NjordWarehouseKeeper.Storage
                     continue;
                 }
 
-                var shared = req.m_resItem.m_itemData.m_shared.m_name;
+                var data = req.m_resItem.m_itemData;
+                var shared = data.m_shared.m_name;
                 needs.Add(new Need
                 {
                     SharedName = shared,
                     DisplayName = Localization.instance.Localize(shared),
                     Amount = amount,
+                    Icon = data.GetIcon(),
                 });
             }
 
@@ -646,6 +651,7 @@ namespace NjordWarehouseKeeper.Storage
             internal string SharedName;
             internal string DisplayName;
             internal int Amount;
+            internal Sprite Icon;
         }
 
         private static int HowManyFit(Inventory dest, ItemDrop.ItemData sample, int want)

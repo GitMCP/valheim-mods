@@ -12,7 +12,8 @@ namespace NjordWarehouseKeeper.UI
 {
     /// <summary>
     /// Sits in the gap between the backpack and the crafting column and lists the
-    /// nearby chests as full-width rows.
+    /// nearby chests as full-width rows. Recipes live in a separate panel that
+    /// replaces vanilla crafting on the right.
     /// </summary>
     internal static class NjordWarehouseKeeperPanel
     {
@@ -23,32 +24,24 @@ namespace NjordWarehouseKeeper.UI
             Category,
         }
 
-        private enum HubTab
-        {
-            Items,
-            Recipes,
-        }
-
         private const float PanelWidth = 520f;
         private const float PanelHeight = 640f;
         private const float RowHeight = 52f;
         private const float RowSpacing = 3f;
         private const float IconSize = 40f;
-        private const float TabY = 82f;
-        private const float TabHeight = 30f;
-        private const float ActionY = 118f;
+        private const float ActionY = 82f;
         private const float ActionHeight = 38f;
-        private const float SearchY = 164f;
-        private const float CatRow1Y = 202f;
-        private const float CatRow2Y = 234f;
-        private const float SortY = 268f;
-        private const float ListTop = 300f;
+        private const float SearchY = 128f;
+        private const float CatRow1Y = 166f;
+        private const float CatRow2Y = 198f;
+        private const float SortY = 232f;
+        private const float ListTop = 264f;
         private const float ListBottom = 28f;
 
         /// <summary>
-        /// Top inset for the preferences and recipes overlays, just below search.
+        /// Top inset for the preferences overlay, just below search.
         /// </summary>
-        internal const float ContentTop = 200f;
+        internal const float ContentTop = 164f;
 
         private static GameObject _root;
         private static Text _title;
@@ -61,8 +54,6 @@ namespace NjordWarehouseKeeper.UI
         private static GameObject _resupplyGo;
         private static GameObject _quickStackGo;
         private static Button _cogButton;
-        private static Button _itemsTab;
-        private static Button _recipesTab;
         private static Button _favFilterButton;
         private static readonly List<RowView> _rows = new List<RowView>();
         private static readonly List<Button> _categoryButtons = new List<Button>();
@@ -71,7 +62,6 @@ namespace NjordWarehouseKeeper.UI
         private static readonly List<GameObject> _chromeUi = new List<GameObject>();
         private static ItemCategory _category = ItemCategory.All;
         private static SortMode _sort = SortMode.Name;
-        private static HubTab _tab = HubTab.Items;
         private static string _query = "";
         private static bool _favouritesOnly;
         private static bool _prefsOpen;
@@ -104,13 +94,13 @@ namespace NjordWarehouseKeeper.UI
                 return;
             }
 
-            _tab = HubTab.Items;
             SetPrefsOpen(false);
             _nextSnap = 0f;
             SnapBetweenInventoryAndCrafting();
             _root.SetActive(true);
             _nextRefresh = 0f;
             Refresh();
+            NjordWarehouseKeeperRecipes.Open();
         }
 
         internal static void Close()
@@ -120,9 +110,8 @@ namespace NjordWarehouseKeeper.UI
             _splitGroup = null;
             UnfocusSearch();
             HubItemHover.Hide();
-            _tab = HubTab.Items;
             SetPrefsOpen(false);
-            NjordWarehouseKeeperRecipes.SetOpen(false);
+            NjordWarehouseKeeperRecipes.Close();
             if (_root != null)
             {
                 _root.SetActive(false);
@@ -147,8 +136,9 @@ namespace NjordWarehouseKeeper.UI
                 SnapBetweenInventoryAndCrafting();
             }
 
+            NjordWarehouseKeeperRecipes.Tick();
             SyncSearchFocus();
-            if (_prefsOpen || _tab != HubTab.Items)
+            if (_prefsOpen)
             {
                 return;
             }
@@ -259,17 +249,25 @@ namespace NjordWarehouseKeeper.UI
 
             var center = parent.rect.center;
             var pos = Vector2.zero;
-            if (gui.m_crafting != null)
+            var rightPanel = NjordWarehouseKeeperRecipes.IsOpen
+                ? NjordWarehouseKeeperRecipes.RootRect
+                : gui.m_crafting;
+            if (rightPanel == null)
+            {
+                rightPanel = gui.m_crafting;
+            }
+
+            if (rightPanel != null)
             {
                 var left = EdgeX(parent, gui.m_player, right: true);
                 if (gui.m_info != null &&
                     parent.InverseTransformPoint(gui.m_info.position).x <
-                    parent.InverseTransformPoint(gui.m_crafting.position).x)
+                    parent.InverseTransformPoint(rightPanel.position).x)
                 {
                     left = Mathf.Max(left, EdgeX(parent, gui.m_info, right: true));
                 }
 
-                var right = EdgeX(parent, gui.m_crafting, right: false);
+                var right = EdgeX(parent, rightPanel, right: false);
                 var midX = (left + right) * 0.5f;
                 var half = PanelWidth * 0.5f;
                 const float pad = 12f;
@@ -358,8 +356,6 @@ namespace NjordWarehouseKeeper.UI
                     SetPrefsOpen(!_prefsOpen);
                 });
             PlaceTopRight(_cogButton.GetComponent<RectTransform>(), 18f, 28f, 28f, 16f);
-
-            AddTabButtons(gui);
 
             _search = gui.CreateInputField(
                 _root.transform,
@@ -462,7 +458,7 @@ namespace NjordWarehouseKeeper.UI
             }
 
             NjordWarehouseKeeperPrefs.Build(_root.transform, gui);
-            NjordWarehouseKeeperRecipes.Build(_root.transform, gui);
+            NjordWarehouseKeeperRecipes.EnsureBuilt();
             _root.SetActive(false);
         }
 
@@ -659,27 +655,11 @@ namespace NjordWarehouseKeeper.UI
             ApplyChrome();
         }
 
-        private static void SetTab(HubTab tab)
-        {
-            _tab = tab;
-            if (_prefsOpen)
-            {
-                _prefsOpen = false;
-                NjordWarehouseKeeperPrefs.SetOpen(false);
-            }
-
-            ApplyChrome();
-        }
-
         private static void ApplyChrome()
         {
             var prefs = _prefsOpen;
-            var items = !prefs && _tab == HubTab.Items;
-            var recipes = !prefs && _tab == HubTab.Recipes;
-
             SetActiveAll(_chromeUi, !prefs);
-            SetActiveAll(_itemTabUi, items);
-            NjordWarehouseKeeperRecipes.SetOpen(recipes);
+            SetActiveAll(_itemTabUi, !prefs);
 
             if (_search != null)
             {
@@ -693,8 +673,6 @@ namespace NjordWarehouseKeeper.UI
             }
 
             Tint(_cogButton, prefs);
-            Tint(_itemsTab, !prefs && _tab == HubTab.Items);
-            Tint(_recipesTab, !prefs && _tab == HubTab.Recipes);
             HubItemHover.Hide();
 
             if (!prefs)
@@ -712,44 +690,6 @@ namespace NjordWarehouseKeeper.UI
                     list[i].SetActive(on);
                 }
             }
-        }
-
-        private static void AddTabButtons(GUIManager gui)
-        {
-            const float width = 180f;
-            const float gap = 10f;
-            var left = -(width + gap) * 0.5f;
-            _itemsTab = MakeTabButton(gui, "$njord_tab_items", HubTab.Items, left, width);
-            _recipesTab = MakeTabButton(gui, "$njord_tab_recipes", HubTab.Recipes, -left, width);
-            _chromeUi.Add(_itemsTab.gameObject);
-            _chromeUi.Add(_recipesTab.gameObject);
-        }
-
-        private static Button MakeTabButton(GUIManager gui, string token, HubTab tab, float x, float width)
-        {
-            var go = gui.CreateButton(
-                Localization.instance.Localize(token),
-                _root.transform,
-                new Vector2(0.5f, 1f),
-                new Vector2(0.5f, 1f),
-                Vector2.zero,
-                width,
-                TabHeight);
-            var button = go.GetComponent<Button>();
-            gui.ApplyButtonStyle(button, 15);
-            PlaceCentered(go.GetComponent<RectTransform>(), x, TabY, width, TabHeight);
-            var captured = tab;
-            button.onClick.AddListener(() =>
-            {
-                if (IsDragging())
-                {
-                    DepositDragged();
-                    return;
-                }
-
-                SetTab(captured);
-            });
-            return button;
         }
 
         private static GameObject MakeActionButton(GUIManager gui, string token, Sprite icon, UnityAction onClick)
@@ -1008,10 +948,6 @@ namespace NjordWarehouseKeeper.UI
             {
                 NjordWarehouseKeeperPrefs.Refresh();
             }
-            else if (_tab == HubTab.Recipes)
-            {
-                NjordWarehouseKeeperRecipes.Refresh();
-            }
             else
             {
                 Refresh();
@@ -1072,6 +1008,11 @@ namespace NjordWarehouseKeeper.UI
             {
                 Refresh();
             }
+
+            if (NjordWarehouseKeeperRecipes.IsOpen)
+            {
+                NjordWarehouseKeeperRecipes.Refresh();
+            }
         }
 
         private static void Refresh()
@@ -1103,16 +1044,6 @@ namespace NjordWarehouseKeeper.UI
             TintFilters();
             if (_prefsOpen)
             {
-                return;
-            }
-
-            if (_tab != HubTab.Items)
-            {
-                if (_tab == HubTab.Recipes)
-                {
-                    NjordWarehouseKeeperRecipes.Refresh();
-                }
-
                 return;
             }
 
