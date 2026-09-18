@@ -34,13 +34,15 @@ now and then the way a vendor does.
 
 ## Using it
 
-Walk up and press use. Your inventory stays on the left and crafting on the
-right. Njord's panel opens in the center, between them. **Items** and **Recipes**
-tabs sit under the title; the cog still opens Preferences. Identical items from
+Walk up and press use. Your inventory stays on the left. Vanilla crafting on the
+right is hidden; Njord's recipe panel opens in that slot, and his item list
+opens in the center. The cog still opens Preferences. Identical items from
 different chests share one row. Hover a row the same way you hover a pack
 slot: keep the cursor still for a moment and the vanilla item tooltip appears.
 
 - **Click a row** to pick up one stack and drag it, the same as a chest slot.
+  If the stores have enough to fill a complete stack, that is what you pick up,
+  not a leftover pile from the first chest that happens to hold some.
 - **Ctrl-click a row** to take as much of that item as your pack will hold.
 - **Shift-click a row** to pick how many to take.
 - **Click the star** on a row to mark that item as a favourite. The Favourites
@@ -52,18 +54,28 @@ slot: keep the cursor still for a moment and the vanilla item tooltip appears.
   into the network. The hotbar is left alone unless you turn that on in config.
 - **Resupply** fills your pack from nearby chests up to the counts set in Preferences.
 - **Quick Stack** deposits and then resupplies in one click.
-- **Recipes** lists crafts you know, filtered by crafting station (All,
-  Handcraft, Hammer, and every station in the game). Rows the nearby chests
-  cannot fully afford are greyed out. Hover a row to see each ingredient with
-  how many are in the stores and how many the craft needs. Click a row to pull
-  those ingredients into your pack; a greyed row still takes whatever is there.
+- **Recipes** sit in the right-hand panel, in place of vanilla crafting. A
+  dropdown at the top picks a station (All, Handcraft, Hammer, and every
+  crafting bench in the game). Search under the dropdown filters the list by
+  name. The list is the same Craft tab that bench would show: known crafts,
+  upgrade-only recipes skipped, missing requirements greyed and at the bottom.
+  Hammer pieces stay under Hammer. The right side shows the item, its tooltip,
+  and the ingredient slots. **Withdraw** pulls those ingredients into your pack;
+  a greyed recipe still takes whatever is there. Hover an ingredient to see
+  have / need. Vanilla crafting comes back when you leave Njord, including Tab
+  inventory, handcraft, and every workbench.
 - **The cog** opens client Preferences: skip favourites on Deposit, bind a
-  Deposit+Resupply hotkey, and choose which items Resupply should keep, with a
-  quantity for each. The resupply list is titled Resupply.
+  Deposit+Resupply hotkey, **Reorganize** to tidy leftover stacks now, and
+  choose which items Resupply should keep, with a quantity for each. The
+  resupply list is titled Resupply.
 - While in range of Njord (the same radius as the network), the hotkey deposits
   and then resupplies without talking to him.
 - Click the search box to type. It keeps focus, so E does not close the panel.
 - Hold use, the same as a vanilla chest, to stack everything that will fit.
+- **From time to time** Njord merges leftover piles of the same item in nearby
+  chests so they occupy as few slots as they can. Full stacks stay put. Chests
+  someone already has open are left alone. The interval is in config, and a
+  **Reorganize** button in Preferences runs the same tidy immediately.
 
 Chests behind a ward you cannot pass, private chests that are not yours, chests
 someone else already has open, other keepers, and incinerators are left
@@ -72,15 +84,17 @@ out of the scan.
 ## Configuration
 
 `BepInEx/config/com.gitmcp.njord.cfg` is written on first launch. The
-server's values for radius, line of sight, and the hotbar are authoritative and
-are synced to clients. Favourites, Resupply, and the deposit-skip toggle are
-**client-only** and stay on that machine.
+server's values for radius, line of sight, the hotbar, and reorganize are
+authoritative and are synced to clients. Favourites, Resupply, and the
+deposit-skip toggle are **client-only** and stay on that machine.
 
 | Setting | Default | Description |
 | --- | --- | --- |
 | `Njord / Radius` | `15` | How far, in metres, a container is still part of Njord's network. |
 | `Njord / RequireLineOfSight` | `false` | Only include chests he can see. Off so a chest in the next room still counts. |
 | `Njord / DepositHotbar` | `false` | Also deposit the first inventory row. |
+| `Njord / Reorganize` | `true` | Merge leftover piles of the same item so they use as few chest slots as possible. |
+| `Njord / ReorganizeInterval` | `60` | Seconds between tidy passes (15–1800). |
 | `Client / DepositSkipFavourites` | `false` | Deposit leaves starred items in the pack. Also set from the cog. |
 | `Client / RestockHotkey` | *(none)* | In range of Njord, Deposit then Resupply. Bound from the cog. |
 | `Client / Favourites` | *(empty)* | Starred item keys. Edited from the item list. |
@@ -99,6 +113,10 @@ the same claim Take All uses. The item changes chest only once, on the peer that
 now owns that ZDO. Talking to him does not lock him to one player, and does not
 steal his ZDO: several people can have the panel open at once. Nearby chests
 that someone already has open in the vanilla GUI are still left out of the scan.
+
+When nobody is rummaging a chest, Njord periodically merges leftover piles of
+the same item so they take as few slots as they can. Only the peer that owns
+his ZDO does that pass, so two clients do not tidy the same hall at once.
 
 Walking away still closes the panel, because the game still treats talking to
 Njord as having a container open.

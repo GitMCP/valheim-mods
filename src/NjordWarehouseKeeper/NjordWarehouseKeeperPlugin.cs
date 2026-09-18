@@ -39,6 +39,8 @@ namespace NjordWarehouseKeeper
         internal static ConfigEntry<float> Radius;
         internal static ConfigEntry<bool> RequireLineOfSight;
         internal static ConfigEntry<bool> DepositHotbar;
+        internal static ConfigEntry<bool> Reorganize;
+        internal static ConfigEntry<float> ReorganizeInterval;
 
         private Harmony _harmony;
 
@@ -98,6 +100,25 @@ namespace NjordWarehouseKeeper
                     "When depositing everything, also send the hotbar (the first inventory row). " +
                     "Off by default so tools stay on the belt.",
                     null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            Reorganize = Config.Bind(
+                "Njord",
+                "Reorganize",
+                true,
+                new ConfigDescription(
+                    "From time to time Njord merges leftover piles of the same item so they " +
+                    "use as few chest slots as possible. Chests someone has open are left alone.",
+                    null,
+                    new ConfigurationManagerAttributes { IsAdminOnly = true }));
+
+            ReorganizeInterval = Config.Bind(
+                "Njord",
+                "ReorganizeInterval",
+                60f,
+                new ConfigDescription(
+                    "Seconds between each tidy pass. Only used when Reorganize is on.",
+                    new AcceptableValueRange<float>(15f, 1800f),
                     new ConfigurationManagerAttributes { IsAdminOnly = true }));
         }
 

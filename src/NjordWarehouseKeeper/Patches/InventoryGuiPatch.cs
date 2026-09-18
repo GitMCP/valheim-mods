@@ -7,25 +7,139 @@ namespace NjordWarehouseKeeper.Patches
     [HarmonyPatch(typeof(InventoryGui))]
     internal static class InventoryGuiPatch
     {
+        /// <summary>
+        /// Set in <see cref="Show"/> before <c>SetupCrafting</c> runs, and kept
+        /// until the hub panel closes. Do not key this off
+        /// <c>m_currentContainer</c>: Tab <c>Show(null)</c> calls SetupCrafting
+        /// while that field can still be Njord, and vanilla never turns
+        /// <c>m_crafting</c> back on after we hide it.
+        /// </summary>
+        private static bool _hideCraft;
+        private static bool _restoringCraft;
+
+        [HarmonyPrefix]
+        [HarmonyPatch(nameof(InventoryGui.Show))]
+        private static void ShowHubPrefix(InventoryGui __instance, Container container)
+        {
+            _hideCraft = NjordWarehouseKeeperMarker.IsHub(container);
+            if (_hideCraft)
+            {
+                NjordWarehouseKeeperRecipes.HideVanillaCrafting();
+                return;
+            }
+
+            // Close first so HubIsOpen is false before SetupCrafting. Tab
+            // Show(null) can run while the Njord panel is still up.
+            _hideCraft = false;
+            NjordWarehouseKeeperPanel.Close();
+            NjordWarehouseKeeperRecipes.RestoreVanillaCrafting();
+        }
+
         [HarmonyPostfix]
         [HarmonyPatch(nameof(InventoryGui.Show))]
-        private static void ShowHub(Container container)
+        private static void ShowHub(InventoryGui __instance, Container container)
         {
             if (NjordWarehouseKeeperMarker.IsHub(container))
             {
+                _hideCraft = true;
+                NjordWarehouseKeeperRecipes.HideVanillaCrafting();
                 NjordWarehouseKeeperPanel.Open(container);
             }
             else
             {
+                _hideCraft = false;
+                NjordWarehouseKeeperRecipes.RestoreVanillaCrafting();
                 NjordWarehouseKeeperPanel.Close();
             }
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch("SetupCrafting")]
+        private static bool SkipSetupCrafting(InventoryGui __instance)
+        {
+            if (!HubIsOpen(__instance))
+            {
+                return true;
+            }
+
+            NjordWarehouseKeeperRecipes.HideVanillaCrafting();
+            return false;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch("UpdateCraftingPanel")]
+        private static bool SkipCraftingPanel(InventoryGui __instance)
+        {
+            if (!HubIsOpen(__instance))
+            {
+                return true;
+            }
+
+            NjordWarehouseKeeperRecipes.HideVanillaCrafting();
+            return false;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch("UpdateRecipe")]
+        private static bool SkipRecipe(InventoryGui __instance)
+        {
+            return !HubIsOpen(__instance);
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch("UpdateRepair")]
+        private static bool SkipRepair(InventoryGui __instance)
+        {
+            return !HubIsOpen(__instance);
+        }
+
+        private static bool HubIsOpen(InventoryGui gui)
+        {
+            if (_restoringCraft)
+            {
+                return false;
+            }
+
+            return _hideCraft || NjordWarehouseKeeperRecipes.IsOpen;
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(nameof(InventoryGui.Hide))]
         private static void HideHub()
         {
+            _hideCraft = false;
+            NjordWarehouseKeeperRecipes.RestoreVanillaCrafting();
             NjordWarehouseKeeperPanel.Close();
+        }
+
+        /// <summary>
+        /// Walking out of range closes the hub without <see cref="InventoryGui.Hide"/>
+        /// or a fresh <see cref="InventoryGui.Show"/>. Turn crafting back on and
+        /// rebuild the recipe list that was skipped while Njord was open.
+        /// </summary>
+        internal static void HubClosed()
+        {
+            var rebuild = _hideCraft && InventoryGui.IsVisible();
+            _hideCraft = false;
+            NjordWarehouseKeeperRecipes.RestoreVanillaCrafting();
+            if (!rebuild)
+            {
+                return;
+            }
+
+            var gui = InventoryGui.instance;
+            if (gui != null && Player.m_localPlayer != null)
+            {
+                _restoringCraft = true;
+                try
+                {
+                    gui.SetupCrafting();
+                }
+                finally
+                {
+                    _restoringCraft = false;
+                }
+            }
         }
 
         /// <summary>
@@ -114,8 +228,13 @@ namespace NjordWarehouseKeeper.Patches
 
         [HarmonyPrefix]
         [HarmonyPatch("Update")]
-        private static void KeepOpenWhileSearching()
+        private static void KeepOpenWhileSearching(InventoryGui __instance)
         {
+            if (HubIsOpen(__instance))
+            {
+                NjordWarehouseKeeperRecipes.HideVanillaCrafting();
+            }
+
             if (!NjordWarehouseKeeperPanel.SearchHasFocus())
             {
                 return;

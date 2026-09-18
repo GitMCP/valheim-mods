@@ -53,6 +53,11 @@ namespace NjordWarehouseKeeper
                 prefab.AddComponent<NjordTalk>();
             }
 
+            if (prefab.GetComponent<NjordReorganize>() == null)
+            {
+                prefab.AddComponent<NjordReorganize>();
+            }
+
             var container = prefab.GetComponent<Container>();
             if (container != null)
             {

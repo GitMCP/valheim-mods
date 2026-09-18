@@ -39,6 +39,9 @@ namespace NjordWarehouseKeeper
                     { "njord_quickstack", "Quick Stack" },
                     { "njord_tab_items", "Items" },
                     { "njord_tab_recipes", "Recipes" },
+                    { "njord_withdraw", "Withdraw" },
+                    { "njord_recipes_empty", "No known recipes." },
+                    { "njord_recipes_none", "No matching recipes." },
                     { "njord_cat_all", "All" },
                     { "njord_cat_weapons", "Weapons" },
                     { "njord_cat_armor", "Armor" },
@@ -61,7 +64,7 @@ namespace NjordWarehouseKeeper
                     { "njord_hotkey_norange", "No warehouse keeper in range." },
                     { "njord_recipe", "Recipe" },
                     { "njord_recipes", "Recipes" },
-                    { "njord_recipe_hint", "Known recipes. Greyed out if nearby chests are short of ingredients. Click to take what is there. Hover to see have / need." },
+                    { "njord_recipe_hint", "Known recipes. Greyed out if nearby chests are short of ingredients. Withdraw takes what is there. Hover an ingredient to see have / need." },
                     { "njord_station_all", "All" },
                     { "njord_station_hand", "Handcraft" },
                     { "njord_station_hammer", "Hammer" },
@@ -74,6 +77,9 @@ namespace NjordWarehouseKeeper
                     { "njord_pref_hotkey_none", "None" },
                     { "njord_pref_hotkey_listen", "Press a key…" },
                     { "njord_pref_resupply_hint", "Tick items to keep in your pack. Resupply pulls that many from nearby chests." },
+                    { "njord_reorganize", "Reorganize" },
+                    { "njord_reorganize_ok", "Tidied the stores. Freed {0} slots." },
+                    { "njord_reorganize_none", "The stores are already tidy." },
                 });
         }
     }

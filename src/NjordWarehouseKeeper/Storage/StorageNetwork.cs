@@ -139,6 +139,238 @@ namespace NjordWarehouseKeeper.Storage
             return routed;
         }
 
+        /// <summary>
+        /// Picks the stack that click-to-drag should lift. Prefers a complete
+        /// stack when one already sits in a chest. If every pile is short but
+        /// the network has enough to fill one, items are merged into the largest
+        /// pile up to <see cref="ItemDrop.ItemData.m_shared"/> max stack, then
+        /// that pile is returned.
+        /// </summary>
+        internal static StackPart PrepareDragStack(IndexedStack group)
+        {
+            if (group == null)
+            {
+                return null;
+            }
+
+            StackPart full = null;
+            StackPart largest = null;
+            var largestCount = -1;
+            var max = 1;
+            var total = 0;
+            var live = new List<StackPart>();
+            for (var i = 0; i < group.Parts.Count; i++)
+            {
+                var part = group.Parts[i];
+                var item = part.Live();
+                if (item?.m_shared == null)
+                {
+                    continue;
+                }
+
+                live.Add(part);
+                max = Mathf.Max(1, item.m_shared.m_maxStackSize);
+                total += item.m_stack;
+                if (full == null && item.m_stack >= max)
+                {
+                    full = part;
+                }
+
+                if (item.m_stack > largestCount)
+                {
+                    largest = part;
+                    largestCount = item.m_stack;
+                }
+            }
+
+            if (full != null)
+            {
+                return full;
+            }
+
+            if (largest == null)
+            {
+                return null;
+            }
+
+            if (largestCount < max && total >= max)
+            {
+                FillTowardMax(largest, live, max);
+            }
+
+            return largest;
+        }
+
+        /// <summary>
+        /// Merge leftover piles of the same item across nearby chests so they
+        /// occupy as few slots as possible. Full stacks are left alone. Chests
+        /// someone already has open are not in the scan.
+        /// Returns how many slots were freed.
+        /// </summary>
+        internal static int Reorganize(Container hub)
+        {
+            return Reorganize(hub, 48, passes: 1);
+        }
+
+        /// <summary>
+        /// Same as <see cref="Reorganize"/> but keeps going until nothing more
+        /// will merge, for the Preferences button.
+        /// </summary>
+        internal static int ReorganizeNow(Container hub)
+        {
+            return Reorganize(hub, 64, passes: 16);
+        }
+
+        private static int Reorganize(Container hub, int budget, int passes)
+        {
+            if (hub == null || budget <= 0 || passes <= 0)
+            {
+                return 0;
+            }
+
+            var freed = 0;
+            for (var n = 0; n < passes; n++)
+            {
+                var before = Snapshot(hub).UsedSlots;
+                var listed = ListItems(hub);
+                var used = 0;
+                for (var i = 0; i < listed.Count && used < budget; i++)
+                {
+                    used += CompactGroup(listed[i], budget - used);
+                }
+
+                if (used <= 0)
+                {
+                    break;
+                }
+
+                freed += Mathf.Max(0, before - Snapshot(hub).UsedSlots);
+                if (used < budget)
+                {
+                    break;
+                }
+            }
+
+            return freed;
+        }
+
+        private static int CompactGroup(IndexedStack group, int budget)
+        {
+            if (group == null || group.Parts.Count < 2 || budget <= 0)
+            {
+                return 0;
+            }
+
+            var sample = group.FirstLive();
+            if (sample?.m_shared == null)
+            {
+                return 0;
+            }
+
+            var max = sample.m_shared.m_maxStackSize;
+            if (max <= 1)
+            {
+                return 0;
+            }
+
+            var moves = 0;
+            while (moves < budget)
+            {
+                var dest = LargestPartial(group, max, skip: null);
+                var destItem = dest == null ? null : dest.Live();
+                if (dest == null || destItem == null || dest.Source == null)
+                {
+                    break;
+                }
+
+                var source = SmallestPartial(group, max, dest, destItem.m_cheated);
+                var srcItem = source == null ? null : source.Live();
+                var srcInv = source == null || source.Source == null ? null : source.Source.GetInventory();
+                if (source == null || srcItem == null || srcInv == null)
+                {
+                    break;
+                }
+
+                var n = Mathf.Min(max - destItem.m_stack, srcItem.m_stack);
+                if (n <= 0)
+                {
+                    break;
+                }
+
+                EnsureOwner(source.Source);
+                var got = MoveAmount(dest.Source, srcInv, srcItem, n, destItem.m_gridPos);
+                if (got <= 0)
+                {
+                    break;
+                }
+
+                moves++;
+            }
+
+            return moves;
+        }
+
+        private static bool Busy(Container chest)
+        {
+            return chest != null && chest.IsInUse() && !chest.IsOwner();
+        }
+
+        private static StackPart LargestPartial(IndexedStack group, int max, StackPart skip)
+        {
+            StackPart best = null;
+            var bestCount = -1;
+            for (var i = 0; i < group.Parts.Count; i++)
+            {
+                var part = group.Parts[i];
+                if (part == skip)
+                {
+                    continue;
+                }
+
+                var item = part.Live();
+                if (item == null || item.m_stack <= 0 || item.m_stack >= max || Busy(part.Source))
+                {
+                    continue;
+                }
+
+                if (item.m_stack > bestCount)
+                {
+                    best = part;
+                    bestCount = item.m_stack;
+                }
+            }
+
+            return best;
+        }
+
+        private static StackPart SmallestPartial(IndexedStack group, int max, StackPart skip, bool cheated)
+        {
+            StackPart best = null;
+            var bestCount = int.MaxValue;
+            for (var i = 0; i < group.Parts.Count; i++)
+            {
+                var part = group.Parts[i];
+                if (part == skip)
+                {
+                    continue;
+                }
+
+                var item = part.Live();
+                if (item == null || item.m_stack <= 0 || item.m_stack >= max || item.m_cheated != cheated || Busy(part.Source))
+                {
+                    continue;
+                }
+
+                if (item.m_stack < bestCount)
+                {
+                    best = part;
+                    bestCount = item.m_stack;
+                }
+            }
+
+            return best;
+        }
+
         internal static bool Withdraw(Player player, IndexedStack group, int amount)
         {
             return Withdraw(player, group, amount, notify: true);
@@ -342,16 +574,18 @@ namespace NjordWarehouseKeeper.Storage
 
         internal readonly struct IngredientLine
         {
-            internal IngredientLine(string displayName, int need, int have)
+            internal IngredientLine(string displayName, int need, int have, Sprite icon)
             {
                 DisplayName = displayName;
                 Need = need;
                 Have = have;
+                Icon = icon;
             }
 
             internal readonly string DisplayName;
             internal readonly int Need;
             internal readonly int Have;
+            internal readonly Sprite Icon;
         }
 
         private static bool CanAffordNeeds(List<IndexedStack> listed, List<Need> needs, bool onlyOne)
@@ -473,7 +707,8 @@ namespace NjordWarehouseKeeper.Storage
                 lines.Add(new IngredientLine(
                     needs[i].DisplayName,
                     needs[i].Amount,
-                    CountBySharedName(listed, needs[i].SharedName)));
+                    CountBySharedName(listed, needs[i].SharedName),
+                    needs[i].Icon));
             }
 
             return lines;
@@ -554,7 +789,12 @@ namespace NjordWarehouseKeeper.Storage
             for (var i = 0; i < resources.Length; i++)
             {
                 var req = resources[i];
-                if (req == null || req.m_resItem == null || req.m_resItem.m_itemData == null)
+                if (req == null || !req.m_resItem || req.m_resItem.m_itemData == null)
+                {
+                    continue;
+                }
+
+                if (req.m_upgraderResource)
                 {
                     continue;
                 }
@@ -565,12 +805,14 @@ namespace NjordWarehouseKeeper.Storage
                     continue;
                 }
 
-                var shared = req.m_resItem.m_itemData.m_shared.m_name;
+                var data = req.m_resItem.m_itemData;
+                var shared = data.m_shared.m_name;
                 needs.Add(new Need
                 {
                     SharedName = shared,
                     DisplayName = Localization.instance.Localize(shared),
                     Amount = amount,
+                    Icon = data.GetIcon(),
                 });
             }
 
@@ -646,6 +888,7 @@ namespace NjordWarehouseKeeper.Storage
             internal string SharedName;
             internal string DisplayName;
             internal int Amount;
+            internal Sprite Icon;
         }
 
         private static int HowManyFit(Inventory dest, ItemDrop.ItemData sample, int want)
@@ -868,6 +1111,56 @@ namespace NjordWarehouseKeeper.Storage
             }
 
             return moved;
+        }
+
+        private static void FillTowardMax(StackPart destPart, List<StackPart> live, int max)
+        {
+            var destItem = destPart == null ? null : destPart.Live();
+            if (destPart == null || destPart.Source == null || destItem == null || destItem.m_stack >= max)
+            {
+                return;
+            }
+
+            live.Sort(CompareByStackSize);
+            for (var i = 0; i < live.Count; i++)
+            {
+                destItem = destPart.Live();
+                if (destItem == null || destItem.m_stack >= max)
+                {
+                    return;
+                }
+
+                var source = live[i];
+                if (source == destPart || source.Source == null)
+                {
+                    continue;
+                }
+
+                var srcItem = source.Live();
+                var srcInv = source.Source.GetInventory();
+                if (srcItem == null || srcInv == null)
+                {
+                    continue;
+                }
+
+                var n = Mathf.Min(max - destItem.m_stack, srcItem.m_stack);
+                if (n <= 0)
+                {
+                    continue;
+                }
+
+                EnsureOwner(source.Source);
+                MoveAmount(destPart.Source, srcInv, srcItem, n, destItem.m_gridPos);
+            }
+        }
+
+        private static int CompareByStackSize(StackPart a, StackPart b)
+        {
+            var ia = a == null ? null : a.Live();
+            var ib = b == null ? null : b.Live();
+            var sa = ia == null ? 0 : ia.m_stack;
+            var sb = ib == null ? 0 : ib.m_stack;
+            return sa.CompareTo(sb);
         }
 
         private static int MoveAmount(

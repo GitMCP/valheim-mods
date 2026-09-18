@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.2.0
+
+Talking to Njord no longer shows the vanilla crafting column. A wood panel sits in that slot instead, listing the same Craft-tab recipes each bench would, so Withdraw pulls those ingredients.
+
+**Recipe panel (right)**
+- Station dropdown in place of CRAFT / UPGRADE (All, Handcraft, Hammer, and every crafting bench)
+- Known recipes listed like the Forge: compact rows, orange when selected, missing ingredients greyed and at the bottom
+- Search box under the station dropdown filters by item name
+- Each row is that item's craft recipe at the chosen station (upgrade-only recipes are skipped; hammer pieces stay under Hammer)
+- Detail view with icon, name, tooltip, and ingredient slots
+- **Withdraw** pulls those ingredients into the pack; greyed recipes still take whatever the stores have
+
+**Items panel (center)**
+- Items list only; the Items / Recipes tab buttons are gone
+- Click-to-drag picks a **complete stack** when nearby chests have enough to fill one, instead of the leftover pile in the first chest scanned
+
+**Auto-reorganize**
+- On a timer, Njord merges leftover piles of the same item so they occupy as few chest slots as possible
+- Full stacks and chests someone already has open are left alone
+- Config: `Njord / Reorganize` (default on) and `Njord / ReorganizeInterval` (default 60s)
+- Preferences has a **Reorganize** button that runs the same tidy immediately
+
+Vanilla crafting is hidden only while talking to Njord. Closing the talk, walking away, or opening inventory with Tab restores the default craft panel for handcraft and every bench.
+
 ## 1.1.1
 
 Deposit works again on Valheim 1.0.14. The game now refuses to merge cheated
