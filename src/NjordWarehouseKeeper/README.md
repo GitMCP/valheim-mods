@@ -58,11 +58,12 @@ slot: keep the cursor still for a moment and the vanilla item tooltip appears.
   dropdown at the top picks a station (All, Handcraft, Hammer, and every
   crafting bench in the game). Search under the dropdown filters the list by
   name. The list is the same Craft tab that bench would show: known crafts,
-  upgrade-only recipes skipped, missing requirements greyed and at the bottom. Hammer pieces stay under Hammer. The right side shows the
-  item, its tooltip, and the ingredient slots. **Withdraw** pulls those
-  ingredients into your pack; a greyed recipe still takes whatever is there.
-  Hover an ingredient to see have / need. Vanilla crafting comes back when you
-  leave Njord, including Tab inventory, handcraft, and every workbench.
+  upgrade-only recipes skipped, missing requirements greyed and at the bottom.
+  Hammer pieces stay under Hammer. The right side shows the item, its tooltip,
+  and the ingredient slots. **Withdraw** pulls those ingredients into your pack;
+  a greyed recipe still takes whatever is there. Hover an ingredient to see
+  have / need. Vanilla crafting comes back when you leave Njord, including Tab
+  inventory, handcraft, and every workbench.
 - **The cog** opens client Preferences: skip favourites on Deposit, bind a
   Deposit+Resupply hotkey, **Reorganize** to tidy leftover stacks now, and
   choose which items Resupply should keep, with a quantity for each. The
