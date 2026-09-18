@@ -29,17 +29,20 @@ namespace NjordWarehouseKeeper.Patches
         }
 
         /// <summary>
-        /// Vanilla turns the container panel back on every frame while Njord is in use.
-        /// Hide that dummy grid — the panel sits in the gap between backpack and craft —
-        /// and keep him marked in-use so walking away still closes it.
+        /// Vanilla turns the container panel back on every frame, requires ZDO
+        /// ownership to keep it open, and cancels a drag that did not come from
+        /// the pack. Njord's dummy grid stays hidden, several people can talk
+        /// to him at once (so this client may not own him), and click-to-drag
+        /// starts from a nearby chest rather than the pack.
         /// </summary>
-        [HarmonyPostfix]
+        [HarmonyPrefix]
         [HarmonyPatch("UpdateContainer")]
-        private static void HideVanillaContainer(InventoryGui __instance)
+        private static bool UpdateHubContainer(InventoryGui __instance, Player player)
         {
-            if (NjordWarehouseKeeperMarker.OpenHub == null || __instance.m_currentContainer != NjordWarehouseKeeperMarker.OpenHub)
+            var hub = __instance.m_currentContainer;
+            if (!NjordWarehouseKeeperMarker.IsHub(hub))
             {
-                return;
+                return true;
             }
 
             if (__instance.m_container != null)
@@ -47,7 +50,45 @@ namespace NjordWarehouseKeeper.Patches
                 __instance.m_container.gameObject.SetActive(false);
             }
 
+            if (player == null
+                || Vector3.Distance(hub.transform.position, player.transform.position) > __instance.m_autoCloseDistance)
+            {
+                NjordWarehouseKeeperPanel.Close();
+                __instance.CloseContainer();
+                return false;
+            }
+
+            if (__instance.m_firstContainerUpdate)
+            {
+                __instance.m_firstContainerUpdate = false;
+                __instance.m_containerHoldTime = 0f;
+                __instance.m_containerHoldState = 0;
+            }
+
+            if (ZInput.GetButton("Use") || ZInput.GetButton("JoyUse"))
+            {
+                __instance.m_containerHoldTime += Time.deltaTime;
+                if (__instance.m_containerHoldTime > __instance.m_containerHoldPlaceStackDelay
+                    && __instance.m_containerHoldState == 0)
+                {
+                    hub.StackAll();
+                    __instance.m_containerHoldState = 1;
+                }
+                else if (__instance.m_containerHoldTime
+                    > __instance.m_containerHoldPlaceStackDelay + __instance.m_containerHoldExitDelay
+                    && __instance.m_containerHoldState == 1)
+                {
+                    __instance.Hide();
+                }
+            }
+            else if (__instance.m_containerHoldState >= 0)
+            {
+                __instance.m_containerHoldState = -1;
+                __instance.m_waitForContainerStack = false;
+            }
+
             NjordWarehouseKeeperPanel.Tick();
+            return false;
         }
 
         [HarmonyPrefix]

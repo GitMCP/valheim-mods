@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>NjordWarehouseKeeper</AssemblyName>
     <RootNamespace>NjordWarehouseKeeper</RootNamespace>
-    <Version>1.0.0</Version>
+    <Version>1.1.1</Version>
     <Authors>GitMCP</Authors>
     <Description>Njord, Warehouse Keeper. Lists and moves items across nearby chests.</Description>
   </PropertyGroup>

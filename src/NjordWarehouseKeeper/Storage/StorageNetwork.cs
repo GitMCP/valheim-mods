@@ -330,6 +330,30 @@ namespace NjordWarehouseKeeper.Storage
             return WithdrawNeeds(player, hub, RequirementNeeds(piece.m_resources), onlyOne: false);
         }
 
+        internal static List<IngredientLine> RecipeIngredients(Recipe recipe, List<IndexedStack> listed)
+        {
+            return IngredientLines(recipe == null ? null : recipe.m_resources, listed);
+        }
+
+        internal static List<IngredientLine> PieceIngredients(Piece piece, List<IndexedStack> listed)
+        {
+            return IngredientLines(piece == null ? null : piece.m_resources, listed);
+        }
+
+        internal readonly struct IngredientLine
+        {
+            internal IngredientLine(string displayName, int need, int have)
+            {
+                DisplayName = displayName;
+                Need = need;
+                Have = have;
+            }
+
+            internal readonly string DisplayName;
+            internal readonly int Need;
+            internal readonly int Have;
+        }
+
         private static bool CanAffordNeeds(List<IndexedStack> listed, List<Need> needs, bool onlyOne)
         {
             if (needs.Count == 0)
@@ -363,32 +387,63 @@ namespace NjordWarehouseKeeper.Storage
 
         private static bool WithdrawNeeds(Player player, Container hub, List<Need> needs, bool onlyOne)
         {
-            var listed = ListItems(hub);
-            if (!CanAffordNeeds(listed, needs, onlyOne))
+            if (player == null || hub == null || needs == null || needs.Count == 0)
             {
-                player.Message(MessageHud.MessageType.Center, "$njord_recipe_missing");
                 return false;
             }
 
+            var listed = ListItems(hub);
+            var complete = CanAffordNeeds(listed, needs, onlyOne);
             if (onlyOne)
             {
                 Need pick = null;
+                Need fallback = null;
+                var fallbackHave = -1;
                 for (var i = 0; i < needs.Count; i++)
                 {
-                    if (CountBySharedName(listed, needs[i].SharedName) >= needs[i].Amount)
+                    var have = CountBySharedName(listed, needs[i].SharedName);
+                    if (have >= needs[i].Amount)
                     {
                         pick = needs[i];
                         break;
                     }
+
+                    if (have > fallbackHave)
+                    {
+                        fallback = needs[i];
+                        fallbackHave = have;
+                    }
                 }
 
-                if (pick == null)
+                if (pick != null)
+                {
+                    needs = new List<Need> { pick };
+                }
+                else if (fallback != null && fallbackHave > 0)
+                {
+                    needs = new List<Need> { fallback };
+                }
+                else
                 {
                     player.Message(MessageHud.MessageType.Center, "$njord_recipe_missing");
                     return false;
                 }
+            }
 
-                needs = new List<Need> { pick };
+            var anyInStores = false;
+            for (var i = 0; i < needs.Count; i++)
+            {
+                if (CountBySharedName(listed, needs[i].SharedName) > 0)
+                {
+                    anyInStores = true;
+                    break;
+                }
+            }
+
+            if (!anyInStores)
+            {
+                player.Message(MessageHud.MessageType.Center, "$njord_recipe_missing");
+                return false;
             }
 
             var taken = 0;
@@ -403,8 +458,25 @@ namespace NjordWarehouseKeeper.Storage
                 return false;
             }
 
-            player.Message(MessageHud.MessageType.Center, "$njord_recipe_ok");
+            player.Message(
+                MessageHud.MessageType.Center,
+                complete ? "$njord_recipe_ok" : "$njord_recipe_partial");
             return true;
+        }
+
+        private static List<IngredientLine> IngredientLines(Piece.Requirement[] resources, List<IndexedStack> listed)
+        {
+            var needs = RequirementNeeds(resources);
+            var lines = new List<IngredientLine>(needs.Count);
+            for (var i = 0; i < needs.Count; i++)
+            {
+                lines.Add(new IngredientLine(
+                    needs[i].DisplayName,
+                    needs[i].Amount,
+                    CountBySharedName(listed, needs[i].SharedName)));
+            }
+
+            return lines;
         }
 
         internal static Container FindHubInRange(Player player)
@@ -493,9 +565,11 @@ namespace NjordWarehouseKeeper.Storage
                     continue;
                 }
 
+                var shared = req.m_resItem.m_itemData.m_shared.m_name;
                 needs.Add(new Need
                 {
-                    SharedName = req.m_resItem.m_itemData.m_shared.m_name,
+                    SharedName = shared,
+                    DisplayName = Localization.instance.Localize(shared),
                     Amount = amount,
                 });
             }
@@ -570,6 +644,7 @@ namespace NjordWarehouseKeeper.Storage
         private sealed class Need
         {
             internal string SharedName;
+            internal string DisplayName;
             internal int Amount;
         }
 
@@ -719,7 +794,8 @@ namespace NjordWarehouseKeeper.Storage
                     var existing = inventory.FindFreeStackItem(
                         item.m_shared.m_name,
                         item.m_quality,
-                        item.m_worldLevel);
+                        item.m_worldLevel,
+                        item.m_cheated);
                     if (existing == null)
                     {
                         break;
@@ -813,7 +889,7 @@ namespace NjordWarehouseKeeper.Storage
             return Mathf.Max(0, before - after);
         }
 
-        private static void EnsureOwner(Container container)
+        internal static void EnsureOwner(Container container)
         {
             var view = container == null ? null : container.m_nview;
             if (view == null || !view.IsValid())

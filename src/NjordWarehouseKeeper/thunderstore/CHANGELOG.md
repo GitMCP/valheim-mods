@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.1.1
+
+Deposit works again on Valheim 1.0.14. The game now refuses to merge cheated
+stacks with regular ones, and `FindFreeStackItem` gained that extra argument.
+
+## 1.1.0
+
+Click a listed item to pick up one stack and drag it, the same as a chest slot.
+Ctrl-click takes as much of that item as the pack will hold. Several people can
+talk to Njord at the same time; he is not locked to one player. On the Recipes
+tab, hover a craft to see each ingredient with have / need. Click a greyed-out
+row to take whatever of those ingredients the stores have.
+
 ## 1.0.0
 
 First release as **Njord, Warehouse Keeper**.
