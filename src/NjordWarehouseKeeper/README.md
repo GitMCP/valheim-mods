@@ -56,9 +56,9 @@ slot: keep the cursor still for a moment and the vanilla item tooltip appears.
 - **Quick Stack** deposits and then resupplies in one click.
 - **Recipes** sit in the right-hand panel, in place of vanilla crafting. A
   dropdown at the top picks a station (All, Handcraft, Hammer, and every
-  crafting bench in the game). The list is the same Craft tab that bench would
-  show: known crafts, upgrade-only recipes skipped, missing requirements greyed
-  and at the bottom. Hammer pieces stay under Hammer. The right side shows the
+  crafting bench in the game). Search under the dropdown filters the list by
+  name. The list is the same Craft tab that bench would show: known crafts,
+  upgrade-only recipes skipped, missing requirements greyed and at the bottom. Hammer pieces stay under Hammer. The right side shows the
   item, its tooltip, and the ingredient slots. **Withdraw** pulls those
   ingredients into your pack; a greyed recipe still takes whatever is there.
   Hover an ingredient to see have / need. Vanilla crafting comes back when you

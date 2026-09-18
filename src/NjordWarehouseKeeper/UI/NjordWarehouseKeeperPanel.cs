@@ -167,6 +167,11 @@ namespace NjordWarehouseKeeper.UI
                 return true;
             }
 
+            if (NjordWarehouseKeeperRecipes.SearchHasFocus())
+            {
+                return true;
+            }
+
             return NjordWarehouseKeeperPrefs.InputHasFocus();
         }
 
@@ -1630,6 +1635,7 @@ namespace NjordWarehouseKeeper.UI
             }
 
             SetSearchBlock(false);
+            NjordWarehouseKeeperRecipes.UnfocusSearch();
         }
 
         private static void SetSearchBlock(bool on)

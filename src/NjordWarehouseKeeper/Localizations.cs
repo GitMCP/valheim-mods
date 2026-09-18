@@ -41,6 +41,7 @@ namespace NjordWarehouseKeeper
                     { "njord_tab_recipes", "Recipes" },
                     { "njord_withdraw", "Withdraw" },
                     { "njord_recipes_empty", "No known recipes." },
+                    { "njord_recipes_none", "No matching recipes." },
                     { "njord_cat_all", "All" },
                     { "njord_cat_weapons", "Weapons" },
                     { "njord_cat_armor", "Armor" },

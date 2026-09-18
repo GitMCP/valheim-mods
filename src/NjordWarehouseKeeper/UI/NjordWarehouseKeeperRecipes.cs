@@ -4,6 +4,8 @@ using System.Text;
 using NjordWarehouseKeeper.Storage;
 using Jotunn.Managers;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace NjordWarehouseKeeper.UI
@@ -21,7 +23,10 @@ namespace NjordWarehouseKeeper.UI
         private const float RowHeight = 32f;
         private const float HeaderHeight = 58f;
         private const float DropdownHeight = 32f;
-        private const float BodyTop = 102f;
+        private const float DropdownTop = HeaderHeight + 4f;
+        private const float SearchHeight = 30f;
+        private const float SearchTop = DropdownTop + DropdownHeight + 6f;
+        private const float BodyTop = SearchTop + SearchHeight + 8f;
         private const float ListWidth = 210f;
         private const float WithdrawHeight = 52f;
         private const float IngredientSize = 64f;
@@ -45,8 +50,10 @@ namespace NjordWarehouseKeeper.UI
         private static Button _withdraw;
         private static Text _withdrawLabel;
         private static Text _empty;
+        private static InputField _search;
         private static readonly List<IngredientSlot> _ingredients = new List<IngredientSlot>();
         private static string _station = AllKey;
+        private static string _query = "";
         private static readonly List<RecipeRow> _rows = new List<RecipeRow>();
         private static readonly List<StationOpt> _stations = new List<StationOpt>();
         private static string _selectedKey;
@@ -63,6 +70,11 @@ namespace NjordWarehouseKeeper.UI
         internal static RectTransform RootRect
         {
             get { return _root != null ? _root.GetComponent<RectTransform>() : null; }
+        }
+
+        internal static bool SearchHasFocus()
+        {
+            return IsOpen && _search != null && _search.isFocused;
         }
 
         internal static void Open()
@@ -111,6 +123,7 @@ namespace NjordWarehouseKeeper.UI
             _selected = null;
             _selectedKey = null;
             SetMenuOpen(false);
+            UnfocusSearch();
             HubItemHover.Hide();
             if (_root != null)
             {
@@ -190,6 +203,7 @@ namespace NjordWarehouseKeeper.UI
             Place(_title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), 0f, -14f, 360f, 32f);
 
             _stationButton = MakeStationButton(gui);
+            MakeSearch(gui);
             BuildStationMenu(gui);
 
             var listRt = MakeFill(
@@ -355,7 +369,14 @@ namespace NjordWarehouseKeeper.UI
 
             if (_empty != null)
             {
-                _empty.gameObject.SetActive(visible.Count == 0);
+                var none = visible.Count == 0;
+                _empty.gameObject.SetActive(none);
+                if (none)
+                {
+                    _empty.text = string.IsNullOrEmpty((_query ?? "").Trim())
+                        ? Localization.instance.Localize("$njord_recipes_empty")
+                        : Localization.instance.Localize("$njord_recipes_none");
+                }
             }
 
             BindDetail(_selected, listed);
@@ -584,8 +605,8 @@ namespace NjordWarehouseKeeper.UI
             rt.anchorMax = new Vector2(1f, 1f);
             rt.pivot = new Vector2(0.5f, 1f);
             rt.anchoredPosition = Vector2.zero;
-            rt.offsetMin = new Vector2(16f, -BodyTop + 8f);
-            rt.offsetMax = new Vector2(-16f, -(HeaderHeight + 4f));
+            rt.offsetMin = new Vector2(16f, -(DropdownTop + DropdownHeight));
+            rt.offsetMax = new Vector2(-16f, -DropdownTop);
             var button = go.GetComponent<Button>();
             gui.ApplyButtonStyle(button, 14);
             button.onClick.AddListener(ToggleMenu);
@@ -602,6 +623,95 @@ namespace NjordWarehouseKeeper.UI
             }
 
             return button;
+        }
+
+        private static void MakeSearch(GUIManager gui)
+        {
+            var mid = new Vector2(0.5f, 0.5f);
+            var go = gui.CreateInputField(
+                _root.transform,
+                mid,
+                mid,
+                Vector2.zero,
+                InputField.ContentType.Standard,
+                Localization.instance.Localize("$njord_search"),
+                16,
+                176f,
+                SearchHeight);
+            _search = go.GetComponent<InputField>();
+            var rt = go.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0f, 1f);
+            rt.anchorMax = new Vector2(1f, 1f);
+            rt.pivot = new Vector2(0.5f, 1f);
+            rt.anchoredPosition = Vector2.zero;
+            rt.offsetMin = new Vector2(16f, -(SearchTop + SearchHeight));
+            rt.offsetMax = new Vector2(-16f, -SearchTop);
+            _search.interactable = true;
+            _search.navigation = new Navigation { mode = Navigation.Mode.None };
+            _search.onValueChanged.AddListener(OnSearch);
+            var image = go.GetComponent<Image>();
+            if (image != null)
+            {
+                image.raycastTarget = true;
+            }
+
+            var trigger = go.GetComponent<EventTrigger>();
+            if (trigger == null)
+            {
+                trigger = go.AddComponent<EventTrigger>();
+            }
+
+            var entry = new EventTrigger.Entry { eventID = EventTriggerType.PointerClick };
+            entry.callback.AddListener(new UnityAction<BaseEventData>(OnSearchClicked));
+            trigger.triggers.Add(entry);
+        }
+
+        private static void OnSearch(string value)
+        {
+            _query = value ?? "";
+            _nextRefresh = 0f;
+            Refresh();
+        }
+
+        private static void OnSearchClicked(BaseEventData _)
+        {
+            if (NjordWarehouseKeeperPanel.IsDragging())
+            {
+                NjordWarehouseKeeperPanel.DepositDragged();
+                return;
+            }
+
+            FocusSearch();
+        }
+
+        private static void FocusSearch()
+        {
+            if (_search == null)
+            {
+                return;
+            }
+
+            _search.ActivateInputField();
+            _search.Select();
+            if (EventSystem.current != null)
+            {
+                EventSystem.current.SetSelectedGameObject(_search.gameObject);
+            }
+        }
+
+        internal static void UnfocusSearch()
+        {
+            if (_search != null && _search.isFocused)
+            {
+                _search.DeactivateInputField();
+            }
+
+            if (EventSystem.current != null &&
+                _search != null &&
+                EventSystem.current.currentSelectedGameObject == _search.gameObject)
+            {
+                EventSystem.current.SetSelectedGameObject(null);
+            }
         }
 
         private static void BuildStationMenu(GUIManager gui)
@@ -625,8 +735,8 @@ namespace NjordWarehouseKeeper.UI
             menuRt.anchorMax = new Vector2(1f, 1f);
             menuRt.pivot = new Vector2(0.5f, 1f);
             menuRt.anchoredPosition = Vector2.zero;
-            menuRt.offsetMin = new Vector2(16f, -BodyTop + 8f - 240f);
-            menuRt.offsetMax = new Vector2(-16f, -BodyTop + 6f);
+            menuRt.offsetMin = new Vector2(16f, -(DropdownTop + DropdownHeight + 2f + 240f));
+            menuRt.offsetMax = new Vector2(-16f, -(DropdownTop + DropdownHeight + 2f));
             var menuImage = _stationMenu.GetComponent<Image>();
             menuImage.color = new Color(0.12f, 0.09f, 0.07f, 0.96f);
             menuImage.raycastTarget = true;
@@ -701,6 +811,11 @@ namespace NjordWarehouseKeeper.UI
 
         private static void SetMenuOpen(bool on)
         {
+            if (on)
+            {
+                UnfocusSearch();
+            }
+
             if (_stationMenu != null)
             {
                 _stationMenu.SetActive(on);
@@ -929,8 +1044,64 @@ namespace NjordWarehouseKeeper.UI
                     : StorageNetwork.CanAffordPiece(listed, offer.Piece);
             }
 
+            if (!string.IsNullOrEmpty((_query ?? "").Trim()))
+            {
+                for (var i = result.Count - 1; i >= 0; i--)
+                {
+                    if (!MatchesQuery(result[i]))
+                    {
+                        result.RemoveAt(i);
+                    }
+                }
+            }
+
             result.Sort(CompareOffers);
             return result;
+        }
+
+        private static bool MatchesQuery(CraftOffer offer)
+        {
+            var query = (_query ?? "").Trim();
+            if (query.Length == 0 || offer == null)
+            {
+                return true;
+            }
+
+            if (!string.IsNullOrEmpty(offer.Name) &&
+                offer.Name.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return true;
+            }
+
+            if (offer.Recipe != null && offer.Recipe.m_item && offer.Recipe.m_item.m_itemData?.m_shared != null)
+            {
+                var item = offer.Recipe.m_item;
+                var shared = item.m_itemData.m_shared.m_name;
+                if (!string.IsNullOrEmpty(shared) &&
+                    (shared.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0
+                     || Localization.instance.Localize(shared).IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0))
+                {
+                    return true;
+                }
+
+                if (!string.IsNullOrEmpty(item.name) &&
+                    item.name.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return true;
+                }
+            }
+
+            if (offer.Piece != null && !string.IsNullOrEmpty(offer.Piece.m_name))
+            {
+                var pieceName = offer.Piece.m_name;
+                if (pieceName.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0
+                    || Localization.instance.Localize(pieceName).IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

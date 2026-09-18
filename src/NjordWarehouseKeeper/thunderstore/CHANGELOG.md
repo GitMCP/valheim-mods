@@ -7,6 +7,7 @@ Talking to Njord no longer shows the vanilla crafting column. A wood panel sits 
 **Recipe panel (right)**
 - Station dropdown in place of CRAFT / UPGRADE (All, Handcraft, Hammer, and every crafting bench)
 - Known recipes listed like the Forge: compact rows, orange when selected, missing ingredients greyed and at the bottom
+- Search box under the station dropdown filters by item name
 - Each row is that item's craft recipe at the chosen station (upgrade-only recipes are skipped; hammer pieces stay under Hammer)
 - Detail view with icon, name, tooltip, and ingredient slots
 - **Withdraw** pulls those ingredients into the pack; greyed recipes still take whatever the stores have
