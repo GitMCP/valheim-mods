@@ -69,6 +69,9 @@ slot: keep the cursor still for a moment and the vanilla item tooltip appears.
   and then resupplies without talking to him.
 - Click the search box to type. It keeps focus, so E does not close the panel.
 - Hold use, the same as a vanilla chest, to stack everything that will fit.
+- **From time to time** Njord merges leftover piles of the same item in nearby
+  chests so they occupy as few slots as they can. Full stacks stay put. Chests
+  someone already has open are left alone. The interval is in config.
 
 Chests behind a ward you cannot pass, private chests that are not yours, chests
 someone else already has open, other keepers, and incinerators are left
@@ -77,15 +80,17 @@ out of the scan.
 ## Configuration
 
 `BepInEx/config/com.gitmcp.njord.cfg` is written on first launch. The
-server's values for radius, line of sight, and the hotbar are authoritative and
-are synced to clients. Favourites, Resupply, and the deposit-skip toggle are
-**client-only** and stay on that machine.
+server's values for radius, line of sight, the hotbar, and reorganize are
+authoritative and are synced to clients. Favourites, Resupply, and the
+deposit-skip toggle are **client-only** and stay on that machine.
 
 | Setting | Default | Description |
 | --- | --- | --- |
 | `Njord / Radius` | `15` | How far, in metres, a container is still part of Njord's network. |
 | `Njord / RequireLineOfSight` | `false` | Only include chests he can see. Off so a chest in the next room still counts. |
 | `Njord / DepositHotbar` | `false` | Also deposit the first inventory row. |
+| `Njord / Reorganize` | `true` | Merge leftover piles of the same item so they use as few chest slots as possible. |
+| `Njord / ReorganizeInterval` | `60` | Seconds between tidy passes (15–1800). |
 | `Client / DepositSkipFavourites` | `false` | Deposit leaves starred items in the pack. Also set from the cog. |
 | `Client / RestockHotkey` | *(none)* | In range of Njord, Deposit then Resupply. Bound from the cog. |
 | `Client / Favourites` | *(empty)* | Starred item keys. Edited from the item list. |
@@ -104,6 +109,10 @@ the same claim Take All uses. The item changes chest only once, on the peer that
 now owns that ZDO. Talking to him does not lock him to one player, and does not
 steal his ZDO: several people can have the panel open at once. Nearby chests
 that someone already has open in the vanilla GUI are still left out of the scan.
+
+When nobody is rummaging a chest, Njord periodically merges leftover piles of
+the same item so they take as few slots as they can. Only the peer that owns
+his ZDO does that pass, so two clients do not tidy the same hall at once.
 
 Walking away still closes the panel, because the game still treats talking to
 Njord as having a container open.

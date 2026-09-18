@@ -201,6 +201,153 @@ namespace NjordWarehouseKeeper.Storage
             return largest;
         }
 
+        /// <summary>
+        /// Merge leftover piles of the same item across nearby chests so they
+        /// occupy as few slots as possible. Full stacks are left alone. Chests
+        /// someone already has open are not in the scan.
+        /// Returns how many slots were freed.
+        /// </summary>
+        internal static int Reorganize(Container hub)
+        {
+            if (hub == null)
+            {
+                return 0;
+            }
+
+            var before = Snapshot(hub).UsedSlots;
+            var listed = ListItems(hub);
+            var budget = 48;
+            var used = 0;
+            for (var i = 0; i < listed.Count && used < budget; i++)
+            {
+                used += CompactGroup(listed[i], budget - used);
+            }
+
+            if (used <= 0)
+            {
+                return 0;
+            }
+
+            return Mathf.Max(0, before - Snapshot(hub).UsedSlots);
+        }
+
+        private static int CompactGroup(IndexedStack group, int budget)
+        {
+            if (group == null || group.Parts.Count < 2 || budget <= 0)
+            {
+                return 0;
+            }
+
+            var sample = group.FirstLive();
+            if (sample?.m_shared == null)
+            {
+                return 0;
+            }
+
+            var max = sample.m_shared.m_maxStackSize;
+            if (max <= 1)
+            {
+                return 0;
+            }
+
+            var moves = 0;
+            while (moves < budget)
+            {
+                var dest = LargestPartial(group, max, skip: null);
+                var destItem = dest == null ? null : dest.Live();
+                if (dest == null || destItem == null || dest.Source == null)
+                {
+                    break;
+                }
+
+                var source = SmallestPartial(group, max, dest, destItem.m_cheated);
+                var srcItem = source == null ? null : source.Live();
+                var srcInv = source == null || source.Source == null ? null : source.Source.GetInventory();
+                if (source == null || srcItem == null || srcInv == null)
+                {
+                    break;
+                }
+
+                var n = Mathf.Min(max - destItem.m_stack, srcItem.m_stack);
+                if (n <= 0)
+                {
+                    break;
+                }
+
+                EnsureOwner(source.Source);
+                var got = MoveAmount(dest.Source, srcInv, srcItem, n, destItem.m_gridPos);
+                if (got <= 0)
+                {
+                    break;
+                }
+
+                moves++;
+            }
+
+            return moves;
+        }
+
+        private static bool Busy(Container chest)
+        {
+            return chest != null && chest.IsInUse() && !chest.IsOwner();
+        }
+
+        private static StackPart LargestPartial(IndexedStack group, int max, StackPart skip)
+        {
+            StackPart best = null;
+            var bestCount = -1;
+            for (var i = 0; i < group.Parts.Count; i++)
+            {
+                var part = group.Parts[i];
+                if (part == skip)
+                {
+                    continue;
+                }
+
+                var item = part.Live();
+                if (item == null || item.m_stack <= 0 || item.m_stack >= max || Busy(part.Source))
+                {
+                    continue;
+                }
+
+                if (item.m_stack > bestCount)
+                {
+                    best = part;
+                    bestCount = item.m_stack;
+                }
+            }
+
+            return best;
+        }
+
+        private static StackPart SmallestPartial(IndexedStack group, int max, StackPart skip, bool cheated)
+        {
+            StackPart best = null;
+            var bestCount = int.MaxValue;
+            for (var i = 0; i < group.Parts.Count; i++)
+            {
+                var part = group.Parts[i];
+                if (part == skip)
+                {
+                    continue;
+                }
+
+                var item = part.Live();
+                if (item == null || item.m_stack <= 0 || item.m_stack >= max || item.m_cheated != cheated || Busy(part.Source))
+                {
+                    continue;
+                }
+
+                if (item.m_stack < bestCount)
+                {
+                    best = part;
+                    bestCount = item.m_stack;
+                }
+            }
+
+            return best;
+        }
+
         internal static bool Withdraw(Player player, IndexedStack group, int amount)
         {
             return Withdraw(player, group, amount, notify: true);

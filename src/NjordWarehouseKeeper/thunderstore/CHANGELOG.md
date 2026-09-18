@@ -11,6 +11,10 @@ panel is items only; the Items / Recipes tabs are gone.
 Clicking an item row drags a complete stack when the nearby chests have enough
 to fill one, instead of whatever leftover pile sits in the first chest scanned.
 
+From time to time Njord tidies the stores: leftover piles of the same item are
+merged so they occupy as few slots as they can. On by default, every 60 seconds,
+and both settings are in config.
+
 ## 1.1.1
 
 Deposit works again on Valheim 1.0.14. The game now refuses to merge cheated
