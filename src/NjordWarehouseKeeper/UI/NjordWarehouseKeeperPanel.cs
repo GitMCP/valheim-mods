@@ -1396,7 +1396,7 @@ namespace NjordWarehouseKeeper.UI
         private static void BeginDragStack(IndexedStack group)
         {
             var gui = InventoryGui.instance;
-            var part = group == null ? null : group.FirstLivePart();
+            var part = StorageNetwork.PrepareDragStack(group);
             var item = part == null ? null : part.Live();
             var inventory = part == null || part.Source == null ? null : part.Source.GetInventory();
             if (gui == null || item == null || inventory == null)

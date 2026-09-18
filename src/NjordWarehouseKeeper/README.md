@@ -41,6 +41,8 @@ different chests share one row. Hover a row the same way you hover a pack
 slot: keep the cursor still for a moment and the vanilla item tooltip appears.
 
 - **Click a row** to pick up one stack and drag it, the same as a chest slot.
+  If the stores have enough to fill a complete stack, that is what you pick up,
+  not a leftover pile from the first chest that happens to hold some.
 - **Ctrl-click a row** to take as much of that item as your pack will hold.
 - **Shift-click a row** to pick how many to take.
 - **Click the star** on a row to mark that item as a favourite. The Favourites

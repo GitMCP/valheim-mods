@@ -139,6 +139,68 @@ namespace NjordWarehouseKeeper.Storage
             return routed;
         }
 
+        /// <summary>
+        /// Picks the stack that click-to-drag should lift. Prefers a complete
+        /// stack when one already sits in a chest. If every pile is short but
+        /// the network has enough to fill one, items are merged into the largest
+        /// pile up to <see cref="ItemDrop.ItemData.m_shared"/> max stack, then
+        /// that pile is returned.
+        /// </summary>
+        internal static StackPart PrepareDragStack(IndexedStack group)
+        {
+            if (group == null)
+            {
+                return null;
+            }
+
+            StackPart full = null;
+            StackPart largest = null;
+            var largestCount = -1;
+            var max = 1;
+            var total = 0;
+            var live = new List<StackPart>();
+            for (var i = 0; i < group.Parts.Count; i++)
+            {
+                var part = group.Parts[i];
+                var item = part.Live();
+                if (item?.m_shared == null)
+                {
+                    continue;
+                }
+
+                live.Add(part);
+                max = Mathf.Max(1, item.m_shared.m_maxStackSize);
+                total += item.m_stack;
+                if (full == null && item.m_stack >= max)
+                {
+                    full = part;
+                }
+
+                if (item.m_stack > largestCount)
+                {
+                    largest = part;
+                    largestCount = item.m_stack;
+                }
+            }
+
+            if (full != null)
+            {
+                return full;
+            }
+
+            if (largest == null)
+            {
+                return null;
+            }
+
+            if (largestCount < max && total >= max)
+            {
+                FillTowardMax(largest, live, max);
+            }
+
+            return largest;
+        }
+
         internal static bool Withdraw(Player player, IndexedStack group, int amount)
         {
             return Withdraw(player, group, amount, notify: true);
@@ -874,6 +936,56 @@ namespace NjordWarehouseKeeper.Storage
             }
 
             return moved;
+        }
+
+        private static void FillTowardMax(StackPart destPart, List<StackPart> live, int max)
+        {
+            var destItem = destPart == null ? null : destPart.Live();
+            if (destPart == null || destPart.Source == null || destItem == null || destItem.m_stack >= max)
+            {
+                return;
+            }
+
+            live.Sort(CompareByStackSize);
+            for (var i = 0; i < live.Count; i++)
+            {
+                destItem = destPart.Live();
+                if (destItem == null || destItem.m_stack >= max)
+                {
+                    return;
+                }
+
+                var source = live[i];
+                if (source == destPart || source.Source == null)
+                {
+                    continue;
+                }
+
+                var srcItem = source.Live();
+                var srcInv = source.Source.GetInventory();
+                if (srcItem == null || srcInv == null)
+                {
+                    continue;
+                }
+
+                var n = Mathf.Min(max - destItem.m_stack, srcItem.m_stack);
+                if (n <= 0)
+                {
+                    continue;
+                }
+
+                EnsureOwner(source.Source);
+                MoveAmount(destPart.Source, srcInv, srcItem, n, destItem.m_gridPos);
+            }
+        }
+
+        private static int CompareByStackSize(StackPart a, StackPart b)
+        {
+            var ia = a == null ? null : a.Live();
+            var ib = b == null ? null : b.Live();
+            var sa = ia == null ? 0 : ia.m_stack;
+            var sb = ib == null ? 0 : ib.m_stack;
+            return sa.CompareTo(sb);
         }
 
         private static int MoveAmount(
