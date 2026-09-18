@@ -1037,8 +1037,7 @@ namespace NjordWarehouseKeeper.Storage
                     var existing = inventory.FindFreeStackItem(
                         item.m_shared.m_name,
                         item.m_quality,
-                        item.m_worldLevel,
-                        item.m_cheated);
+                        item.m_worldLevel);
                     if (existing == null)
                     {
                         break;

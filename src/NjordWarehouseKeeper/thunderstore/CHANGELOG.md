@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.1
+
+Deposit works again on Valheim 1.0.15. `FindFreeStackItem` no longer takes
+whether the stack is cheated; the game now merges those piles and marks the
+destination if a cheated item lands on it.
+
 ## 1.2.0
 
 Talking to Njord no longer shows the vanilla crafting column. A wood panel sits in that slot instead, listing the same Craft-tab recipes each bench would, so Withdraw pulls those ingredients.
