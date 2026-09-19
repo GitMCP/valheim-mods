@@ -95,6 +95,7 @@ namespace NjordWarehouseKeeper.UI
             }
 
             SetPrefsOpen(false);
+            ResetSearch();
             _nextSnap = 0f;
             SnapBetweenInventoryAndCrafting();
             _root.SetActive(true);
@@ -109,6 +110,7 @@ namespace NjordWarehouseKeeper.UI
             _pending = null;
             _splitGroup = null;
             UnfocusSearch();
+            ResetSearch();
             HubItemHover.Hide();
             SetPrefsOpen(false);
             NjordWarehouseKeeperRecipes.Close();
@@ -377,6 +379,7 @@ namespace NjordWarehouseKeeper.UI
             PlaceTop(_search.GetComponent<RectTransform>(), SearchY, 484f, 30f);
             _search.interactable = true;
             _search.navigation = new Navigation { mode = Navigation.Mode.None };
+            SearchField.Decorate(_search, OnSearchCleared);
             WireSearchFocus();
             WirePanelDrop();
 
@@ -950,6 +953,7 @@ namespace NjordWarehouseKeeper.UI
         private static void OnSearch(string value)
         {
             _query = value ?? "";
+            SearchField.Sync(_search);
             if (_prefsOpen)
             {
                 NjordWarehouseKeeperPrefs.Refresh();
@@ -958,6 +962,32 @@ namespace NjordWarehouseKeeper.UI
             {
                 Refresh();
             }
+        }
+
+        private static void OnSearchCleared()
+        {
+            if (IsDragging())
+            {
+                DepositDragged();
+                return;
+            }
+
+            _query = "";
+            SearchField.SetText(_search, "", OnSearch);
+            if (_prefsOpen)
+            {
+                NjordWarehouseKeeperPrefs.Refresh();
+            }
+            else
+            {
+                Refresh();
+            }
+        }
+
+        private static void ResetSearch()
+        {
+            _query = "";
+            SearchField.SetText(_search, "", OnSearch);
         }
 
         private static void OnDeposit()
@@ -1302,11 +1332,11 @@ namespace NjordWarehouseKeeper.UI
             star.sprite = HubSprites.StarEmpty;
             star.color = new Color(1f, 1f, 1f, 0.85f);
             var starRt = star.rectTransform;
-            starRt.anchorMin = new Vector2(0f, 0.5f);
-            starRt.anchorMax = new Vector2(0f, 0.5f);
-            starRt.pivot = new Vector2(0.5f, 0.5f);
-            starRt.sizeDelta = new Vector2(18f, 18f);
-            starRt.anchoredPosition = new Vector2(8f + IconSize - 2f, IconSize * 0.5f - 6f);
+            starRt.anchorMin = new Vector2(0f, 1f);
+            starRt.anchorMax = new Vector2(0f, 1f);
+            starRt.pivot = new Vector2(0f, 1f);
+            starRt.sizeDelta = new Vector2(16f, 16f);
+            starRt.anchoredPosition = new Vector2(2f, -2f);
             var starBtn = starGo.GetComponent<Button>();
             starBtn.targetGraphic = star;
             starBtn.transition = Selectable.Transition.None;

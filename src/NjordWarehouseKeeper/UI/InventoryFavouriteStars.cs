@@ -79,6 +79,7 @@ namespace NjordWarehouseKeeper.UI
             if (existing != null)
             {
                 existing.transform.SetAsLastSibling();
+                PlaceStar(existing.transform as RectTransform);
                 return existing;
             }
 
@@ -90,12 +91,7 @@ namespace NjordWarehouseKeeper.UI
                 typeof(Button),
                 typeof(PackFavouriteStar));
             go.transform.SetParent(element.transform, false);
-            var rt = go.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(1f, 1f);
-            rt.anchorMax = new Vector2(1f, 1f);
-            rt.pivot = new Vector2(1f, 1f);
-            rt.sizeDelta = new Vector2(Size, Size);
-            rt.anchoredPosition = new Vector2(-2f, -2f);
+            PlaceStar(go.GetComponent<RectTransform>());
 
             var image = go.GetComponent<Image>();
             image.preserveAspect = true;
@@ -112,6 +108,20 @@ namespace NjordWarehouseKeeper.UI
             star.Image = image;
             button.onClick.AddListener(star.OnClicked);
             return star;
+        }
+
+        private static void PlaceStar(RectTransform rt)
+        {
+            if (rt == null)
+            {
+                return;
+            }
+
+            rt.anchorMin = new Vector2(0f, 1f);
+            rt.anchorMax = new Vector2(0f, 1f);
+            rt.pivot = new Vector2(0f, 1f);
+            rt.sizeDelta = new Vector2(Size, Size);
+            rt.anchoredPosition = new Vector2(2f, -2f);
         }
 
         private static void Bind(PackFavouriteStar star, ItemDrop.ItemData item)

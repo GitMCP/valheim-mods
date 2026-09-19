@@ -12,6 +12,11 @@ If EpicLoot is installed, listed magic items use that mod's rarity colours on
 the row (and unique names stay separate). Item tooltips now draw above the
 list so the scroll mask no longer crops them.
 
+Search on both panels clears when Njord closes, so the next talk starts with
+every item listed. An X on the right of each search box clears the filter;
+typed text stops short of that icon. Favourite stars on pack slots and listed
+rows sit in the upper-left corner.
+
 ## 1.2.1
 
 Deposit works again on Valheim 1.0.15. `FindFreeStackItem` no longer takes
