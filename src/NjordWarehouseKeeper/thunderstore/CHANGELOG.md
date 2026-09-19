@@ -15,7 +15,8 @@ list so the scroll mask no longer crops them.
 Search on both panels clears when Njord closes, so the next talk starts with
 every item listed. An X on the right of each search box clears the filter;
 typed text stops short of that icon. Favourite stars on pack slots and listed
-rows sit in the upper-left corner.
+rows sit in the upper-left corner. The item list sits above the panel trim.
+EpicLoot's rarity background is centred on the row, not framed around the icon.
 
 ## 1.2.1
 

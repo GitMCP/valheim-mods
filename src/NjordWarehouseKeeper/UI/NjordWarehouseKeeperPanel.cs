@@ -36,7 +36,7 @@ namespace NjordWarehouseKeeper.UI
         private const float CatRow2Y = 198f;
         private const float SortY = 232f;
         private const float ListTop = 264f;
-        private const float ListBottom = 28f;
+        private const float ListBottom = 42f;
 
         /// <summary>
         /// Top inset for the preferences overlay, just below search.
@@ -439,7 +439,7 @@ namespace NjordWarehouseKeeper.UI
                 layout.childControlHeight = true;
                 layout.childControlWidth = true;
                 layout.spacing = RowSpacing;
-                layout.padding = new RectOffset(6, 20, 4, 8);
+                layout.padding = new RectOffset(6, 20, 4, 16);
 
                 var fitter = _rowParent.gameObject.GetComponent<ContentSizeFitter>();
                 if (fitter == null)
@@ -1249,16 +1249,16 @@ namespace NjordWarehouseKeeper.UI
 
             var magicGo = new GameObject("MagicBg", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             magicGo.transform.SetParent(row.transform, false);
+            magicGo.transform.SetAsFirstSibling();
             var magic = magicGo.GetComponent<Image>();
             magic.preserveAspect = true;
             magic.raycastTarget = false;
             magic.enabled = false;
             var magicRt = magic.rectTransform;
-            magicRt.anchorMin = new Vector2(0f, 0.5f);
-            magicRt.anchorMax = new Vector2(0f, 0.5f);
-            magicRt.pivot = new Vector2(0f, 0.5f);
-            magicRt.sizeDelta = new Vector2(IconSize + 8f, IconSize + 8f);
-            magicRt.anchoredPosition = new Vector2(4f, 0f);
+            magicRt.anchorMin = Vector2.zero;
+            magicRt.anchorMax = Vector2.one;
+            magicRt.offsetMin = Vector2.zero;
+            magicRt.offsetMax = Vector2.zero;
 
             var iconGo = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             iconGo.transform.SetParent(row.transform, false);
