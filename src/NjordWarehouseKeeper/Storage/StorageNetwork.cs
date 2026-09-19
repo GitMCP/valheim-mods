@@ -992,13 +992,14 @@ namespace NjordWarehouseKeeper.Storage
                     group = new IndexedStack
                     {
                         SharedName = item.m_shared.m_name,
-                        DisplayName = Localization.instance.Localize(item.m_shared.m_name),
+                        DisplayName = EpicLootCompat.DisplayName(item),
                         Quality = item.m_quality,
                         Variant = item.m_variant,
                         WorldLevel = item.m_worldLevel,
                         Category = ItemCategories.Of(item),
                         Icon = item.GetIcon(),
                         Distance = distance,
+                        MagicKey = EpicLootCompat.GroupKey(item),
                     };
                     listed.Add(group);
                 }

@@ -8,6 +8,10 @@ star does. Deposit skip and the Favourites filter both see it. Chest slots are
 left alone. The preferences toggle is now **Ignore favourite items on deposit**
 and defaults to on.
 
+If EpicLoot is installed, listed magic items use that mod's rarity colours on
+the row (and unique names stay separate). Item tooltips now draw above the
+list so the scroll mask no longer crops them.
+
 ## 1.2.1
 
 Deposit works again on Valheim 1.0.15. `FindFreeStackItem` no longer takes

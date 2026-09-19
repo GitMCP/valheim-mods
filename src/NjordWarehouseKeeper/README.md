@@ -11,6 +11,11 @@ stays in your pack.
 Because he is a buildable piece, the mod must be installed on the **server and
 on every client**. A client whose version does not match the server's is refused.
 
+If [EpicLoot](https://github.com/OrianaVenture/Randy_Vapok_ValheimMods/tree/main/EpicLoot)
+is also installed, listed magic items, runestones, and crafting materials use
+that mod's rarity colours on the row, the same way pack slots do. EpicLoot is
+optional.
+
 ## Installation
 
 Drop `NjordWarehouseKeeper.dll` into `BepInEx/plugins`, or install the zip with a
@@ -38,7 +43,8 @@ Walk up and press use. Your inventory stays on the left. Vanilla crafting on the
 right is hidden; Njord's recipe panel opens in that slot, and his item list
 opens in the center. The cog still opens Preferences. Identical items from
 different chests share one row. Hover a row the same way you hover a pack
-slot: keep the cursor still for a moment and the vanilla item tooltip appears.
+slot: keep the cursor still for a moment and the vanilla item tooltip appears
+in front of the list, so the scroll mask does not crop it.
 
 - **Click a row** to pick up one stack and drag it, the same as a chest slot.
   If the stores have enough to fill a complete stack, that is what you pick up,

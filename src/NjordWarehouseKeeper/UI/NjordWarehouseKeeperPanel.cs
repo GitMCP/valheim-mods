@@ -1217,6 +1217,19 @@ namespace NjordWarehouseKeeper.UI
             rt.anchorMax = new Vector2(1f, 1f);
             rt.pivot = new Vector2(0.5f, 1f);
 
+            var magicGo = new GameObject("MagicBg", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            magicGo.transform.SetParent(row.transform, false);
+            var magic = magicGo.GetComponent<Image>();
+            magic.preserveAspect = true;
+            magic.raycastTarget = false;
+            magic.enabled = false;
+            var magicRt = magic.rectTransform;
+            magicRt.anchorMin = new Vector2(0f, 0.5f);
+            magicRt.anchorMax = new Vector2(0f, 0.5f);
+            magicRt.pivot = new Vector2(0f, 0.5f);
+            magicRt.sizeDelta = new Vector2(IconSize + 8f, IconSize + 8f);
+            magicRt.anchoredPosition = new Vector2(4f, 0f);
+
             var iconGo = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             iconGo.transform.SetParent(row.transform, false);
             var icon = iconGo.GetComponent<Image>();
@@ -1299,16 +1312,20 @@ namespace NjordWarehouseKeeper.UI
             starBtn.transition = Selectable.Transition.None;
             starBtn.navigation = new Navigation { mode = Navigation.Mode.None };
 
+            var button = row.GetComponent<Button>();
             var view = new RowView
             {
                 Go = row,
                 Icon = icon,
+                MagicBg = magic,
                 Name = name,
                 Qty = qty,
                 Star = star,
                 Hover = row.AddComponent<HubItemHover>(),
+                PlainColors = button.colors,
+                PlainName = name.color,
             };
-            row.GetComponent<Button>().onClick.AddListener(() => OnRowClicked(view));
+            button.onClick.AddListener(() => OnRowClicked(view));
             starBtn.onClick.AddListener(() => OnStarClicked(view));
             return view;
         }
@@ -1337,10 +1354,13 @@ namespace NjordWarehouseKeeper.UI
                 view.Qty.text = "x" + stack.Quantity;
             }
 
+            var live = stack.FirstLive();
             if (view.Hover != null)
             {
-                view.Hover.Bind(stack.FirstLive());
+                view.Hover.Bind(live);
             }
+
+            PaintRarity(view, live);
 
             var favourite = ClientPreferences.IsFavourite(stack.Key());
             if (view.Star != null)
@@ -1349,6 +1369,63 @@ namespace NjordWarehouseKeeper.UI
                 view.Star.color = favourite
                     ? new Color(1f, 0.82f, 0.28f, 1f)
                     : new Color(1f, 1f, 1f, 0.8f);
+            }
+        }
+
+        private static void PaintRarity(RowView view, ItemDrop.ItemData item)
+        {
+            if (view == null || view.Go == null)
+            {
+                return;
+            }
+
+            var button = view.Go.GetComponent<Button>();
+            Color rarity;
+            if (EpicLootCompat.TryGetRarityColor(item, out rarity))
+            {
+                if (button != null)
+                {
+                    var colors = view.PlainColors;
+                    colors.normalColor = rarity;
+                    colors.highlightedColor = Color.Lerp(rarity, Color.white, 0.22f);
+                    colors.pressedColor = Color.Lerp(rarity, Color.black, 0.18f);
+                    colors.selectedColor = rarity;
+                    button.colors = colors;
+                }
+
+                if (view.Name != null)
+                {
+                    view.Name.color = rarity;
+                }
+
+                if (view.MagicBg != null)
+                {
+                    Sprite sprite;
+                    if (EpicLootCompat.TryGetMagicBackground(out sprite))
+                    {
+                        view.MagicBg.sprite = sprite;
+                    }
+
+                    view.MagicBg.color = rarity;
+                    view.MagicBg.enabled = true;
+                }
+
+                return;
+            }
+
+            if (button != null)
+            {
+                button.colors = view.PlainColors;
+            }
+
+            if (view.Name != null)
+            {
+                view.Name.color = view.PlainName;
+            }
+
+            if (view.MagicBg != null)
+            {
+                view.MagicBg.enabled = false;
             }
         }
 
@@ -1653,11 +1730,14 @@ namespace NjordWarehouseKeeper.UI
         {
             internal GameObject Go;
             internal Image Icon;
+            internal Image MagicBg;
             internal Text Name;
             internal Text Qty;
             internal Image Star;
             internal HubItemHover Hover;
             internal IndexedStack Stack;
+            internal ColorBlock PlainColors;
+            internal Color PlainName;
         }
     }
 }
