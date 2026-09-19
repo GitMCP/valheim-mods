@@ -431,8 +431,8 @@ namespace NjordWarehouseKeeper.UI
         {
             for (var i = 0; i < keys.Count; i++)
             {
-                var key = keys[i];
-                if (byKey.ContainsKey(key))
+                var key = ItemKey.TypeOf(keys[i]);
+                if (string.IsNullOrEmpty(key) || byKey.ContainsKey(key))
                 {
                     continue;
                 }
@@ -447,8 +447,8 @@ namespace NjordWarehouseKeeper.UI
 
         private static int Compare(IndexedStack a, IndexedStack b)
         {
-            var af = ClientPreferences.IsFavourite(a.Key());
-            var bf = ClientPreferences.IsFavourite(b.Key());
+            var af = ClientPreferences.IsFavourite(a);
+            var bf = ClientPreferences.IsFavourite(b);
             if (af != bf)
             {
                 return af ? -1 : 1;

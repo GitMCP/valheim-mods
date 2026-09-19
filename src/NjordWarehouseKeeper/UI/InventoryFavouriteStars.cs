@@ -131,16 +131,15 @@ namespace NjordWarehouseKeeper.UI
                 return;
             }
 
-            var key = ItemKey.Of(item);
-            star.Key = key;
-            var show = !string.IsNullOrEmpty(key);
+            star.Pos = item != null ? item.m_gridPos : new Vector2i(-1, -1);
+            var show = item?.m_shared != null;
             star.gameObject.SetActive(show);
             if (!show || star.Image == null)
             {
                 return;
             }
 
-            var favourite = ClientPreferences.IsFavourite(key);
+            var favourite = ClientPreferences.IsFavourite(item);
             star.Image.sprite = favourite ? HubSprites.StarFilled : HubSprites.StarEmpty;
             star.Image.color = favourite
                 ? new Color(1f, 0.82f, 0.28f, 1f)
@@ -151,15 +150,10 @@ namespace NjordWarehouseKeeper.UI
     internal sealed class PackFavouriteStar : MonoBehaviour
     {
         internal Image Image;
-        internal string Key;
+        internal Vector2i Pos;
 
         internal void OnClicked()
         {
-            if (string.IsNullOrEmpty(Key))
-            {
-                return;
-            }
-
             if (NjordWarehouseKeeperPanel.IsDragging())
             {
                 NjordWarehouseKeeperPanel.DepositDragged();
@@ -172,8 +166,18 @@ namespace NjordWarehouseKeeper.UI
                 return;
             }
 
-            ClientPreferences.SetFavourite(Key, !ClientPreferences.IsFavourite(Key));
-            var favourite = ClientPreferences.IsFavourite(Key);
+            var inventory = gui != null && gui.m_playerGrid != null
+                ? gui.m_playerGrid.GetInventory()
+                : Player.m_localPlayer != null ? Player.m_localPlayer.GetInventory() : null;
+            var item = inventory != null ? inventory.GetItemAt(Pos.x, Pos.y) : null;
+            if (item?.m_shared == null)
+            {
+                return;
+            }
+
+            ClientPreferences.ToggleFavourite(item);
+            ItemKey.Persist(inventory);
+            var favourite = ClientPreferences.IsFavourite(item);
             if (Image != null)
             {
                 Image.sprite = favourite ? HubSprites.StarFilled : HubSprites.StarEmpty;

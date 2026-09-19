@@ -1232,7 +1232,7 @@ namespace NjordWarehouseKeeper.UI
             foreach (var item in items)
             {
                 var wantFavourite = _category == ItemCategory.Favourites || _favouritesOnly;
-                if (wantFavourite && !ClientPreferences.IsFavourite(item.Key()))
+                if (wantFavourite && !ClientPreferences.IsFavourite(item))
                 {
                     continue;
                 }
@@ -1436,7 +1436,7 @@ namespace NjordWarehouseKeeper.UI
 
             PaintRarity(view, live);
 
-            var favourite = ClientPreferences.IsFavourite(stack.Key());
+            var favourite = ClientPreferences.IsFavourite(stack);
             if (view.Star != null)
             {
                 view.Star.sprite = favourite ? HubSprites.StarFilled : HubSprites.StarEmpty;
@@ -1512,8 +1512,20 @@ namespace NjordWarehouseKeeper.UI
                 return;
             }
 
-            var key = view.Stack.Key();
-            ClientPreferences.SetFavourite(key, !ClientPreferences.IsFavourite(key));
+            var part = view.Stack.FirstLivePart();
+            var live = part == null ? null : part.Live();
+            if (live == null)
+            {
+                return;
+            }
+
+            if (part.Source != null)
+            {
+                StorageNetwork.EnsureOwner(part.Source);
+            }
+
+            ClientPreferences.ToggleFavourite(live);
+            ItemKey.Persist(part.Source != null ? part.Source.GetInventory() : null);
             Refresh();
         }
 

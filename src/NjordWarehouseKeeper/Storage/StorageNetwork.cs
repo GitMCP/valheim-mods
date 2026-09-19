@@ -142,7 +142,7 @@ namespace NjordWarehouseKeeper.Storage
                 }
 
                 if (ClientPreferences.DepositSkipFavourites.Value &&
-                    ClientPreferences.IsFavourite(ItemKey.Of(item)))
+                    ClientPreferences.IsFavourite(item))
                 {
                     continue;
                 }
@@ -1000,12 +1000,15 @@ namespace NjordWarehouseKeeper.Storage
                 };
 
                 IndexedStack group = null;
-                for (var i = 0; i < listed.Count; i++)
+                if (item.m_shared.m_maxStackSize > 1)
                 {
-                    if (listed[i].SameAs(item))
+                    for (var i = 0; i < listed.Count; i++)
                     {
-                        group = listed[i];
-                        break;
+                        if (listed[i].SameAs(item))
+                        {
+                            group = listed[i];
+                            break;
+                        }
                     }
                 }
 

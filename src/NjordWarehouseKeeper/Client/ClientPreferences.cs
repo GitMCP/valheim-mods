@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using BepInEx.Configuration;
+using NjordWarehouseKeeper.Storage;
 
 namespace NjordWarehouseKeeper.Client
 {
@@ -33,7 +34,7 @@ namespace NjordWarehouseKeeper.Client
                 "Client",
                 "Favourites",
                 "",
-                "Item keys marked with a star in Njord's list or on a pack slot. Local to this client.");
+                "Item keys marked with a star in Njord's list or on a pack slot. Unique items (weapons, armour, tools) store a per-instance id. Local to this client.");
 
             ResupplyRaw = config.Bind(
                 "Client",
@@ -57,6 +58,41 @@ namespace NjordWarehouseKeeper.Client
             return !string.IsNullOrEmpty(key) && Favourites.Contains(key);
         }
 
+        internal static bool IsFavourite(ItemDrop.ItemData item)
+        {
+            if (item?.m_shared == null)
+            {
+                return false;
+            }
+
+            var type = ItemKey.Of(item);
+            if (!ItemKey.IsUnique(item))
+            {
+                return IsFavourite(type);
+            }
+
+            return IsFavourite(ItemKey.FavouriteOf(item)) || IsFavourite(type);
+        }
+
+        internal static bool IsFavourite(IndexedStack stack)
+        {
+            if (stack == null)
+            {
+                return false;
+            }
+
+            for (var i = 0; i < stack.Parts.Count; i++)
+            {
+                var live = stack.Parts[i].Live();
+                if (live != null && IsFavourite(live))
+                {
+                    return true;
+                }
+            }
+
+            return IsFavourite(stack.Key());
+        }
+
         internal static void SetFavourite(string key, bool on)
         {
             if (string.IsNullOrEmpty(key))
@@ -65,6 +101,48 @@ namespace NjordWarehouseKeeper.Client
             }
 
             var changed = on ? Favourites.Add(key) : Favourites.Remove(key);
+            if (changed)
+            {
+                SaveFavourites();
+            }
+        }
+
+        /// <summary>
+        /// Stars or unstars the clicked item. Stackable goods still share one
+        /// key. Unique pieces get their own id so a second sword is left alone.
+        /// A leftover type-wide unique key is converted onto this instance.
+        /// </summary>
+        internal static void ToggleFavourite(ItemDrop.ItemData item)
+        {
+            if (item?.m_shared == null)
+            {
+                return;
+            }
+
+            if (!ItemKey.IsUnique(item))
+            {
+                var key = ItemKey.Of(item);
+                SetFavourite(key, !IsFavourite(key));
+                return;
+            }
+
+            var type = ItemKey.Of(item);
+            var instance = ItemKey.EnsureFavourite(item);
+            if (IsFavourite(type) && !IsFavourite(instance))
+            {
+                Favourites.Remove(type);
+                Favourites.Add(instance);
+                SaveFavourites();
+                return;
+            }
+
+            var on = !IsFavourite(instance);
+            var changed = on ? Favourites.Add(instance) : Favourites.Remove(instance);
+            if (Favourites.Remove(type))
+            {
+                changed = true;
+            }
+
             if (changed)
             {
                 SaveFavourites();

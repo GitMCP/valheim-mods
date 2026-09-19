@@ -19,6 +19,7 @@ rows sit in the upper-left corner. The item list sits above the panel trim.
 EpicLoot items keep the rarity card colour only; the slot frame sprite is not drawn.
 A full store now says so when you drop or shift-click an item, not only when you press Deposit.
 The item panel is taller so more rows fit, and the list is clipped inside the wood.
+Starring a weapon, armour piece, or tool marks that specific item, not every other copy of the same kind.
 
 ## 1.2.1
 

@@ -52,10 +52,11 @@ in front of the list, so the scroll mask does not crop it.
 - **Ctrl-click a row** to take as much of that item as your pack will hold.
 - **Shift-click a row** to pick how many to take.
 - **Click the star** on a listed row, or on an item in your own pack, to mark
-  that item as a favourite. The pack star is there whenever inventory is open
-  (Tab included), not only while talking to Njord. The Favourites category
-  lists only starred items. The star next to the sort buttons filters the
-  current category the same way.
+  that item as a favourite. Weapons, armour, and tools star as that specific
+  piece; stacking goods still share one star. The pack star is there whenever
+  inventory is open (Tab included), not only while talking to Njord. The
+  Favourites category lists only starred items. The star next to the sort
+  buttons filters the current category the same way.
 - **Click an item in your inventory**, then click the panel (or a row) to
   store it. Dropping on a row stores the dragged item; it does not withdraw.
 - **Shift-click** an item in your inventory, or press **Deposit**, to send it
