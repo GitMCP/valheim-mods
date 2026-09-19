@@ -26,14 +26,14 @@ namespace NjordWarehouseKeeper.Client
             DepositSkipFavourites = config.Bind(
                 "Client",
                 "DepositSkipFavourites",
-                false,
-                "When depositing everything, leave favourite items in your pack.");
+                true,
+                "Ignore favourite items on deposit. When depositing everything, leave starred items in your pack.");
 
             FavouritesRaw = config.Bind(
                 "Client",
                 "Favourites",
                 "",
-                "Item keys marked with a star in Njord's list. Local to this client.");
+                "Item keys marked with a star in Njord's list or on a pack slot. Local to this client.");
 
             ResupplyRaw = config.Bind(
                 "Client",

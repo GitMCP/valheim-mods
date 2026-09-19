@@ -47,6 +47,7 @@ namespace NjordWarehouseKeeper.Storage
         internal ItemCategory Category;
         internal Sprite Icon;
         internal float Distance;
+        internal string MagicKey;
 
         internal bool SameAs(ItemDrop.ItemData item)
         {
@@ -54,12 +55,13 @@ namespace NjordWarehouseKeeper.Storage
                 && item.m_shared.m_name == SharedName
                 && item.m_quality == Quality
                 && item.m_variant == Variant
-                && item.m_worldLevel == WorldLevel;
+                && item.m_worldLevel == WorldLevel
+                && (MagicKey ?? "") == EpicLootCompat.GroupKey(item);
         }
 
         internal string Identity()
         {
-            return SharedName + "\0" + Quality + "\0" + Variant + "\0" + WorldLevel;
+            return SharedName + "\0" + Quality + "\0" + Variant + "\0" + WorldLevel + "\0" + (MagicKey ?? "");
         }
 
         internal string Key()

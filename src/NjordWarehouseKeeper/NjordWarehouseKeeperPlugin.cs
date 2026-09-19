@@ -27,6 +27,7 @@ namespace NjordWarehouseKeeper
     /// </summary>
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     [BepInDependency(Jotunn.Main.ModGuid)]
+    [BepInDependency(Client.EpicLootCompat.PluginId, BepInDependency.DependencyFlags.SoftDependency)]
     [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.Minor)]
     public class NjordWarehouseKeeperPlugin : BaseUnityPlugin
     {

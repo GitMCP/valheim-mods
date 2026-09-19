@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.2.2
+
+Favourite stars on pack slots. Open inventory (Tab, or while talking to Njord)
+and click the star on an occupied slot to mark that item the same way the list
+star does. Deposit skip and the Favourites filter both see it. Chest slots are
+left alone. The preferences toggle is now **Ignore favourite items on deposit**
+and defaults to on.
+
+If EpicLoot is installed, listed magic items use that mod's rarity colours on
+the row (and unique names stay separate). Item tooltips now draw above the
+list so the scroll mask no longer crops them.
+
+Search on both panels clears when Njord closes, so the next talk starts with
+every item listed. An X on the right of each search box clears the filter;
+typed text stops short of that icon. Favourite stars on pack slots and listed
+rows sit in the upper-left corner. The item list sits above the panel trim.
+EpicLoot items keep the rarity card colour only; the slot frame sprite is not drawn.
+A full store now says so when you drop or shift-click an item, not only when you press Deposit.
+The item panel is taller so more rows fit, and the list is clipped inside the wood.
+
 ## 1.2.1
 
 Deposit works again on Valheim 1.0.15. `FindFreeStackItem` no longer takes

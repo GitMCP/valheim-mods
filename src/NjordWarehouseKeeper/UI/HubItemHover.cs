@@ -1,6 +1,8 @@
+using Jotunn.Managers;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace NjordWarehouseKeeper.UI
 {
@@ -8,15 +10,18 @@ namespace NjordWarehouseKeeper.UI
     /// Inventory-style item tooltip. Vanilla <see cref="UITooltip"/> waits 0.5s
     /// after pointer-enter; this also requires the cursor <em>and</em> the row
     /// to stay still so a scrolling list does not flash a tooltip on every row
-    /// that slides under the mouse.
+    /// that slides under the mouse. The tip is parented to a front overlay so
+    /// the list <see cref="RectMask2D"/> cannot crop it.
     /// </summary>
     internal sealed class HubItemHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
         private const float ShowDelay = 0.5f;
         private const float MoveSlop = 4f;
+        private const int OverlaySort = 12000;
 
         private static GameObject Shown;
         private static HubItemHover Owner;
+        private static Transform Overlay;
 
         internal string Topic;
         internal string Body;
@@ -158,18 +163,20 @@ namespace NjordWarehouseKeeper.UI
             }
 
             var prefab = Prefab();
-            var canvas = GetComponentInParent<Canvas>();
-            if (prefab == null || canvas == null)
+            var parent = OverlayRoot();
+            if (prefab == null || parent == null)
             {
                 return;
             }
 
             Hide();
-            Shown = UnityEngine.Object.Instantiate(prefab, canvas.transform);
+            Shown = UnityEngine.Object.Instantiate(prefab, parent);
             Owner = this;
+            IgnoreRaycasts(Shown);
             ApplyText(Shown);
             Shown.transform.position = mouse;
             Clamp(Shown);
+            parent.SetAsLastSibling();
         }
 
         private void ApplyText(GameObject tip)
@@ -212,6 +219,71 @@ namespace NjordWarehouseKeeper.UI
         private static Vector2 Mouse()
         {
             return ZInput.instance != null ? (Vector2)ZInput.pointerPosition : (Vector2)Input.mousePosition;
+        }
+
+        private static Transform OverlayRoot()
+        {
+            if (Overlay != null)
+            {
+                return Overlay;
+            }
+
+            Transform parent = null;
+            if (GUIManager.CustomGUIFront != null)
+            {
+                parent = GUIManager.CustomGUIFront.transform;
+            }
+            else if (InventoryGui.instance != null)
+            {
+                parent = InventoryGui.instance.transform;
+            }
+
+            if (parent == null)
+            {
+                return null;
+            }
+
+            var go = new GameObject(
+                "NjordHoverOverlay",
+                typeof(RectTransform),
+                typeof(Canvas));
+            go.transform.SetParent(parent, false);
+            go.transform.SetAsLastSibling();
+            var rt = go.GetComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+            var canvas = go.GetComponent<Canvas>();
+            var parentCanvas = parent.GetComponent<Canvas>() ?? parent.GetComponentInParent<Canvas>();
+            if (parentCanvas != null)
+            {
+                canvas.renderMode = parentCanvas.renderMode;
+                canvas.worldCamera = parentCanvas.worldCamera;
+                canvas.sortingLayerID = parentCanvas.sortingLayerID;
+            }
+
+            canvas.overrideSorting = true;
+            canvas.sortingOrder = OverlaySort;
+            Overlay = go.transform;
+            return Overlay;
+        }
+
+        private static void IgnoreRaycasts(GameObject root)
+        {
+            if (root == null)
+            {
+                return;
+            }
+
+            var graphics = root.GetComponentsInChildren<Graphic>(true);
+            for (var i = 0; i < graphics.Length; i++)
+            {
+                if (graphics[i] != null)
+                {
+                    graphics[i].raycastTarget = false;
+                }
+            }
         }
 
         private static GameObject Prefab()
