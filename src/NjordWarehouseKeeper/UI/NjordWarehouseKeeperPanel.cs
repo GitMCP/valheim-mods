@@ -36,7 +36,7 @@ namespace NjordWarehouseKeeper.UI
         private const float CatRow2Y = 198f;
         private const float SortY = 232f;
         private const float ListTop = 268f;
-        private const float ListBottom = 28f;
+        private const float ListBottom = 16f;
         private const float ListInset = 22f;
 
         /// <summary>
@@ -348,7 +348,7 @@ namespace NjordWarehouseKeeper.UI
                 rootMask = _root.AddComponent<RectMask2D>();
             }
 
-            rootMask.padding = new Vector4(14f, 18f, 14f, 10f);
+            rootMask.padding = new Vector4(14f, 12f, 14f, 10f);
 
             _title = MakeText(
                 gui,
@@ -443,6 +443,7 @@ namespace NjordWarehouseKeeper.UI
             var scrollView = scroll.GetComponentInChildren<ScrollRect>(true);
             if (scrollView != null)
             {
+                StretchFill(scrollView.transform as RectTransform);
                 FitScrollView(scrollView, ListScrollSensitivity());
                 TightenListViewport(scrollView);
                 scrollView.onValueChanged.AddListener(_ => HubItemHover.Hide());
@@ -833,11 +834,35 @@ namespace NjordWarehouseKeeper.UI
 
         private static void PlaceFillBottom(RectTransform rt, float top, float bottom, float inset)
         {
+            if (rt == null)
+            {
+                return;
+            }
+
             rt.anchorMin = new Vector2(0f, 0f);
             rt.anchorMax = new Vector2(1f, 1f);
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.offsetMin = new Vector2(inset, bottom);
             rt.offsetMax = new Vector2(-inset, -top);
+        }
+
+        /// <summary>
+        /// Jötunn's CreateScrollView returns a fixed-size Canvas wrapper. The
+        /// inner Scroll View stays 400px tall unless it is stretched to fill.
+        /// </summary>
+        private static void StretchFill(RectTransform rt)
+        {
+            if (rt == null)
+            {
+                return;
+            }
+
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = Vector2.zero;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
         }
 
         private static void StretchContent(RectTransform content)
