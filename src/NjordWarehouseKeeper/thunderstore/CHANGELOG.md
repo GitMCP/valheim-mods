@@ -6,23 +6,24 @@ Favourite stars on pack slots. Open inventory (Tab, or while talking to Njord)
 and click the star on an occupied slot to mark that item the same way the list
 star does. Deposit skip and the Favourites filter both see it. Chest slots are
 left alone. The preferences toggle is now **Ignore favourite items on deposit**
-and defaults to on.
+and defaults to on. Starring a weapon, armour piece, or tool marks that
+specific item, not every other copy of the same kind.
 
 If EpicLoot is installed, listed magic items use that mod's rarity colours on
-the row (and unique names stay separate). Item tooltips now draw above the
-list so the scroll mask no longer crops them.
+the row (and unique names stay separate). The inventory slot-frame sprite is
+not drawn on Njord's list. Item tooltips now draw above the list so the scroll
+mask no longer crops them.
 
 Search on both panels clears when Njord closes, so the next talk starts with
-every item listed. An X on the right of each search box clears the filter;
-typed text stops short of that icon. Favourite stars on pack slots and listed
-rows sit in the upper-left corner. The item list sits above the panel trim.
-EpicLoot items keep the rarity card colour only; the slot frame sprite is not drawn.
-A full store now says so when you drop or shift-click an item, not only when you press Deposit.
-The item panel is taller so more rows fit, and the list fills most of that height
-and stays clipped inside the wood.
-Starring a weapon, armour piece, or tool marks that specific item, not every other copy of the same kind.
-Preferences is split into Settings (skip favourites, hotkey, Reorganize) and Resupply (search and the keep-in-pack list).
-List scrollbars travel the full height of the taller lists, not the old 400px track.
+every item listed. An X on the right of each search box clears the filter.
+Favourite stars sit in the upper-left corner. The item panel is taller so more
+rows fit; the list fills that height, stays clipped inside the wood, and its
+scrollbar travels the full track. Preferences is split into **Settings**
+(skip favourites, hotkey, Reorganize) and **Resupply** (search and the
+keep-in-pack list).
+
+A full store now says so when you drop or shift-click an item, not only when
+you press Deposit.
 
 ## 1.2.1
 
