@@ -25,7 +25,7 @@ namespace NjordWarehouseKeeper.UI
         }
 
         private const float PanelWidth = 520f;
-        private const float PanelHeight = 640f;
+        private const float PanelHeight = 750f;
         private const float RowHeight = 52f;
         private const float RowSpacing = 3f;
         private const float IconSize = 40f;
@@ -36,7 +36,8 @@ namespace NjordWarehouseKeeper.UI
         private const float CatRow2Y = 198f;
         private const float SortY = 232f;
         private const float ListTop = 264f;
-        private const float ListBottom = 42f;
+        private const float ListBottom = 72f;
+        private const float ListInset = 24f;
 
         /// <summary>
         /// Top inset for the preferences overlay, just below search.
@@ -249,7 +250,7 @@ namespace NjordWarehouseKeeper.UI
 
             ours.anchorMin = new Vector2(0.5f, 0.5f);
             ours.anchorMax = new Vector2(0.5f, 0.5f);
-            ours.pivot = new Vector2(0.5f, 0.5f);
+            ours.pivot = new Vector2(0.5f, 1f);
             if (ours.sizeDelta.x != PanelWidth || ours.sizeDelta.y != PanelHeight)
             {
                 ours.sizeDelta = new Vector2(PanelWidth, PanelHeight);
@@ -284,7 +285,11 @@ namespace NjordWarehouseKeeper.UI
                     midX = right - pad - half;
                 }
 
-                pos = new Vector2(midX - center.x, 0f);
+                pos = new Vector2(midX - center.x, InventoryTop(parent, gui.m_player) - center.y);
+            }
+            else
+            {
+                pos = new Vector2(0f, InventoryTop(parent, gui.m_player) - center.y);
             }
 
             if ((ours.anchoredPosition - pos).sqrMagnitude > 4f)
@@ -293,6 +298,19 @@ namespace NjordWarehouseKeeper.UI
             }
 
             _nextSnap = Time.time + 0.35f;
+        }
+
+        private static float InventoryTop(RectTransform parent, RectTransform player)
+        {
+            if (parent == null || player == null)
+            {
+                return 320f;
+            }
+
+            player.GetWorldCorners(Corners);
+            var a = parent.InverseTransformPoint(Corners[1]).y;
+            var b = parent.InverseTransformPoint(Corners[2]).y;
+            return Mathf.Max(a, b);
         }
 
         private static float EdgeX(RectTransform parent, RectTransform child, bool right)
@@ -324,10 +342,13 @@ namespace NjordWarehouseKeeper.UI
                 PanelHeight,
                 draggable: false);
             _root.name = "NjordWarehouseKeeperPanel";
-            if (_root.GetComponent<RectMask2D>() == null)
+            var rootMask = _root.GetComponent<RectMask2D>();
+            if (rootMask == null)
             {
-                _root.AddComponent<RectMask2D>();
+                rootMask = _root.AddComponent<RectMask2D>();
             }
+
+            rootMask.padding = new Vector4(16f, 36f, 16f, 10f);
 
             _title = MakeText(
                 gui,
@@ -417,12 +438,13 @@ namespace NjordWarehouseKeeper.UI
                 480f,
                 400f);
             _scrollRect = scroll.GetComponent<RectTransform>();
-            PlaceFillBottom(_scrollRect, top: ListTop, bottom: ListBottom, inset: 16f);
+            PlaceFillBottom(_scrollRect, top: ListTop, bottom: ListBottom, inset: ListInset);
 
             var scrollView = scroll.GetComponentInChildren<ScrollRect>(true);
             if (scrollView != null)
             {
                 FitScrollView(scrollView, ListScrollSensitivity());
+                TightenListViewport(scrollView);
                 scrollView.onValueChanged.AddListener(_ => HubItemHover.Hide());
                 _rowParent = scrollView.content;
                 StretchContent(_rowParent as RectTransform);
@@ -439,7 +461,7 @@ namespace NjordWarehouseKeeper.UI
                 layout.childControlHeight = true;
                 layout.childControlWidth = true;
                 layout.spacing = RowSpacing;
-                layout.padding = new RectOffset(6, 20, 4, 16);
+                layout.padding = new RectOffset(6, 24, 4, 24);
 
                 var fitter = _rowParent.gameObject.GetComponent<ContentSizeFitter>();
                 if (fitter == null)
@@ -772,6 +794,41 @@ namespace NjordWarehouseKeeper.UI
             rt.pivot = new Vector2(0.5f, 1f);
             rt.sizeDelta = new Vector2(width, height);
             rt.anchoredPosition = new Vector2(x, -yFromTop);
+        }
+
+        private static void TightenListViewport(ScrollRect scrollView)
+        {
+            if (scrollView == null)
+            {
+                return;
+            }
+
+            var viewport = scrollView.viewport;
+            if (viewport == null)
+            {
+                return;
+            }
+
+            viewport.offsetMin = new Vector2(0f, 0f);
+            viewport.offsetMax = new Vector2(-16f, 0f);
+
+            var image = viewport.GetComponent<Image>();
+            if (image == null)
+            {
+                image = viewport.gameObject.AddComponent<Image>();
+            }
+
+            image.color = new Color(1f, 1f, 1f, 0.004f);
+            image.raycastTarget = true;
+
+            var stencil = viewport.GetComponent<Mask>();
+            if (stencil == null)
+            {
+                stencil = viewport.gameObject.AddComponent<Mask>();
+            }
+
+            stencil.showMaskGraphic = false;
+            stencil.enabled = true;
         }
 
         private static void PlaceFillBottom(RectTransform rt, float top, float bottom, float inset)
