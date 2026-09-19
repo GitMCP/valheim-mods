@@ -25,7 +25,7 @@ namespace NjordWarehouseKeeper.UI
         }
 
         private const float PanelWidth = 520f;
-        private const float PanelHeight = 750f;
+        private const float PanelHeight = 830f;
         private const float RowHeight = 52f;
         private const float RowSpacing = 3f;
         private const float IconSize = 40f;
@@ -35,9 +35,9 @@ namespace NjordWarehouseKeeper.UI
         private const float CatRow1Y = 166f;
         private const float CatRow2Y = 198f;
         private const float SortY = 232f;
-        private const float ListTop = 264f;
-        private const float ListBottom = 72f;
-        private const float ListInset = 24f;
+        private const float ListTop = 268f;
+        private const float ListBottom = 28f;
+        private const float ListInset = 22f;
 
         /// <summary>
         /// Top inset for the preferences overlay, just below search.
@@ -348,7 +348,7 @@ namespace NjordWarehouseKeeper.UI
                 rootMask = _root.AddComponent<RectMask2D>();
             }
 
-            rootMask.padding = new Vector4(16f, 36f, 16f, 10f);
+            rootMask.padding = new Vector4(14f, 18f, 14f, 10f);
 
             _title = MakeText(
                 gui,
@@ -461,7 +461,7 @@ namespace NjordWarehouseKeeper.UI
                 layout.childControlHeight = true;
                 layout.childControlWidth = true;
                 layout.spacing = RowSpacing;
-                layout.padding = new RectOffset(6, 24, 4, 24);
+                layout.padding = new RectOffset(6, 20, 4, 8);
 
                 var fitter = _rowParent.gameObject.GetComponent<ContentSizeFitter>();
                 if (fitter == null)
