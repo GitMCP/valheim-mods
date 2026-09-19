@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.2
+
+Favourite stars on pack slots. Open inventory (Tab, or while talking to Njord)
+and click the star on an occupied slot to mark that item the same way the list
+star does. Deposit skip and the Favourites filter both see it. Chest slots are
+left alone.
+
 ## 1.2.1
 
 Deposit works again on Valheim 1.0.15. `FindFreeStackItem` no longer takes

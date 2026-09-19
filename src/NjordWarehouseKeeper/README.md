@@ -45,9 +45,11 @@ slot: keep the cursor still for a moment and the vanilla item tooltip appears.
   not a leftover pile from the first chest that happens to hold some.
 - **Ctrl-click a row** to take as much of that item as your pack will hold.
 - **Shift-click a row** to pick how many to take.
-- **Click the star** on a row to mark that item as a favourite. The Favourites
-  category lists only starred items. The star next to the sort buttons filters
-  the current category the same way.
+- **Click the star** on a listed row, or on an item in your own pack, to mark
+  that item as a favourite. The pack star is there whenever inventory is open
+  (Tab included), not only while talking to Njord. The Favourites category
+  lists only starred items. The star next to the sort buttons filters the
+  current category the same way.
 - **Click an item in your inventory**, then click the panel (or a row) to
   store it. Dropping on a row stores the dragged item; it does not withdraw.
 - **Shift-click** an item in your inventory, or press **Deposit**, to send it
@@ -97,7 +99,7 @@ deposit-skip toggle are **client-only** and stay on that machine.
 | `Njord / ReorganizeInterval` | `60` | Seconds between tidy passes (15–1800). |
 | `Client / DepositSkipFavourites` | `false` | Deposit leaves starred items in the pack. Also set from the cog. |
 | `Client / RestockHotkey` | *(none)* | In range of Njord, Deposit then Resupply. Bound from the cog. |
-| `Client / Favourites` | *(empty)* | Starred item keys. Edited from the item list. |
+| `Client / Favourites` | *(empty)* | Starred item keys. Edited from the item list or from pack slots. |
 | `Client / Resupply` | *(empty)* | Item keys and counts for the Resupply button. Edited from the cog. |
 
 ## How it works
