@@ -38,14 +38,20 @@ namespace NjordWarehouseKeeper.Storage
         /// The hub itself is only used if nowhere else will take it.
         /// Returns true when the stack left <paramref name="from"/> entirely.
         /// </summary>
-        internal static bool Route(Inventory from, ItemDrop.ItemData item, Container hub, bool allowHub)
+        internal static bool Route(
+            Inventory from,
+            ItemDrop.ItemData item,
+            Container hub,
+            bool allowHub,
+            bool notify = false)
         {
             if (from == null || item == null || hub == null)
             {
                 return false;
             }
 
-            return RouteAmount(from, item, item.m_stack, hub, allowHub) && !from.ContainsItem(item);
+            return RouteAmount(from, item, item.m_stack, hub, allowHub, notify)
+                && !from.ContainsItem(item);
         }
 
         internal static bool RouteAmount(
@@ -53,7 +59,8 @@ namespace NjordWarehouseKeeper.Storage
             ItemDrop.ItemData item,
             int amount,
             Container hub,
-            bool allowHub)
+            bool allowHub,
+            bool notify = false)
         {
             if (from == null || item == null || hub == null || amount <= 0)
             {
@@ -84,7 +91,22 @@ namespace NjordWarehouseKeeper.Storage
                 }
             }
 
-            return left < amount;
+            var moved = left < amount;
+            if (notify && !moved)
+            {
+                NotifyNoSpace();
+            }
+
+            return moved;
+        }
+
+        private static void NotifyNoSpace()
+        {
+            var player = Player.m_localPlayer;
+            if (player != null)
+            {
+                player.Message(MessageHud.MessageType.Center, "$njord_nospace");
+            }
         }
 
         internal static int DepositAll(Player player, Container hub)
@@ -120,7 +142,7 @@ namespace NjordWarehouseKeeper.Storage
                 }
 
                 if (ClientPreferences.DepositSkipFavourites.Value &&
-                    ClientPreferences.IsFavourite(ItemKey.Of(item)))
+                    ClientPreferences.IsFavourite(item))
                 {
                     continue;
                 }
@@ -978,12 +1000,15 @@ namespace NjordWarehouseKeeper.Storage
                 };
 
                 IndexedStack group = null;
-                for (var i = 0; i < listed.Count; i++)
+                if (item.m_shared.m_maxStackSize > 1)
                 {
-                    if (listed[i].SameAs(item))
+                    for (var i = 0; i < listed.Count; i++)
                     {
-                        group = listed[i];
-                        break;
+                        if (listed[i].SameAs(item))
+                        {
+                            group = listed[i];
+                            break;
+                        }
                     }
                 }
 
@@ -992,13 +1017,14 @@ namespace NjordWarehouseKeeper.Storage
                     group = new IndexedStack
                     {
                         SharedName = item.m_shared.m_name,
-                        DisplayName = Localization.instance.Localize(item.m_shared.m_name),
+                        DisplayName = EpicLootCompat.DisplayName(item),
                         Quality = item.m_quality,
                         Variant = item.m_variant,
                         WorldLevel = item.m_worldLevel,
                         Category = ItemCategories.Of(item),
                         Icon = item.GetIcon(),
                         Distance = distance,
+                        MagicKey = EpicLootCompat.GroupKey(item),
                     };
                     listed.Add(group);
                 }

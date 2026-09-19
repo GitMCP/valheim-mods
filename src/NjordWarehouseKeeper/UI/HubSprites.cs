@@ -10,6 +10,7 @@ namespace NjordWarehouseKeeper.UI
     {
         internal static Sprite StarEmpty { get; private set; }
         internal static Sprite StarFilled { get; private set; }
+        internal static Sprite Cross { get; private set; }
         internal static Sprite Cog { get; private set; }
         internal static Sprite Deposit { get; private set; }
         internal static Sprite Resupply { get; private set; }
@@ -24,6 +25,7 @@ namespace NjordWarehouseKeeper.UI
 
             StarFilled = MakeSprite(DrawStar(filled: true), "hub_star_filled");
             StarEmpty = MakeSprite(DrawStar(filled: false), "hub_star_empty");
+            Cross = MakeSprite(DrawCross(), "hub_cross");
             Cog = MakeSprite(DrawCog(), "hub_cog");
             Deposit = NjordWarehouseKeeperAssets.LoadSprite("NjordWarehouseKeeper.Assets.hub_deposit.png");
             Resupply = NjordWarehouseKeeperAssets.LoadSprite("NjordWarehouseKeeper.Assets.hub_resupply.png");
@@ -65,6 +67,29 @@ namespace NjordWarehouseKeeper.UI
                     }
 
                     tex.SetPixel(x, y, new Color(1f, 1f, 1f, a));
+                }
+            }
+
+            tex.Apply(false, true);
+            return tex;
+        }
+
+        private static Texture2D DrawCross()
+        {
+            const int size = 32;
+            var tex = new Texture2D(size, size, TextureFormat.ARGB32, false);
+            var a = new Vector2(size * 0.22f, size * 0.22f);
+            var b = new Vector2(size * 0.78f, size * 0.78f);
+            var c = new Vector2(size * 0.78f, size * 0.22f);
+            var d = new Vector2(size * 0.22f, size * 0.78f);
+            for (var y = 0; y < size; y++)
+            {
+                for (var x = 0; x < size; x++)
+                {
+                    var p = new Vector2(x + 0.5f, y + 0.5f);
+                    var dist = Mathf.Min(DistanceToSegment(p, a, b), DistanceToSegment(p, c, d));
+                    var alpha = Mathf.Clamp01(2.2f - dist);
+                    tex.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
                 }
             }
 

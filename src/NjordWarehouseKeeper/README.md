@@ -11,6 +11,11 @@ stays in your pack.
 Because he is a buildable piece, the mod must be installed on the **server and
 on every client**. A client whose version does not match the server's is refused.
 
+If [EpicLoot](https://github.com/OrianaVenture/Randy_Vapok_ValheimMods/tree/main/EpicLoot)
+is also installed, listed magic items, runestones, and crafting materials tint
+the row with that mod's rarity colour. The inventory slot frame is not drawn
+on Njord's list. EpicLoot is optional.
+
 ## Installation
 
 Drop `NjordWarehouseKeeper.dll` into `BepInEx/plugins`, or install the zip with a
@@ -38,16 +43,20 @@ Walk up and press use. Your inventory stays on the left. Vanilla crafting on the
 right is hidden; Njord's recipe panel opens in that slot, and his item list
 opens in the center. The cog still opens Preferences. Identical items from
 different chests share one row. Hover a row the same way you hover a pack
-slot: keep the cursor still for a moment and the vanilla item tooltip appears.
+slot: keep the cursor still for a moment and the vanilla item tooltip appears
+in front of the list, so the scroll mask does not crop it.
 
 - **Click a row** to pick up one stack and drag it, the same as a chest slot.
   If the stores have enough to fill a complete stack, that is what you pick up,
   not a leftover pile from the first chest that happens to hold some.
 - **Ctrl-click a row** to take as much of that item as your pack will hold.
 - **Shift-click a row** to pick how many to take.
-- **Click the star** on a row to mark that item as a favourite. The Favourites
-  category lists only starred items. The star next to the sort buttons filters
-  the current category the same way.
+- **Click the star** on a listed row, or on an item in your own pack, to mark
+  that item as a favourite. Weapons, armour, and tools star as that specific
+  piece; stacking goods still share one star. The pack star is there whenever
+  inventory is open (Tab included), not only while talking to Njord. The
+  Favourites category lists only starred items. The star next to the sort
+  buttons filters the current category the same way.
 - **Click an item in your inventory**, then click the panel (or a row) to
   store it. Dropping on a row stores the dragged item; it does not withdraw.
 - **Shift-click** an item in your inventory, or press **Deposit**, to send it
@@ -64,10 +73,10 @@ slot: keep the cursor still for a moment and the vanilla item tooltip appears.
   a greyed recipe still takes whatever is there. Hover an ingredient to see
   have / need. Vanilla crafting comes back when you leave Njord, including Tab
   inventory, handcraft, and every workbench.
-- **The cog** opens client Preferences: skip favourites on Deposit, bind a
-  Deposit+Resupply hotkey, **Reorganize** to tidy leftover stacks now, and
-  choose which items Resupply should keep, with a quantity for each. The
-  resupply list is titled Resupply.
+- **The cog** opens client Preferences. **Settings** holds ignore favourite
+  items on deposit, the Deposit+Resupply hotkey, and **Reorganize**. **Resupply**
+  has its own search and the list of items to keep in your pack, with a
+  quantity for each.
 - While in range of Njord (the same radius as the network), the hotkey deposits
   and then resupplies without talking to him.
 - Click the search box to type. It keeps focus, so E does not close the panel.
@@ -95,9 +104,9 @@ deposit-skip toggle are **client-only** and stay on that machine.
 | `Njord / DepositHotbar` | `false` | Also deposit the first inventory row. |
 | `Njord / Reorganize` | `true` | Merge leftover piles of the same item so they use as few chest slots as possible. |
 | `Njord / ReorganizeInterval` | `60` | Seconds between tidy passes (15–1800). |
-| `Client / DepositSkipFavourites` | `false` | Deposit leaves starred items in the pack. Also set from the cog. |
+| `Client / DepositSkipFavourites` | `true` | Ignore favourite items on deposit. Also set from the cog. |
 | `Client / RestockHotkey` | *(none)* | In range of Njord, Deposit then Resupply. Bound from the cog. |
-| `Client / Favourites` | *(empty)* | Starred item keys. Edited from the item list. |
+| `Client / Favourites` | *(empty)* | Starred item keys. Edited from the item list or from pack slots. |
 | `Client / Resupply` | *(empty)* | Item keys and counts for the Resupply button. Edited from the cog. |
 
 ## How it works

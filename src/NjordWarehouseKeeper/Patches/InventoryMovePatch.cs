@@ -33,7 +33,7 @@ namespace NjordWarehouseKeeper.Patches
                 return false;
             }
 
-            StorageNetwork.Route(from, item, hub, allowHub: false);
+            StorageNetwork.Route(from, item, hub, allowHub: false, notify: true);
             return true;
         }
     }

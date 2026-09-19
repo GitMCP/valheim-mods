@@ -99,6 +99,7 @@ namespace NjordWarehouseKeeper.UI
             }
 
             HideVanillaCrafting();
+            ResetSearch();
             _nextSnap = 0f;
             SnapToCrafting();
             _root.SetActive(true);
@@ -124,6 +125,7 @@ namespace NjordWarehouseKeeper.UI
             _selectedKey = null;
             SetMenuOpen(false);
             UnfocusSearch();
+            ResetSearch();
             HubItemHover.Hide();
             if (_root != null)
             {
@@ -649,6 +651,7 @@ namespace NjordWarehouseKeeper.UI
             _search.interactable = true;
             _search.navigation = new Navigation { mode = Navigation.Mode.None };
             _search.onValueChanged.AddListener(OnSearch);
+            SearchField.Decorate(_search, OnSearchCleared);
             var image = go.GetComponent<Image>();
             if (image != null)
             {
@@ -669,8 +672,29 @@ namespace NjordWarehouseKeeper.UI
         private static void OnSearch(string value)
         {
             _query = value ?? "";
+            SearchField.Sync(_search);
             _nextRefresh = 0f;
             Refresh();
+        }
+
+        private static void OnSearchCleared()
+        {
+            if (NjordWarehouseKeeperPanel.IsDragging())
+            {
+                NjordWarehouseKeeperPanel.DepositDragged();
+                return;
+            }
+
+            _query = "";
+            SearchField.SetText(_search, "", OnSearch);
+            _nextRefresh = 0f;
+            Refresh();
+        }
+
+        private static void ResetSearch()
+        {
+            _query = "";
+            SearchField.SetText(_search, "", OnSearch);
         }
 
         private static void OnSearchClicked(BaseEventData _)

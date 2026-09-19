@@ -25,7 +25,7 @@ namespace NjordWarehouseKeeper.UI
         }
 
         private const float PanelWidth = 520f;
-        private const float PanelHeight = 640f;
+        private const float PanelHeight = 830f;
         private const float RowHeight = 52f;
         private const float RowSpacing = 3f;
         private const float IconSize = 40f;
@@ -35,13 +35,14 @@ namespace NjordWarehouseKeeper.UI
         private const float CatRow1Y = 166f;
         private const float CatRow2Y = 198f;
         private const float SortY = 232f;
-        private const float ListTop = 264f;
-        private const float ListBottom = 28f;
+        private const float ListTop = 268f;
+        private const float ListBottom = 16f;
+        private const float ListInset = 22f;
 
         /// <summary>
         /// Top inset for the preferences overlay, just below search.
         /// </summary>
-        internal const float ContentTop = 164f;
+        internal const float ContentTop = 76f;
 
         private static GameObject _root;
         private static Text _title;
@@ -95,6 +96,7 @@ namespace NjordWarehouseKeeper.UI
             }
 
             SetPrefsOpen(false);
+            ResetSearch();
             _nextSnap = 0f;
             SnapBetweenInventoryAndCrafting();
             _root.SetActive(true);
@@ -109,6 +111,7 @@ namespace NjordWarehouseKeeper.UI
             _pending = null;
             _splitGroup = null;
             UnfocusSearch();
+            ResetSearch();
             HubItemHover.Hide();
             SetPrefsOpen(false);
             NjordWarehouseKeeperRecipes.Close();
@@ -247,7 +250,7 @@ namespace NjordWarehouseKeeper.UI
 
             ours.anchorMin = new Vector2(0.5f, 0.5f);
             ours.anchorMax = new Vector2(0.5f, 0.5f);
-            ours.pivot = new Vector2(0.5f, 0.5f);
+            ours.pivot = new Vector2(0.5f, 1f);
             if (ours.sizeDelta.x != PanelWidth || ours.sizeDelta.y != PanelHeight)
             {
                 ours.sizeDelta = new Vector2(PanelWidth, PanelHeight);
@@ -282,7 +285,11 @@ namespace NjordWarehouseKeeper.UI
                     midX = right - pad - half;
                 }
 
-                pos = new Vector2(midX - center.x, 0f);
+                pos = new Vector2(midX - center.x, InventoryTop(parent, gui.m_player) - center.y);
+            }
+            else
+            {
+                pos = new Vector2(0f, InventoryTop(parent, gui.m_player) - center.y);
             }
 
             if ((ours.anchoredPosition - pos).sqrMagnitude > 4f)
@@ -291,6 +298,19 @@ namespace NjordWarehouseKeeper.UI
             }
 
             _nextSnap = Time.time + 0.35f;
+        }
+
+        private static float InventoryTop(RectTransform parent, RectTransform player)
+        {
+            if (parent == null || player == null)
+            {
+                return 320f;
+            }
+
+            player.GetWorldCorners(Corners);
+            var a = parent.InverseTransformPoint(Corners[1]).y;
+            var b = parent.InverseTransformPoint(Corners[2]).y;
+            return Mathf.Max(a, b);
         }
 
         private static float EdgeX(RectTransform parent, RectTransform child, bool right)
@@ -322,10 +342,13 @@ namespace NjordWarehouseKeeper.UI
                 PanelHeight,
                 draggable: false);
             _root.name = "NjordWarehouseKeeperPanel";
-            if (_root.GetComponent<RectMask2D>() == null)
+            var rootMask = _root.GetComponent<RectMask2D>();
+            if (rootMask == null)
             {
-                _root.AddComponent<RectMask2D>();
+                rootMask = _root.AddComponent<RectMask2D>();
             }
+
+            rootMask.padding = new Vector4(14f, 12f, 14f, 10f);
 
             _title = MakeText(
                 gui,
@@ -377,6 +400,7 @@ namespace NjordWarehouseKeeper.UI
             PlaceTop(_search.GetComponent<RectTransform>(), SearchY, 484f, 30f);
             _search.interactable = true;
             _search.navigation = new Navigation { mode = Navigation.Mode.None };
+            SearchField.Decorate(_search, OnSearchCleared);
             WireSearchFocus();
             WirePanelDrop();
 
@@ -414,12 +438,14 @@ namespace NjordWarehouseKeeper.UI
                 480f,
                 400f);
             _scrollRect = scroll.GetComponent<RectTransform>();
-            PlaceFillBottom(_scrollRect, top: ListTop, bottom: ListBottom, inset: 16f);
+            PlaceFillBottom(_scrollRect, top: ListTop, bottom: ListBottom, inset: ListInset);
 
             var scrollView = scroll.GetComponentInChildren<ScrollRect>(true);
             if (scrollView != null)
             {
+                StretchFill(scrollView.transform as RectTransform);
                 FitScrollView(scrollView, ListScrollSensitivity());
+                TightenListViewport(scrollView);
                 scrollView.onValueChanged.AddListener(_ => HubItemHover.Hide());
                 _rowParent = scrollView.content;
                 StretchContent(_rowParent as RectTransform);
@@ -483,9 +509,12 @@ namespace NjordWarehouseKeeper.UI
                 return;
             }
 
+            StretchFill(scrollView.transform as RectTransform);
             scrollView.horizontal = false;
             scrollView.movementType = ScrollRect.MovementType.Clamped;
             scrollView.scrollSensitivity = sensitivity;
+            scrollView.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent;
+            scrollView.horizontalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent;
 
             var viewport = scrollView.viewport;
             if (viewport == null)
@@ -520,19 +549,55 @@ namespace NjordWarehouseKeeper.UI
                 }
             }
 
-            var bar = scrollView.verticalScrollbar;
-            if (bar != null)
+            FitVerticalScrollbar(scrollView.verticalScrollbar);
+        }
+
+        /// <summary>
+        /// Jötunn sizes the bar and its Sliding Area to the create height (400).
+        /// After the list grows, stretch both so the handle can travel the
+        /// full track instead of stopping at the old bottom.
+        /// </summary>
+        private static void FitVerticalScrollbar(Scrollbar bar)
+        {
+            if (bar == null)
             {
-                var barRt = bar.transform as RectTransform;
-                if (barRt != null)
-                {
-                    barRt.anchorMin = new Vector2(1f, 0f);
-                    barRt.anchorMax = new Vector2(1f, 1f);
-                    barRt.pivot = new Vector2(1f, 0.5f);
-                    barRt.sizeDelta = new Vector2(10f, 0f);
-                    barRt.anchoredPosition = new Vector2(-4f, 0f);
-                }
+                return;
             }
+
+            var barRt = bar.transform as RectTransform;
+            if (barRt != null)
+            {
+                barRt.anchorMin = new Vector2(1f, 0f);
+                barRt.anchorMax = new Vector2(1f, 1f);
+                barRt.pivot = new Vector2(1f, 0.5f);
+                barRt.anchoredPosition = new Vector2(-4f, 0f);
+                barRt.sizeDelta = new Vector2(10f, 0f);
+                barRt.offsetMin = new Vector2(barRt.offsetMin.x, 0f);
+                barRt.offsetMax = new Vector2(barRt.offsetMax.x, 0f);
+            }
+
+            var sliding = bar.transform.Find("Sliding Area") as RectTransform;
+            StretchFill(sliding);
+
+            var handle = bar.handleRect;
+            if (handle == null && sliding != null)
+            {
+                var found = sliding.Find("Handle");
+                handle = found as RectTransform;
+                bar.handleRect = handle;
+            }
+
+            if (handle != null)
+            {
+                handle.anchorMin = Vector2.zero;
+                handle.anchorMax = Vector2.one;
+                handle.pivot = new Vector2(0.5f, 0.5f);
+                handle.offsetMin = Vector2.zero;
+                handle.offsetMax = Vector2.zero;
+            }
+
+            bar.direction = Scrollbar.Direction.BottomToTop;
+            bar.SetValueWithoutNotify(bar.value);
         }
 
         /// <summary>
@@ -669,7 +734,7 @@ namespace NjordWarehouseKeeper.UI
 
             if (_search != null)
             {
-                _search.gameObject.SetActive(true);
+                _search.gameObject.SetActive(!prefs);
             }
 
             if (_title != null)
@@ -771,13 +836,72 @@ namespace NjordWarehouseKeeper.UI
             rt.anchoredPosition = new Vector2(x, -yFromTop);
         }
 
+        private static void TightenListViewport(ScrollRect scrollView)
+        {
+            if (scrollView == null)
+            {
+                return;
+            }
+
+            var viewport = scrollView.viewport;
+            if (viewport == null)
+            {
+                return;
+            }
+
+            viewport.offsetMin = new Vector2(0f, 0f);
+            viewport.offsetMax = new Vector2(-16f, 0f);
+
+            var image = viewport.GetComponent<Image>();
+            if (image == null)
+            {
+                image = viewport.gameObject.AddComponent<Image>();
+            }
+
+            image.color = new Color(1f, 1f, 1f, 0.004f);
+            image.raycastTarget = true;
+
+            var stencil = viewport.GetComponent<Mask>();
+            if (stencil == null)
+            {
+                stencil = viewport.gameObject.AddComponent<Mask>();
+            }
+
+            stencil.showMaskGraphic = false;
+            stencil.enabled = true;
+        }
+
         private static void PlaceFillBottom(RectTransform rt, float top, float bottom, float inset)
         {
+            if (rt == null)
+            {
+                return;
+            }
+
             rt.anchorMin = new Vector2(0f, 0f);
             rt.anchorMax = new Vector2(1f, 1f);
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.offsetMin = new Vector2(inset, bottom);
             rt.offsetMax = new Vector2(-inset, -top);
+        }
+
+        /// <summary>
+        /// Jötunn's CreateScrollView returns a fixed-size Canvas wrapper. The
+        /// inner Scroll View stays 400px tall unless it is stretched to fill.
+        /// </summary>
+        internal static void StretchFill(RectTransform rt)
+        {
+            if (rt == null)
+            {
+                return;
+            }
+
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = Vector2.zero;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
         }
 
         private static void StretchContent(RectTransform content)
@@ -950,6 +1074,7 @@ namespace NjordWarehouseKeeper.UI
         private static void OnSearch(string value)
         {
             _query = value ?? "";
+            SearchField.Sync(_search);
             if (_prefsOpen)
             {
                 NjordWarehouseKeeperPrefs.Refresh();
@@ -958,6 +1083,33 @@ namespace NjordWarehouseKeeper.UI
             {
                 Refresh();
             }
+        }
+
+        private static void OnSearchCleared()
+        {
+            if (IsDragging())
+            {
+                DepositDragged();
+                return;
+            }
+
+            _query = "";
+            SearchField.SetText(_search, "", OnSearch);
+            if (_prefsOpen)
+            {
+                NjordWarehouseKeeperPrefs.Refresh();
+            }
+            else
+            {
+                Refresh();
+            }
+        }
+
+        private static void ResetSearch()
+        {
+            _query = "";
+            SearchField.SetText(_search, "", OnSearch);
+            NjordWarehouseKeeperPrefs.ResetSearch();
         }
 
         private static void OnDeposit()
@@ -1145,7 +1297,7 @@ namespace NjordWarehouseKeeper.UI
             foreach (var item in items)
             {
                 var wantFavourite = _category == ItemCategory.Favourites || _favouritesOnly;
-                if (wantFavourite && !ClientPreferences.IsFavourite(item.Key()))
+                if (wantFavourite && !ClientPreferences.IsFavourite(item))
                 {
                     continue;
                 }
@@ -1201,6 +1353,7 @@ namespace NjordWarehouseKeeper.UI
                 0f,
                 RowHeight);
             gui.ApplyButtonStyle(row.GetComponent<Button>(), 16);
+            HideTemplateChildren(row.transform);
 
             var layout = row.GetComponent<LayoutElement>();
             if (layout == null)
@@ -1289,16 +1442,17 @@ namespace NjordWarehouseKeeper.UI
             star.sprite = HubSprites.StarEmpty;
             star.color = new Color(1f, 1f, 1f, 0.85f);
             var starRt = star.rectTransform;
-            starRt.anchorMin = new Vector2(0f, 0.5f);
-            starRt.anchorMax = new Vector2(0f, 0.5f);
-            starRt.pivot = new Vector2(0.5f, 0.5f);
-            starRt.sizeDelta = new Vector2(18f, 18f);
-            starRt.anchoredPosition = new Vector2(8f + IconSize - 2f, IconSize * 0.5f - 6f);
+            starRt.anchorMin = new Vector2(0f, 1f);
+            starRt.anchorMax = new Vector2(0f, 1f);
+            starRt.pivot = new Vector2(0f, 1f);
+            starRt.sizeDelta = new Vector2(16f, 16f);
+            starRt.anchoredPosition = new Vector2(2f, -2f);
             var starBtn = starGo.GetComponent<Button>();
             starBtn.targetGraphic = star;
             starBtn.transition = Selectable.Transition.None;
             starBtn.navigation = new Navigation { mode = Navigation.Mode.None };
 
+            var button = row.GetComponent<Button>();
             var view = new RowView
             {
                 Go = row,
@@ -1307,8 +1461,10 @@ namespace NjordWarehouseKeeper.UI
                 Qty = qty,
                 Star = star,
                 Hover = row.AddComponent<HubItemHover>(),
+                PlainColors = button.colors,
+                PlainName = name.color,
             };
-            row.GetComponent<Button>().onClick.AddListener(() => OnRowClicked(view));
+            button.onClick.AddListener(() => OnRowClicked(view));
             starBtn.onClick.AddListener(() => OnStarClicked(view));
             return view;
         }
@@ -1337,18 +1493,74 @@ namespace NjordWarehouseKeeper.UI
                 view.Qty.text = "x" + stack.Quantity;
             }
 
+            var live = stack.FirstLive();
             if (view.Hover != null)
             {
-                view.Hover.Bind(stack.FirstLive());
+                view.Hover.Bind(live);
             }
 
-            var favourite = ClientPreferences.IsFavourite(stack.Key());
+            PaintRarity(view, live);
+
+            var favourite = ClientPreferences.IsFavourite(stack);
             if (view.Star != null)
             {
                 view.Star.sprite = favourite ? HubSprites.StarFilled : HubSprites.StarEmpty;
                 view.Star.color = favourite
                     ? new Color(1f, 0.82f, 0.28f, 1f)
                     : new Color(1f, 1f, 1f, 0.8f);
+            }
+        }
+
+        private static void PaintRarity(RowView view, ItemDrop.ItemData item)
+        {
+            if (view == null || view.Go == null)
+            {
+                return;
+            }
+
+            var button = view.Go.GetComponent<Button>();
+            Color rarity;
+            if (EpicLootCompat.TryGetRarityColor(item, out rarity))
+            {
+                if (button != null)
+                {
+                    var colors = view.PlainColors;
+                    colors.normalColor = rarity;
+                    colors.highlightedColor = Color.Lerp(rarity, Color.white, 0.22f);
+                    colors.pressedColor = Color.Lerp(rarity, Color.black, 0.18f);
+                    colors.selectedColor = rarity;
+                    button.colors = colors;
+                }
+
+                if (view.Name != null)
+                {
+                    view.Name.color = rarity;
+                }
+
+                return;
+            }
+
+            if (button != null)
+            {
+                button.colors = view.PlainColors;
+            }
+
+            if (view.Name != null)
+            {
+                view.Name.color = view.PlainName;
+            }
+        }
+
+        private static void HideTemplateChildren(Transform root)
+        {
+            if (root == null)
+            {
+                return;
+            }
+
+            for (var i = root.childCount - 1; i >= 0; i--)
+            {
+                root.GetChild(i).gameObject.SetActive(false);
             }
         }
 
@@ -1365,8 +1577,20 @@ namespace NjordWarehouseKeeper.UI
                 return;
             }
 
-            var key = view.Stack.Key();
-            ClientPreferences.SetFavourite(key, !ClientPreferences.IsFavourite(key));
+            var part = view.Stack.FirstLivePart();
+            var live = part == null ? null : part.Live();
+            if (live == null)
+            {
+                return;
+            }
+
+            if (part.Source != null)
+            {
+                StorageNetwork.EnsureOwner(part.Source);
+            }
+
+            ClientPreferences.ToggleFavourite(live);
+            ItemKey.Persist(part.Source != null ? part.Source.GetInventory() : null);
             Refresh();
         }
 
@@ -1469,7 +1693,7 @@ namespace NjordWarehouseKeeper.UI
                 return;
             }
 
-            StorageNetwork.RouteAmount(from, item, gui.m_dragAmount, hub, allowHub: false);
+            StorageNetwork.RouteAmount(from, item, gui.m_dragAmount, hub, allowHub: false, notify: true);
             gui.SetupDragItem(null, null, 1);
             Refresh();
         }
@@ -1658,6 +1882,8 @@ namespace NjordWarehouseKeeper.UI
             internal Image Star;
             internal HubItemHover Hover;
             internal IndexedStack Stack;
+            internal ColorBlock PlainColors;
+            internal Color PlainName;
         }
     }
 }
