@@ -42,7 +42,7 @@ namespace NjordWarehouseKeeper.UI
         /// <summary>
         /// Top inset for the preferences overlay, just below search.
         /// </summary>
-        internal const float ContentTop = 164f;
+        internal const float ContentTop = 76f;
 
         private static GameObject _root;
         private static Text _title;
@@ -695,7 +695,7 @@ namespace NjordWarehouseKeeper.UI
 
             if (_search != null)
             {
-                _search.gameObject.SetActive(true);
+                _search.gameObject.SetActive(!prefs);
             }
 
             if (_title != null)
@@ -850,7 +850,7 @@ namespace NjordWarehouseKeeper.UI
         /// Jötunn's CreateScrollView returns a fixed-size Canvas wrapper. The
         /// inner Scroll View stays 400px tall unless it is stretched to fill.
         /// </summary>
-        private static void StretchFill(RectTransform rt)
+        internal static void StretchFill(RectTransform rt)
         {
             if (rt == null)
             {
@@ -1070,6 +1070,7 @@ namespace NjordWarehouseKeeper.UI
         {
             _query = "";
             SearchField.SetText(_search, "", OnSearch);
+            NjordWarehouseKeeperPrefs.ResetSearch();
         }
 
         private static void OnDeposit()

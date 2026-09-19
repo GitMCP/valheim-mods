@@ -73,10 +73,10 @@ in front of the list, so the scroll mask does not crop it.
   a greyed recipe still takes whatever is there. Hover an ingredient to see
   have / need. Vanilla crafting comes back when you leave Njord, including Tab
   inventory, handcraft, and every workbench.
-- **The cog** opens client Preferences: ignore favourite items on deposit, bind a
-  Deposit+Resupply hotkey, **Reorganize** to tidy leftover stacks now, and
-  choose which items Resupply should keep, with a quantity for each. The
-  resupply list is titled Resupply.
+- **The cog** opens client Preferences. **Settings** holds ignore favourite
+  items on deposit, the Deposit+Resupply hotkey, and **Reorganize**. **Resupply**
+  has its own search and the list of items to keep in your pack, with a
+  quantity for each.
 - While in range of Njord (the same radius as the network), the hotkey deposits
   and then resupplies without talking to him.
 - Click the search box to type. It keeps focus, so E does not close the panel.

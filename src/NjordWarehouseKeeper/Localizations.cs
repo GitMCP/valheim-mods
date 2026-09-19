@@ -72,6 +72,7 @@ namespace NjordWarehouseKeeper
                     { "njord_recipe_ok", "Took the ingredients." },
                     { "njord_recipe_partial", "Took what the stores had." },
                     { "njord_preferences", "Preferences" },
+                    { "njord_pref_settings", "Settings" },
                     { "njord_pref_skip_favourites", "Ignore favourite items on deposit" },
                     { "njord_pref_hotkey", "Deposit + Resupply hotkey" },
                     { "njord_pref_hotkey_none", "None" },

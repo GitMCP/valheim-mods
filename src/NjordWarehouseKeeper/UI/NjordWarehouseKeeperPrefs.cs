@@ -11,19 +11,30 @@ using UnityEngine.UI;
 namespace NjordWarehouseKeeper.UI
 {
     /// <summary>
-    /// Client-only hub settings shown when the cog is open: ignore favourite
-    /// items on deposit, and the list of items Resupply should keep in the pack.
+    /// Client-only hub settings shown when the cog is open. Settings holds the
+    /// deposit skip toggle, restock hotkey, and Reorganize. Resupply holds
+    /// search and the list of items to keep in the pack.
     /// </summary>
     internal static class NjordWarehouseKeeperPrefs
     {
         private const float RowHeight = 42f;
+        private const float SettingsTitleY = 0f;
+        private const float ToggleY = 26f;
+        private const float HotkeyY = 56f;
+        private const float ReorgY = 90f;
+        private const float ResupplyTitleY = 132f;
+        private const float HintY = 156f;
+        private const float SearchY = 192f;
+        private const float ListTop = 228f;
 
         private static GameObject _root;
         private static Toggle _skipFavourites;
         private static Button _hotkeyButton;
         private static Text _hotkeyLabel;
+        private static InputField _search;
         private static Transform _rowParent;
         private static readonly List<PrefRow> _rows = new List<PrefRow>();
+        private static string _query = "";
         private static bool _suppress;
         private static bool _capturing;
 
@@ -100,16 +111,16 @@ namespace NjordWarehouseKeeper.UI
             rootRt.offsetMin = new Vector2(16f, 18f);
             rootRt.offsetMax = new Vector2(-16f, -NjordWarehouseKeeperPanel.ContentTop);
 
+            PlaceSectionTitle(
+                gui,
+                Localization.instance.Localize("$njord_pref_settings"),
+                SettingsTitleY);
+
             var toggleGo = gui.CreateToggle(_root.transform, 26f, 26f);
             toggleGo.transform.SetParent(_root.transform, false);
             _skipFavourites = toggleGo.GetComponent<Toggle>();
             HideToggleLabel(toggleGo);
-            var toggleRt = toggleGo.GetComponent<RectTransform>();
-            toggleRt.anchorMin = new Vector2(0f, 1f);
-            toggleRt.anchorMax = new Vector2(0f, 1f);
-            toggleRt.pivot = new Vector2(0f, 1f);
-            toggleRt.anchoredPosition = new Vector2(4f, 0f);
-            toggleRt.sizeDelta = new Vector2(26f, 26f);
+            PlaceTopLeft(toggleGo.GetComponent<RectTransform>(), 4f, ToggleY, 26f, 26f);
             _skipFavourites.onValueChanged.AddListener(OnSkipChanged);
 
             var skipLabel = MakeLabel(
@@ -119,12 +130,7 @@ namespace NjordWarehouseKeeper.UI
                 15,
                 Color.white,
                 TextAnchor.MiddleLeft);
-            var skipRt = skipLabel.GetComponent<RectTransform>();
-            skipRt.anchorMin = new Vector2(0f, 1f);
-            skipRt.anchorMax = new Vector2(1f, 1f);
-            skipRt.pivot = new Vector2(0f, 1f);
-            skipRt.anchoredPosition = new Vector2(38f, 0f);
-            skipRt.sizeDelta = new Vector2(-38f, 26f);
+            PlaceTopStretch(skipLabel.GetComponent<RectTransform>(), 38f, ToggleY, 26f, 0f);
 
             var hotkeyLabel = MakeLabel(
                 gui,
@@ -133,12 +139,7 @@ namespace NjordWarehouseKeeper.UI
                 15,
                 Color.white,
                 TextAnchor.MiddleLeft);
-            var hotkeyRt = hotkeyLabel.GetComponent<RectTransform>();
-            hotkeyRt.anchorMin = new Vector2(0f, 1f);
-            hotkeyRt.anchorMax = new Vector2(1f, 1f);
-            hotkeyRt.pivot = new Vector2(0f, 1f);
-            hotkeyRt.anchoredPosition = new Vector2(4f, -32f);
-            hotkeyRt.sizeDelta = new Vector2(-150f, 28f);
+            PlaceTopStretch(hotkeyLabel.GetComponent<RectTransform>(), 4f, HotkeyY, 28f, 150f);
 
             var hotkeyGo = gui.CreateButton(
                 "",
@@ -153,7 +154,7 @@ namespace NjordWarehouseKeeper.UI
             hotkeyBtnRt.anchorMin = new Vector2(1f, 1f);
             hotkeyBtnRt.anchorMax = new Vector2(1f, 1f);
             hotkeyBtnRt.pivot = new Vector2(1f, 1f);
-            hotkeyBtnRt.anchoredPosition = new Vector2(0f, -32f);
+            hotkeyBtnRt.anchoredPosition = new Vector2(0f, -HotkeyY);
             hotkeyBtnRt.sizeDelta = new Vector2(140f, 28f);
             _hotkeyButton = hotkeyGo.GetComponent<Button>();
             _hotkeyLabel = hotkeyGo.GetComponentInChildren<Text>();
@@ -168,12 +169,7 @@ namespace NjordWarehouseKeeper.UI
                 Vector2.zero,
                 0f,
                 32f);
-            var reorgRt = reorgGo.GetComponent<RectTransform>();
-            reorgRt.anchorMin = new Vector2(0f, 1f);
-            reorgRt.anchorMax = new Vector2(1f, 1f);
-            reorgRt.pivot = new Vector2(0.5f, 1f);
-            reorgRt.anchoredPosition = new Vector2(0f, -66f);
-            reorgRt.sizeDelta = new Vector2(-8f, 32f);
+            PlaceTopStretch(reorgGo.GetComponent<RectTransform>(), 4f, ReorgY, 32f, 4f);
             var reorgButton = reorgGo.GetComponent<Button>();
             gui.ApplyButtonStyle(reorgButton, 15);
             reorgButton.onClick.AddListener(OnReorganize);
@@ -184,19 +180,10 @@ namespace NjordWarehouseKeeper.UI
                 reorgLabel.alignment = TextAnchor.MiddleCenter;
             }
 
-            var title = MakeLabel(
+            PlaceSectionTitle(
                 gui,
-                _root.transform,
                 Localization.instance.Localize("$njord_resupply"),
-                18,
-                gui.ValheimOrange,
-                TextAnchor.MiddleLeft);
-            var titleRt = title.GetComponent<RectTransform>();
-            titleRt.anchorMin = new Vector2(0f, 1f);
-            titleRt.anchorMax = new Vector2(1f, 1f);
-            titleRt.pivot = new Vector2(0f, 1f);
-            titleRt.anchoredPosition = new Vector2(4f, -104f);
-            titleRt.sizeDelta = new Vector2(-8f, 24f);
+                ResupplyTitleY);
 
             var hint = MakeLabel(
                 gui,
@@ -205,14 +192,25 @@ namespace NjordWarehouseKeeper.UI
                 13,
                 new Color(1f, 0.9f, 0.75f, 1f),
                 TextAnchor.UpperLeft);
-            var hintRt = hint.GetComponent<RectTransform>();
-            hintRt.anchorMin = new Vector2(0f, 1f);
-            hintRt.anchorMax = new Vector2(1f, 1f);
-            hintRt.pivot = new Vector2(0f, 1f);
-            hintRt.anchoredPosition = new Vector2(4f, -128f);
-            hintRt.sizeDelta = new Vector2(-8f, 32f);
+            PlaceTopStretch(hint.GetComponent<RectTransform>(), 4f, HintY, 32f, 4f);
             hint.horizontalOverflow = HorizontalWrapMode.Wrap;
             hint.verticalOverflow = VerticalWrapMode.Overflow;
+
+            _search = gui.CreateInputField(
+                _root.transform,
+                new Vector2(0.5f, 1f),
+                new Vector2(0.5f, 1f),
+                Vector2.zero,
+                InputField.ContentType.Standard,
+                Localization.instance.Localize("$njord_search"),
+                16,
+                176f,
+                30f).GetComponent<InputField>();
+            _search.onValueChanged.AddListener(OnSearch);
+            PlaceTopStretch(_search.GetComponent<RectTransform>(), 0f, SearchY, 30f, 0f);
+            _search.interactable = true;
+            _search.navigation = new Navigation { mode = Navigation.Mode.None };
+            SearchField.Decorate(_search, OnSearchCleared);
 
             var scroll = gui.CreateScrollView(
                 _root.transform,
@@ -228,11 +226,12 @@ namespace NjordWarehouseKeeper.UI
             scrollRt.anchorMin = new Vector2(0f, 0f);
             scrollRt.anchorMax = new Vector2(1f, 1f);
             scrollRt.offsetMin = new Vector2(0f, 0f);
-            scrollRt.offsetMax = new Vector2(0f, -162f);
+            scrollRt.offsetMax = new Vector2(0f, -ListTop);
 
             var scrollView = scroll.GetComponentInChildren<ScrollRect>(true);
             if (scrollView != null)
             {
+                NjordWarehouseKeeperPanel.StretchFill(scrollView.transform as RectTransform);
                 NjordWarehouseKeeperPanel.FitScrollView(scrollView, NjordWarehouseKeeperPanel.ListScrollSensitivity());
                 _rowParent = scrollView.content;
                 var content = _rowParent as RectTransform;
@@ -287,6 +286,7 @@ namespace NjordWarehouseKeeper.UI
             else
             {
                 _capturing = false;
+                ResetSearch();
                 UnfocusInputs();
             }
         }
@@ -301,6 +301,11 @@ namespace NjordWarehouseKeeper.UI
             if (!IsOpen)
             {
                 return false;
+            }
+
+            if (_search != null && _search.isFocused)
+            {
+                return true;
             }
 
             for (var i = 0; i < _rows.Count; i++)
@@ -331,7 +336,7 @@ namespace NjordWarehouseKeeper.UI
 
             PaintHotkeyButton();
 
-            var visible = Candidates(NjordWarehouseKeeperPanel.SearchQuery);
+            var visible = Candidates(_query);
             while (_rows.Count > visible.Count)
             {
                 var extra = _rows[_rows.Count - 1];
@@ -351,6 +356,32 @@ namespace NjordWarehouseKeeper.UI
             {
                 BindRow(_rows[i], visible[i]);
             }
+        }
+
+        internal static void ResetSearch()
+        {
+            _query = "";
+            SearchField.SetText(_search, "", OnSearch);
+        }
+
+        private static void OnSearch(string value)
+        {
+            _query = value ?? "";
+            SearchField.Sync(_search);
+            Refresh();
+        }
+
+        private static void OnSearchCleared()
+        {
+            if (NjordWarehouseKeeperPanel.IsDragging())
+            {
+                NjordWarehouseKeeperPanel.DepositDragged();
+                return;
+            }
+
+            _query = "";
+            SearchField.SetText(_search, "", OnSearch);
+            Refresh();
         }
 
         private static void OnSkipChanged(bool on)
@@ -683,6 +714,11 @@ namespace NjordWarehouseKeeper.UI
 
         private static void UnfocusInputs()
         {
+            if (_search != null && _search.isFocused)
+            {
+                _search.DeactivateInputField();
+            }
+
             for (var i = 0; i < _rows.Count; i++)
             {
                 if (_rows[i].Qty != null && _rows[i].Qty.isFocused)
@@ -690,6 +726,40 @@ namespace NjordWarehouseKeeper.UI
                     _rows[i].Qty.DeactivateInputField();
                 }
             }
+        }
+
+        private static void PlaceSectionTitle(GUIManager gui, string text, float yFromTop)
+        {
+            var title = MakeLabel(gui, _root.transform, text, 18, gui.ValheimOrange, TextAnchor.MiddleLeft);
+            PlaceTopStretch(title.GetComponent<RectTransform>(), 4f, yFromTop, 22f, 4f);
+        }
+
+        private static void PlaceTopLeft(RectTransform rt, float x, float yFromTop, float width, float height)
+        {
+            if (rt == null)
+            {
+                return;
+            }
+
+            rt.anchorMin = new Vector2(0f, 1f);
+            rt.anchorMax = new Vector2(0f, 1f);
+            rt.pivot = new Vector2(0f, 1f);
+            rt.anchoredPosition = new Vector2(x, -yFromTop);
+            rt.sizeDelta = new Vector2(width, height);
+        }
+
+        private static void PlaceTopStretch(RectTransform rt, float left, float yFromTop, float height, float right)
+        {
+            if (rt == null)
+            {
+                return;
+            }
+
+            rt.anchorMin = new Vector2(0f, 1f);
+            rt.anchorMax = new Vector2(1f, 1f);
+            rt.pivot = new Vector2(0f, 1f);
+            rt.anchoredPosition = new Vector2(left, -yFromTop);
+            rt.sizeDelta = new Vector2(-(left + right), height);
         }
 
         private static Text MakeLabel(

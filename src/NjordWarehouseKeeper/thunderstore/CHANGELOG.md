@@ -21,6 +21,7 @@ A full store now says so when you drop or shift-click an item, not only when you
 The item panel is taller so more rows fit, and the list fills most of that height
 and stays clipped inside the wood.
 Starring a weapon, armour piece, or tool marks that specific item, not every other copy of the same kind.
+Preferences is split into Settings (skip favourites, hotkey, Reorganize) and Resupply (search and the keep-in-pack list).
 
 ## 1.2.1
 
