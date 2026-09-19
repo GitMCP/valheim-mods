@@ -22,6 +22,7 @@ The item panel is taller so more rows fit, and the list fills most of that heigh
 and stays clipped inside the wood.
 Starring a weapon, armour piece, or tool marks that specific item, not every other copy of the same kind.
 Preferences is split into Settings (skip favourites, hotkey, Reorganize) and Resupply (search and the keep-in-pack list).
+List scrollbars travel the full height of the taller lists, not the old 400px track.
 
 ## 1.2.1
 

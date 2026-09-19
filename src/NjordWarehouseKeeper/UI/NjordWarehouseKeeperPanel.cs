@@ -509,9 +509,12 @@ namespace NjordWarehouseKeeper.UI
                 return;
             }
 
+            StretchFill(scrollView.transform as RectTransform);
             scrollView.horizontal = false;
             scrollView.movementType = ScrollRect.MovementType.Clamped;
             scrollView.scrollSensitivity = sensitivity;
+            scrollView.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent;
+            scrollView.horizontalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent;
 
             var viewport = scrollView.viewport;
             if (viewport == null)
@@ -546,19 +549,55 @@ namespace NjordWarehouseKeeper.UI
                 }
             }
 
-            var bar = scrollView.verticalScrollbar;
-            if (bar != null)
+            FitVerticalScrollbar(scrollView.verticalScrollbar);
+        }
+
+        /// <summary>
+        /// Jötunn sizes the bar and its Sliding Area to the create height (400).
+        /// After the list grows, stretch both so the handle can travel the
+        /// full track instead of stopping at the old bottom.
+        /// </summary>
+        private static void FitVerticalScrollbar(Scrollbar bar)
+        {
+            if (bar == null)
             {
-                var barRt = bar.transform as RectTransform;
-                if (barRt != null)
-                {
-                    barRt.anchorMin = new Vector2(1f, 0f);
-                    barRt.anchorMax = new Vector2(1f, 1f);
-                    barRt.pivot = new Vector2(1f, 0.5f);
-                    barRt.sizeDelta = new Vector2(10f, 0f);
-                    barRt.anchoredPosition = new Vector2(-4f, 0f);
-                }
+                return;
             }
+
+            var barRt = bar.transform as RectTransform;
+            if (barRt != null)
+            {
+                barRt.anchorMin = new Vector2(1f, 0f);
+                barRt.anchorMax = new Vector2(1f, 1f);
+                barRt.pivot = new Vector2(1f, 0.5f);
+                barRt.anchoredPosition = new Vector2(-4f, 0f);
+                barRt.sizeDelta = new Vector2(10f, 0f);
+                barRt.offsetMin = new Vector2(barRt.offsetMin.x, 0f);
+                barRt.offsetMax = new Vector2(barRt.offsetMax.x, 0f);
+            }
+
+            var sliding = bar.transform.Find("Sliding Area") as RectTransform;
+            StretchFill(sliding);
+
+            var handle = bar.handleRect;
+            if (handle == null && sliding != null)
+            {
+                var found = sliding.Find("Handle");
+                handle = found as RectTransform;
+                bar.handleRect = handle;
+            }
+
+            if (handle != null)
+            {
+                handle.anchorMin = Vector2.zero;
+                handle.anchorMax = Vector2.one;
+                handle.pivot = new Vector2(0.5f, 0.5f);
+                handle.offsetMin = Vector2.zero;
+                handle.offsetMax = Vector2.zero;
+            }
+
+            bar.direction = Scrollbar.Direction.BottomToTop;
+            bar.SetValueWithoutNotify(bar.value);
         }
 
         /// <summary>
