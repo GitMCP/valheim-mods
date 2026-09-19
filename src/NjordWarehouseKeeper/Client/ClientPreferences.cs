@@ -26,8 +26,8 @@ namespace NjordWarehouseKeeper.Client
             DepositSkipFavourites = config.Bind(
                 "Client",
                 "DepositSkipFavourites",
-                false,
-                "When depositing everything, leave favourite items in your pack.");
+                true,
+                "Ignore favourite items on deposit. When depositing everything, leave starred items in your pack.");
 
             FavouritesRaw = config.Bind(
                 "Client",

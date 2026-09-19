@@ -11,8 +11,8 @@ using UnityEngine.UI;
 namespace NjordWarehouseKeeper.UI
 {
     /// <summary>
-    /// Client-only hub settings shown when the cog is open: skip favourites on
-    /// deposit, and the list of items Resupply should keep in the pack.
+    /// Client-only hub settings shown when the cog is open: ignore favourite
+    /// items on deposit, and the list of items Resupply should keep in the pack.
     /// </summary>
     internal static class NjordWarehouseKeeperPrefs
     {

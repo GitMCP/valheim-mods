@@ -5,7 +5,8 @@
 Favourite stars on pack slots. Open inventory (Tab, or while talking to Njord)
 and click the star on an occupied slot to mark that item the same way the list
 star does. Deposit skip and the Favourites filter both see it. Chest slots are
-left alone.
+left alone. The preferences toggle is now **Ignore favourite items on deposit**
+and defaults to on.
 
 ## 1.2.1
 

@@ -66,7 +66,7 @@ slot: keep the cursor still for a moment and the vanilla item tooltip appears.
   a greyed recipe still takes whatever is there. Hover an ingredient to see
   have / need. Vanilla crafting comes back when you leave Njord, including Tab
   inventory, handcraft, and every workbench.
-- **The cog** opens client Preferences: skip favourites on Deposit, bind a
+- **The cog** opens client Preferences: ignore favourite items on deposit, bind a
   Deposit+Resupply hotkey, **Reorganize** to tidy leftover stacks now, and
   choose which items Resupply should keep, with a quantity for each. The
   resupply list is titled Resupply.
@@ -97,7 +97,7 @@ deposit-skip toggle are **client-only** and stay on that machine.
 | `Njord / DepositHotbar` | `false` | Also deposit the first inventory row. |
 | `Njord / Reorganize` | `true` | Merge leftover piles of the same item so they use as few chest slots as possible. |
 | `Njord / ReorganizeInterval` | `60` | Seconds between tidy passes (15–1800). |
-| `Client / DepositSkipFavourites` | `false` | Deposit leaves starred items in the pack. Also set from the cog. |
+| `Client / DepositSkipFavourites` | `true` | Ignore favourite items on deposit. Also set from the cog. |
 | `Client / RestockHotkey` | *(none)* | In range of Njord, Deposit then Resupply. Bound from the cog. |
 | `Client / Favourites` | *(empty)* | Starred item keys. Edited from the item list or from pack slots. |
 | `Client / Resupply` | *(empty)* | Item keys and counts for the Resupply button. Edited from the cog. |
