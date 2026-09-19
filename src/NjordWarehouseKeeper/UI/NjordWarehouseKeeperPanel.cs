@@ -1559,7 +1559,7 @@ namespace NjordWarehouseKeeper.UI
                 return;
             }
 
-            StorageNetwork.RouteAmount(from, item, gui.m_dragAmount, hub, allowHub: false);
+            StorageNetwork.RouteAmount(from, item, gui.m_dragAmount, hub, allowHub: false, notify: true);
             gui.SetupDragItem(null, null, 1);
             Refresh();
         }

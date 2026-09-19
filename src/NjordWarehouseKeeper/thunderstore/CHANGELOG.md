@@ -17,6 +17,7 @@ every item listed. An X on the right of each search box clears the filter;
 typed text stops short of that icon. Favourite stars on pack slots and listed
 rows sit in the upper-left corner. The item list sits above the panel trim.
 EpicLoot items keep the rarity card colour only; the slot frame sprite is not drawn.
+A full store now says so when you drop or shift-click an item, not only when you press Deposit.
 
 ## 1.2.1
 

@@ -38,14 +38,20 @@ namespace NjordWarehouseKeeper.Storage
         /// The hub itself is only used if nowhere else will take it.
         /// Returns true when the stack left <paramref name="from"/> entirely.
         /// </summary>
-        internal static bool Route(Inventory from, ItemDrop.ItemData item, Container hub, bool allowHub)
+        internal static bool Route(
+            Inventory from,
+            ItemDrop.ItemData item,
+            Container hub,
+            bool allowHub,
+            bool notify = false)
         {
             if (from == null || item == null || hub == null)
             {
                 return false;
             }
 
-            return RouteAmount(from, item, item.m_stack, hub, allowHub) && !from.ContainsItem(item);
+            return RouteAmount(from, item, item.m_stack, hub, allowHub, notify)
+                && !from.ContainsItem(item);
         }
 
         internal static bool RouteAmount(
@@ -53,7 +59,8 @@ namespace NjordWarehouseKeeper.Storage
             ItemDrop.ItemData item,
             int amount,
             Container hub,
-            bool allowHub)
+            bool allowHub,
+            bool notify = false)
         {
             if (from == null || item == null || hub == null || amount <= 0)
             {
@@ -84,7 +91,22 @@ namespace NjordWarehouseKeeper.Storage
                 }
             }
 
-            return left < amount;
+            var moved = left < amount;
+            if (notify && !moved)
+            {
+                NotifyNoSpace();
+            }
+
+            return moved;
+        }
+
+        private static void NotifyNoSpace()
+        {
+            var player = Player.m_localPlayer;
+            if (player != null)
+            {
+                player.Message(MessageHud.MessageType.Center, "$njord_nospace");
+            }
         }
 
         internal static int DepositAll(Player player, Container hub)
