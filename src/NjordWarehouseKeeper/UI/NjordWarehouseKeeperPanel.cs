@@ -1248,15 +1248,6 @@ namespace NjordWarehouseKeeper.UI
             rt.anchorMax = new Vector2(1f, 1f);
             rt.pivot = new Vector2(0.5f, 1f);
 
-            var magicGo = new GameObject("MagicBg", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            magicGo.transform.SetParent(row.transform, false);
-            magicGo.transform.SetAsFirstSibling();
-            var magic = magicGo.GetComponent<Image>();
-            magic.sprite = null;
-            magic.raycastTarget = false;
-            magic.enabled = false;
-            PlaceMagicBg(magic);
-
             var iconGo = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             iconGo.transform.SetParent(row.transform, false);
             var icon = iconGo.GetComponent<Image>();
@@ -1344,7 +1335,6 @@ namespace NjordWarehouseKeeper.UI
             {
                 Go = row,
                 Icon = icon,
-                MagicBg = magic,
                 Name = name,
                 Qty = qty,
                 Star = star,
@@ -1425,23 +1415,6 @@ namespace NjordWarehouseKeeper.UI
                     view.Name.color = rarity;
                 }
 
-                if (view.MagicBg != null)
-                {
-                    Sprite sprite;
-                    if (EpicLootCompat.TryGetMagicBackground(out sprite) && sprite != null)
-                    {
-                        PlaceMagicBg(view.MagicBg);
-                        view.MagicBg.sprite = sprite;
-                        view.MagicBg.color = rarity;
-                        view.MagicBg.enabled = true;
-                    }
-                    else
-                    {
-                        view.MagicBg.sprite = null;
-                        view.MagicBg.enabled = false;
-                    }
-                }
-
                 return;
             }
 
@@ -1453,12 +1426,6 @@ namespace NjordWarehouseKeeper.UI
             if (view.Name != null)
             {
                 view.Name.color = view.PlainName;
-            }
-
-            if (view.MagicBg != null)
-            {
-                view.MagicBg.sprite = null;
-                view.MagicBg.enabled = false;
             }
         }
 
@@ -1473,24 +1440,6 @@ namespace NjordWarehouseKeeper.UI
             {
                 root.GetChild(i).gameObject.SetActive(false);
             }
-        }
-
-        private static void PlaceMagicBg(Image magic)
-        {
-            if (magic == null)
-            {
-                return;
-            }
-
-            magic.type = Image.Type.Simple;
-            magic.preserveAspect = true;
-            magic.raycastTarget = false;
-            var rt = magic.rectTransform;
-            rt.anchorMin = new Vector2(0.5f, 0.5f);
-            rt.anchorMax = new Vector2(0.5f, 0.5f);
-            rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.sizeDelta = new Vector2(IconSize, IconSize);
-            rt.anchoredPosition = Vector2.zero;
         }
 
         private static void OnStarClicked(RowView view)
@@ -1794,7 +1743,6 @@ namespace NjordWarehouseKeeper.UI
         {
             internal GameObject Go;
             internal Image Icon;
-            internal Image MagicBg;
             internal Text Name;
             internal Text Qty;
             internal Image Star;

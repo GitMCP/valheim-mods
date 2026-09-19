@@ -12,9 +12,9 @@ Because he is a buildable piece, the mod must be installed on the **server and
 on every client**. A client whose version does not match the server's is refused.
 
 If [EpicLoot](https://github.com/OrianaVenture/Randy_Vapok_ValheimMods/tree/main/EpicLoot)
-is also installed, listed magic items, runestones, and crafting materials use
-that mod's rarity colours on the row, the same way pack slots do. EpicLoot is
-optional.
+is also installed, listed magic items, runestones, and crafting materials tint
+the row with that mod's rarity colour. The inventory slot frame is not drawn
+on Njord's list. EpicLoot is optional.
 
 ## Installation
 

@@ -21,8 +21,6 @@ namespace NjordWarehouseKeeper.Client
         private static MethodInfo _getRarity;
         private static MethodInfo _getRarityColor;
         private static MethodInfo _getDisplayName;
-        private static MethodInfo _getMagicBg;
-        private static Sprite _centeredBg;
 
         internal static bool Present
         {
@@ -74,26 +72,6 @@ namespace NjordWarehouseKeeper.Client
             {
                 color = (Color)_getRarityColor.Invoke(null, new object[] { item });
                 return color.a > 0f;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        internal static bool TryGetMagicBackground(out Sprite sprite)
-        {
-            sprite = null;
-            Bind();
-            if (!_ready || _getMagicBg == null)
-            {
-                return false;
-            }
-
-            try
-            {
-                sprite = Centered(_getMagicBg.Invoke(null, null) as Sprite);
-                return sprite != null;
             }
             catch
             {
@@ -163,36 +141,6 @@ namespace NjordWarehouseKeeper.Client
             return item.m_shared.m_name;
         }
 
-        private static Sprite Centered(Sprite source)
-        {
-            if (source == null || source.texture == null)
-            {
-                return source;
-            }
-
-            if (_centeredBg != null)
-            {
-                return _centeredBg;
-            }
-
-            try
-            {
-                _centeredBg = Sprite.Create(
-                    source.texture,
-                    source.textureRect,
-                    new Vector2(0.5f, 0.5f),
-                    source.pixelsPerUnit,
-                    0,
-                    SpriteMeshType.FullRect);
-            }
-            catch
-            {
-                _centeredBg = source;
-            }
-
-            return _centeredBg;
-        }
-
         private static void Bind()
         {
             if (_tried)
@@ -211,7 +159,6 @@ namespace NjordWarehouseKeeper.Client
             {
                 var assembly = info.Instance.GetType().Assembly;
                 var extensions = assembly.GetType("EpicLoot.ItemDataExtensions");
-                var main = assembly.GetType("EpicLoot.EpicLoot");
                 if (extensions == null)
                 {
                     return;
@@ -222,9 +169,6 @@ namespace NjordWarehouseKeeper.Client
                 _getRarity = extensions.GetMethod("GetRarity", BindingFlags.Public | BindingFlags.Static, null, item, null);
                 _getRarityColor = extensions.GetMethod("GetRarityColor", BindingFlags.Public | BindingFlags.Static, null, item, null);
                 _getDisplayName = extensions.GetMethod("GetDisplayName", BindingFlags.Public | BindingFlags.Static, null, item, null);
-                _getMagicBg = main != null
-                    ? main.GetMethod("GetMagicItemBgSprite", BindingFlags.Public | BindingFlags.Static, null, Type.EmptyTypes, null)
-                    : null;
                 _ready = _hasRarity != null && _getRarityColor != null;
             }
             catch (Exception ex)
