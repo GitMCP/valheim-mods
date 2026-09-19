@@ -1231,6 +1231,7 @@ namespace NjordWarehouseKeeper.UI
                 0f,
                 RowHeight);
             gui.ApplyButtonStyle(row.GetComponent<Button>(), 16);
+            HideTemplateChildren(row.transform);
 
             var layout = row.GetComponent<LayoutElement>();
             if (layout == null)
@@ -1251,14 +1252,10 @@ namespace NjordWarehouseKeeper.UI
             magicGo.transform.SetParent(row.transform, false);
             magicGo.transform.SetAsFirstSibling();
             var magic = magicGo.GetComponent<Image>();
-            magic.preserveAspect = true;
+            magic.sprite = null;
             magic.raycastTarget = false;
             magic.enabled = false;
-            var magicRt = magic.rectTransform;
-            magicRt.anchorMin = Vector2.zero;
-            magicRt.anchorMax = Vector2.one;
-            magicRt.offsetMin = Vector2.zero;
-            magicRt.offsetMax = Vector2.zero;
+            PlaceMagicBg(magic);
 
             var iconGo = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             iconGo.transform.SetParent(row.transform, false);
@@ -1431,13 +1428,18 @@ namespace NjordWarehouseKeeper.UI
                 if (view.MagicBg != null)
                 {
                     Sprite sprite;
-                    if (EpicLootCompat.TryGetMagicBackground(out sprite))
+                    if (EpicLootCompat.TryGetMagicBackground(out sprite) && sprite != null)
                     {
+                        PlaceMagicBg(view.MagicBg);
                         view.MagicBg.sprite = sprite;
+                        view.MagicBg.color = rarity;
+                        view.MagicBg.enabled = true;
                     }
-
-                    view.MagicBg.color = rarity;
-                    view.MagicBg.enabled = true;
+                    else
+                    {
+                        view.MagicBg.sprite = null;
+                        view.MagicBg.enabled = false;
+                    }
                 }
 
                 return;
@@ -1455,8 +1457,40 @@ namespace NjordWarehouseKeeper.UI
 
             if (view.MagicBg != null)
             {
+                view.MagicBg.sprite = null;
                 view.MagicBg.enabled = false;
             }
+        }
+
+        private static void HideTemplateChildren(Transform root)
+        {
+            if (root == null)
+            {
+                return;
+            }
+
+            for (var i = root.childCount - 1; i >= 0; i--)
+            {
+                root.GetChild(i).gameObject.SetActive(false);
+            }
+        }
+
+        private static void PlaceMagicBg(Image magic)
+        {
+            if (magic == null)
+            {
+                return;
+            }
+
+            magic.type = Image.Type.Simple;
+            magic.preserveAspect = true;
+            magic.raycastTarget = false;
+            var rt = magic.rectTransform;
+            rt.anchorMin = new Vector2(0.5f, 0.5f);
+            rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.sizeDelta = new Vector2(IconSize, IconSize);
+            rt.anchoredPosition = Vector2.zero;
         }
 
         private static void OnStarClicked(RowView view)

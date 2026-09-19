@@ -22,6 +22,7 @@ namespace NjordWarehouseKeeper.Client
         private static MethodInfo _getRarityColor;
         private static MethodInfo _getDisplayName;
         private static MethodInfo _getMagicBg;
+        private static Sprite _centeredBg;
 
         internal static bool Present
         {
@@ -91,7 +92,7 @@ namespace NjordWarehouseKeeper.Client
 
             try
             {
-                sprite = _getMagicBg.Invoke(null, null) as Sprite;
+                sprite = Centered(_getMagicBg.Invoke(null, null) as Sprite);
                 return sprite != null;
             }
             catch
@@ -160,6 +161,36 @@ namespace NjordWarehouseKeeper.Client
             }
 
             return item.m_shared.m_name;
+        }
+
+        private static Sprite Centered(Sprite source)
+        {
+            if (source == null || source.texture == null)
+            {
+                return source;
+            }
+
+            if (_centeredBg != null)
+            {
+                return _centeredBg;
+            }
+
+            try
+            {
+                _centeredBg = Sprite.Create(
+                    source.texture,
+                    source.textureRect,
+                    new Vector2(0.5f, 0.5f),
+                    source.pixelsPerUnit,
+                    0,
+                    SpriteMeshType.FullRect);
+            }
+            catch
+            {
+                _centeredBg = source;
+            }
+
+            return _centeredBg;
         }
 
         private static void Bind()
