@@ -13,4 +13,10 @@
     <PackageReference Include="JotunnLib" Version="2.30.0" ExcludeAssets="build" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Language catalogs travel inside the single plugin DLL. Add a new JSON file
+         named after the Valheim language to extend the catalog without code changes. -->
+    <EmbeddedResource Include="Localization\*.json" />
+  </ItemGroup>
+
 </Project>

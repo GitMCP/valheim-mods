@@ -21,6 +21,26 @@ on Njord's list. EpicLoot is optional.
 Drop `NjordWarehouseKeeper.dll` into `BepInEx/plugins`, or install the zip with a
 mod manager. Requires [Jötunn](https://thunderstore.io/c/valheim/p/ValheimModding/Jotunn/).
 
+## Localization
+
+Njord follows the language selected in Valheim. Its in-game UI, Njord's lines,
+build-piece text, and status messages are stored in embedded JSON catalogs under
+`Localization/`. `English.json` is the reference catalog and `Russian.json`
+provides the Russian translation.
+
+To add another language, copy `English.json` to a file named after the Valheim
+language (for example, `German.json`), translate the values without changing the
+keys or numbered placeholders, and build the mod. The catalog check can be run
+from the repository root:
+
+```text
+python tools/validate-localization.py src/NjordWarehouseKeeper/Localization
+python tools/test-localization-registration.py
+```
+
+The catalogs are embedded in `NjordWarehouseKeeper.dll`, so an installed mod
+does not need a separate localization file beside the plugin.
+
 ## Source
 
 The source is on [GitHub](https://github.com/GitMCP/valheim-mods). The mod is

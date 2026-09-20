@@ -48,6 +48,9 @@ namespace NjordWarehouseKeeper
         private void Awake()
         {
             Log = Logger;
+            // Register before Valheim builds its localization table. Jötunn copies
+            // custom translations into that table during its localization load.
+            Localizations.Register();
             BindConfig();
             ClientPreferences.Bind(Config);
 
@@ -127,7 +130,6 @@ namespace NjordWarehouseKeeper
         {
             PrefabManager.OnVanillaPrefabsAvailable -= RegisterContent;
 
-            Localizations.Register();
             NjordWarehouseKeeperAssets.Load();
             NjordWarehouseKeeperPiece.Register();
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+Localization catalogs are now embedded in the plugin. The in-game UI, Njord's
+dialogue, build-piece text, and status messages follow Valheim's selected
+language, with Russian included as the first additional translation.
+Catalog registration now happens before Valheim builds its localization table,
+so the selected language is applied in-game instead of falling back to English.
+
 ## 1.2.2
 
 Favourite stars on pack slots. Open inventory (Tab, or while talking to Njord)
