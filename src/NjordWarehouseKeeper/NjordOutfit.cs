@@ -208,6 +208,11 @@ namespace NjordWarehouseKeeper
             vis.m_isPlayer = true;
             vis.m_isArmorStand = false;
 
+            if (view != null && view.IsValid() && !view.IsOwner())
+            {
+                view.ClaimOwnership();
+            }
+
             if (vis.m_nview == null)
             {
                 ApplyAnimator(animator, ReadPose(hub), 0, 0);
@@ -233,18 +238,30 @@ namespace NjordWarehouseKeeper
             var pose = ReadPose(hub);
             var drawn = pose == NjordPose.Drawn;
 
-            if (chest == 0)
-            {
-                chest = DefaultHash(ItemDrop.ItemData.ItemType.Chest, "ArmorLeatherChest", "leather");
-            }
-
-            if (legs == 0)
-            {
-                legs = DefaultHash(ItemDrop.ItemData.ItemType.Legs, "ArmorLeatherLegs", "leather");
-            }
+            chest = OrDefault(chest, NjordSlot.Chest);
+            legs = OrDefault(legs, NjordSlot.Legs);
+            handL = OrDefault(handL, NjordSlot.HandLeft);
+            handR = OrDefault(handR, NjordSlot.HandRight);
 
             try
             {
+                WriteVisZdo(
+                    zdo,
+                    drawn,
+                    chest,
+                    legs,
+                    helmet,
+                    shoulder,
+                    shoulderVar,
+                    shoulderQual,
+                    utility,
+                    trinket,
+                    handL,
+                    handLVar,
+                    handLQual,
+                    handR,
+                    handRQual);
+
                 vis.SetHelmetItem(helmet);
                 vis.SetShoulderItem(shoulder, shoulderVar, shoulderQual);
                 vis.SetUtilityItem(utility);
@@ -568,11 +585,105 @@ namespace NjordWarehouseKeeper
             return null;
         }
 
-        private static int DefaultHash(ItemDrop.ItemData.ItemType type, string prefab, params string[] needles)
+        private static int OrDefault(int hash, NjordSlot slot)
         {
+            return hash != 0 ? hash : DefaultOf(slot);
+        }
+
+        private static int DefaultOf(NjordSlot slot)
+        {
+            switch (slot)
+            {
+                case NjordSlot.Chest:
+                    return ItemHash("ArmorRagsChest", ItemDrop.ItemData.ItemType.Chest, "rag");
+                case NjordSlot.Legs:
+                    return ItemHash("ArmorRagsLegs", ItemDrop.ItemData.ItemType.Legs, "rag");
+                case NjordSlot.HandLeft:
+                    return ItemHash("ShieldWood", ItemDrop.ItemData.ItemType.Shield, "wood");
+                case NjordSlot.HandRight:
+                    var sword = ItemHash("SwordWood", ItemDrop.ItemData.ItemType.OneHandedWeapon);
+                    return sword != 0
+                        ? sword
+                        : ItemHash("Club", ItemDrop.ItemData.ItemType.OneHandedWeapon, "club");
+                default:
+                    return 0;
+            }
+        }
+
+        private static int ItemHash(string prefab, ItemDrop.ItemData.ItemType type, params string[] needles)
+        {
+            var db = ObjectDB.instance;
+            if (db != null && !string.IsNullOrEmpty(prefab) && db.GetItemPrefab(prefab) != null)
+            {
+                return prefab.GetStableHashCode();
+            }
+
+            if (needles == null || needles.Length == 0)
+            {
+                return 0;
+            }
+
             var name = NjordLook.FindArmor(type, prefab, needles);
             return string.IsNullOrEmpty(name) ? 0 : name.GetStableHashCode();
         }
+
+        private static void WriteVisZdo(
+            ZDO zdo,
+            bool drawn,
+            int chest,
+            int legs,
+            int helmet,
+            int shoulder,
+            int shoulderVar,
+            int shoulderQual,
+            int utility,
+            int trinket,
+            int handL,
+            int handLVar,
+            int handLQual,
+            int handR,
+            int handRQual)
+        {
+            if (zdo == null)
+            {
+                return;
+            }
+
+            zdo.Set(ZDOVars.s_chestItem, chest);
+            zdo.Set(ZDOVars.s_legItem, legs);
+            zdo.Set(ZDOVars.s_helmetItem, helmet);
+            zdo.Set(ZDOVars.s_shoulderItem, shoulder);
+            zdo.Set(ZDOVars.s_shoulderItemVariant, shoulderVar);
+            zdo.Set(ZDOVars.s_shoulderItemQuality, shoulderQual);
+            zdo.Set(ZDOVars.s_utilityItem, utility);
+            zdo.Set(ZDOVars.s_trinketItem, trinket);
+            if (drawn)
+            {
+                zdo.Set(ZDOVars.s_leftItem, handL);
+                zdo.Set(ZDOVars.s_leftItemVariant, handLVar);
+                zdo.Set(ZDOVars.s_leftItemQuality, handLQual);
+                zdo.Set(ZDOVars.s_rightItem, handR);
+                zdo.Set(ZDOVars.s_rightItemQuality, handRQual);
+                zdo.Set(ZDOVars.s_leftBackItem, 0);
+                zdo.Set(ZDOVars.s_leftBackItemVariant, 0);
+                zdo.Set(ZDOVars.s_leftBackItemQuality, 0);
+                zdo.Set(ZDOVars.s_rightBackItem, 0);
+                zdo.Set(ZDOVars.s_rightBackItemQuality, 0);
+            }
+            else
+            {
+                zdo.Set(ZDOVars.s_leftItem, 0);
+                zdo.Set(ZDOVars.s_leftItemVariant, 0);
+                zdo.Set(ZDOVars.s_leftItemQuality, 0);
+                zdo.Set(ZDOVars.s_rightItem, 0);
+                zdo.Set(ZDOVars.s_rightItemQuality, 0);
+                zdo.Set(ZDOVars.s_leftBackItem, handL);
+                zdo.Set(ZDOVars.s_leftBackItemVariant, handLVar);
+                zdo.Set(ZDOVars.s_leftBackItemQuality, handLQual);
+                zdo.Set(ZDOVars.s_rightBackItem, handR);
+                zdo.Set(ZDOVars.s_rightBackItemQuality, handRQual);
+            }
+            }
 
         private static bool Own(Container hub)
         {

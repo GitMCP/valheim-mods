@@ -8,7 +8,8 @@ of the name, before the quantity. Click it and he wears that piece; the
 item stays in the chest.
 One look per slot — helmet, chest, legs, cape, belt, trinket, and each
 hand. Dressing another item of the same slot replaces the last. Click the
-button again to take that piece off. He still starts in leather.
+button again to take that piece off. Empty slots fall back to rags, no
+cloak, and a wooden club and wooden shield.
 
 Press **R** while talking to him or hovering him to draw or sheathe his
 weapons. The hover text is **Draw weapons** or **Sheathe Weapons**.
