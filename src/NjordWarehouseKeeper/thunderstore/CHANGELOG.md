@@ -14,6 +14,9 @@ sheathed, weapons drawn, sitting, and flexing.
 His head turns toward the nearest player in range. Now and then he waves,
 flexes, or otherwise fidgets in place without walking off the spot.
 
+The piece still registers if dressing the preview mesh fails, so already
+placed Njords and the hammer recipe do not vanish.
+
 ## 1.2.2
 
 Favourite stars on pack slots. Open inventory (Tab, or while talking to Njord)

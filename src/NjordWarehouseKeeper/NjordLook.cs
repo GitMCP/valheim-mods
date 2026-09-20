@@ -340,7 +340,14 @@ namespace NjordWarehouseKeeper
 
         private void WireAndDress()
         {
-            NjordOutfit.Apply(Hub(), _vis, _animator);
+            try
+            {
+                NjordOutfit.Apply(Hub(), _vis, _animator);
+            }
+            catch (System.Exception ex)
+            {
+                NjordWarehouseKeeperPlugin.Log.LogWarning("Njord look failed: " + ex);
+            }
         }
 
         private void HoldAnimator()
@@ -351,9 +358,16 @@ namespace NjordWarehouseKeeper
             var right = drawn && zdo != null ? zdo.GetInt("njord.handR", 0) : 0;
             var left = drawn && zdo != null ? zdo.GetInt("njord.handL", 0) : 0;
             NjordOutfit.ApplyAnimator(_animator, pose, right, left);
-            if (_vis != null)
+            if (_vis != null && _vis.m_nview != null)
             {
-                _vis.UpdateVisuals();
+                try
+                {
+                    _vis.UpdateVisuals();
+                }
+                catch (System.Exception ex)
+                {
+                    NjordWarehouseKeeperPlugin.Log.LogWarning("Njord visuals failed: " + ex);
+                }
             }
         }
 
@@ -390,7 +404,14 @@ namespace NjordWarehouseKeeper
                 return false;
             }
 
-            if (Console.IsVisible() || Menu.IsVisible() || TextInput.IsVisible())
+            try
+            {
+                if (Console.IsVisible() || Menu.IsVisible() || TextInput.IsVisible())
+                {
+                    return false;
+                }
+            }
+            catch (System.Exception)
             {
                 return false;
             }
@@ -519,8 +540,7 @@ namespace NjordWarehouseKeeper
 
         private ZDO Zdo()
         {
-            var hub = Hub();
-            var view = hub == null ? null : hub.m_nview;
+            var view = NjordOutfit.ViewOf(Hub());
             return view == null || !view.IsValid() ? null : view.GetZDO();
         }
     }

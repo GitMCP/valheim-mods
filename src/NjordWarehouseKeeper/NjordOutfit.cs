@@ -204,12 +204,27 @@ namespace NjordWarehouseKeeper
                 return;
             }
 
-            var view = hub == null ? null : hub.m_nview;
-            vis.m_nViewOverride = view;
-            vis.m_nview = view;
+            var view = ViewOf(hub);
+            if (view == null)
+            {
+                view = vis.m_nViewOverride != null ? vis.m_nViewOverride : vis.m_nview;
+            }
+
+            if (view != null)
+            {
+                vis.m_nViewOverride = view;
+                vis.m_nview = view;
+            }
+
             vis.m_playerComponent = null;
             vis.m_isPlayer = true;
             vis.m_isArmorStand = false;
+
+            if (vis.m_nview == null)
+            {
+                ApplyAnimator(animator, ReadPose(hub), 0, 0);
+                return;
+            }
 
             var zdo = view != null && view.IsValid() ? view.GetZDO() : null;
             var owner = zdo != null && view.IsOwner();
@@ -240,73 +255,102 @@ namespace NjordWarehouseKeeper
                 legs = DefaultHash(ItemDrop.ItemData.ItemType.Legs, "ArmorLeatherLegs", "leather");
             }
 
-            vis.SetHelmetItem(helmet);
-            vis.SetShoulderItem(shoulder, shoulderVar, shoulderQual);
-            vis.SetUtilityItem(utility);
-            vis.SetTrinketItem(trinket == 0 ? "" : PrefabName(trinket));
-            vis.SetChestItem(chest);
-            vis.SetLegItem(legs);
-
-            if (drawn)
+            try
             {
-                vis.SetLeftItem(handL, handLVar, handLQual);
-                vis.SetRightItem(handR, handRQual);
-                vis.SetLeftBackItem(0, 0, 0);
-                vis.SetRightBackItem(0, 0);
+                vis.SetHelmetItem(helmet);
+                vis.SetShoulderItem(shoulder, shoulderVar, shoulderQual);
+                vis.SetUtilityItem(utility);
+                vis.SetTrinketItem(trinket == 0 ? "" : PrefabName(trinket));
+                vis.SetChestItem(chest);
+                vis.SetLegItem(legs);
+
+                if (drawn)
+                {
+                    vis.SetLeftItem(handL, handLVar, handLQual);
+                    vis.SetRightItem(handR, handRQual);
+                    vis.SetLeftBackItem(0, 0, 0);
+                    vis.SetRightBackItem(0, 0);
+                }
+                else
+                {
+                    vis.SetLeftItem(0, 0, 0);
+                    vis.SetRightItem(0, 0);
+                    vis.SetLeftBackItem(handL, handLVar, handLQual);
+                    vis.SetRightBackItem(handR, handRQual);
+                }
+
+                if (owner)
+                {
+                    EnsureHair(vis, zdo);
+                }
+
+                vis.UpdateVisuals();
             }
-            else
+            catch (System.Exception ex)
             {
-                vis.SetLeftItem(0, 0, 0);
-                vis.SetRightItem(0, 0);
-                vis.SetLeftBackItem(handL, handLVar, handLQual);
-                vis.SetRightBackItem(handR, handRQual);
+                NjordWarehouseKeeperPlugin.Log.LogWarning("Njord visuals failed: " + ex);
             }
 
-            if (owner)
-            {
-                EnsureHair(vis, zdo);
-            }
-
-            vis.UpdateVisuals();
             ApplyAnimator(animator, pose, drawn ? handR : 0, drawn ? handL : 0);
+        }
+
+        internal static ZNetView ViewOf(Container hub)
+        {
+            if (hub == null)
+            {
+                return null;
+            }
+
+            if (hub.m_nview != null)
+            {
+                return hub.m_nview;
+            }
+
+            return hub.GetComponent<ZNetView>();
         }
 
         internal static void ApplyAnimator(Animator animator, NjordPose pose, int drawnRight, int drawnLeft)
         {
-            if (animator == null)
+            if (animator == null || !animator.isInitialized)
             {
                 return;
             }
 
-            animator.SetBool("encumbered", false);
-            animator.SetBool("crouching", false);
-            animator.SetBool("flying", false);
-            animator.SetBool("inWater", false);
-            animator.SetBool("wakeup", false);
-            animator.SetBool("intro", false);
-            animator.SetBool("dead", false);
-            animator.SetBool("onGround", true);
-            animator.SetFloat("forward_speed", 0f);
-            animator.SetFloat("sideway_speed", 0f);
-            animator.SetFloat("turn_speed", 0f);
-
-            var sitting = pose == NjordPose.Sit;
-            var flexing = pose == NjordPose.Flex;
-            SetEmoteBool(animator, "sit", sitting);
-            SetEmoteBool(animator, "flex", flexing);
-            if (!sitting && !flexing)
+            try
             {
-                animator.ResetTrigger("emote_stop");
-            }
+                animator.SetBool("encumbered", false);
+                animator.SetBool("crouching", false);
+                animator.SetBool("flying", false);
+                animator.SetBool("inWater", false);
+                animator.SetBool("wakeup", false);
+                animator.SetBool("intro", false);
+                animator.SetBool("dead", false);
+                animator.SetBool("onGround", true);
+                animator.SetFloat("forward_speed", 0f);
+                animator.SetFloat("sideway_speed", 0f);
+                animator.SetFloat("turn_speed", 0f);
 
-            var state = ItemDrop.ItemData.AnimationState.Unarmed;
-            if (pose == NjordPose.Drawn)
+                var sitting = pose == NjordPose.Sit;
+                var flexing = pose == NjordPose.Flex;
+                SetEmoteBool(animator, "sit", sitting);
+                SetEmoteBool(animator, "flex", flexing);
+                if (!sitting && !flexing)
+                {
+                    animator.ResetTrigger("emote_stop");
+                }
+
+                var state = ItemDrop.ItemData.AnimationState.Unarmed;
+                if (pose == NjordPose.Drawn)
+                {
+                    state = DrawnState(drawnRight, drawnLeft);
+                }
+
+                animator.SetFloat("statef", (float)state);
+                animator.SetInteger("statei", (int)state);
+            }
+            catch (System.Exception)
             {
-                state = DrawnState(drawnRight, drawnLeft);
             }
-
-            animator.SetFloat("statef", (float)state);
-            animator.SetInteger("statei", (int)state);
         }
 
         internal static bool PoseUsesIdle(NjordPose pose)
@@ -559,7 +603,7 @@ namespace NjordWarehouseKeeper
 
         private static bool Own(Container hub)
         {
-            var view = hub == null ? null : hub.m_nview;
+            var view = ViewOf(hub);
             if (view == null || !view.IsValid())
             {
                 return false;
@@ -580,7 +624,7 @@ namespace NjordWarehouseKeeper
 
         private static ZDO Zdo(Container hub)
         {
-            var view = hub == null ? null : hub.m_nview;
+            var view = ViewOf(hub);
             return view == null || !view.IsValid() ? null : view.GetZDO();
         }
     }
