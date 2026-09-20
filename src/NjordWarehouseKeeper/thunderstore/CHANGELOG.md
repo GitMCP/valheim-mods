@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.3.1
+
+Njord follows the language selected in Valheim. UI, dialogue, build-piece
+text, and status messages are embedded JSON catalogs. Russian comes from
+community pull request #21. Catalogs also cover Simplified Chinese,
+Traditional Chinese, German, French, Spanish, Portuguese (Brazil), Polish,
+Ukrainian, Italian, Turkish, Japanese, and Korean. Registration happens in
+Awake so the selected language applies instead of falling back to English.
+
 ## 1.3.0
 
 Njord can be dressed from the item list. Equipable rows show a small dress

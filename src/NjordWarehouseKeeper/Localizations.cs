@@ -1,92 +1,201 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text.RegularExpressions;
 using Jotunn.Managers;
+using Newtonsoft.Json;
 
 namespace NjordWarehouseKeeper
 {
+    /// <summary>
+    /// Loads every embedded JSON catalog whose file name matches a Valheim language
+    /// (for example, Localization/English.json or Localization/Chinese_Trad.json).
+    /// Adding another language only requires adding another catalog file.
+    /// </summary>
     internal static class Localizations
     {
+        private const string ResourceMarker = ".Localization.";
+        private const string ResourceExtension = ".json";
+        private static readonly Regex Placeholder = new Regex(@"\{\d+\}", RegexOptions.Compiled);
+
+        // Folder names from Jötunn's Valheim language list. A catalog whose file
+        // name is not in this set still loads, but will not match a game language.
+        private static readonly HashSet<string> ValheimLanguages = new HashSet<string>(StringComparer.Ordinal)
+        {
+            "English", "Swedish", "French", "Italian", "German", "Spanish", "Russian",
+            "Romanian", "Bulgarian", "Macedonian", "Finnish", "Danish", "Norwegian",
+            "Icelandic", "Turkish", "Lithuanian", "Czech", "Hungarian", "Slovak",
+            "Polish", "Dutch", "Portuguese_European", "Portuguese_Brazilian",
+            "Chinese", "Chinese_Trad", "Japanese", "Korean", "Hindi", "Thai",
+            "Abenaki", "Croatian", "Georgian", "Greek", "Serbian", "Ukrainian",
+            "Latvian",
+        };
+
         internal static void Register()
         {
-            var localization = LocalizationManager.Instance.GetLocalization();
-            localization.AddTranslation(
-                "English",
-                new Dictionary<string, string>
+            try
+            {
+                var catalogs = LoadCatalogs(typeof(Localizations).Assembly);
+                Validate(catalogs);
+
+                var localization = LocalizationManager.Instance.GetLocalization();
+                foreach (var catalog in catalogs.OrderBy(c => c.Language == "English" ? 0 : 1))
                 {
-                    { $"{NjordWarehouseKeeperPiece.PrefabName}_name", "Njord, Warehouse Keeper" },
+                    localization.AddTranslation(catalog.Language, catalog.Translations);
+                }
+
+                NjordWarehouseKeeperPlugin.Log.LogInfo(
+                    "Registered " + catalogs.Count + " localization catalog(s): " +
+                    string.Join(", ", catalogs.Select(c => c.Language).OrderBy(n => n)));
+            }
+            catch (Exception ex)
+            {
+                NjordWarehouseKeeperPlugin.Log.LogError(
+                    "Could not register Njord localization catalogs: " + ex);
+            }
+        }
+
+        private static List<Catalog> LoadCatalogs(Assembly assembly)
+        {
+            var catalogs = new List<Catalog>();
+            foreach (var resourceName in assembly.GetManifestResourceNames())
+            {
+                if (!resourceName.EndsWith(ResourceExtension, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var marker = resourceName.LastIndexOf(ResourceMarker, StringComparison.OrdinalIgnoreCase);
+                if (marker < 0)
+                {
+                    continue;
+                }
+
+                var languageStart = marker + ResourceMarker.Length;
+                var languageLength = resourceName.Length - languageStart - ResourceExtension.Length;
+                if (languageLength <= 0)
+                {
+                    continue;
+                }
+
+                var language = resourceName.Substring(languageStart, languageLength);
+                if (language.IndexOf('.') >= 0)
+                {
+                    continue;
+                }
+
+                if (!ValheimLanguages.Contains(language))
+                {
+                    NjordWarehouseKeeperPlugin.Log.LogWarning(
+                        "Localization catalog '" + language +
+                        "' is not a Valheim language id and will not be selected in-game.");
+                }
+
+                using (var stream = assembly.GetManifestResourceStream(resourceName))
+                {
+                    if (stream == null)
                     {
-                        $"{NjordWarehouseKeeperPiece.PrefabName}_description",
-                        "A keeper who opens a window onto every nearby chest. Deposit and withdraw without walking the room. Costs 200 coins."
-                    },
-                    { "njord_npc", "Njord" },
-                    { "njord_talk_greet_1", "Need something from the stores?" },
-                    { "njord_talk_greet_2", "Njord's watching the chests." },
-                    { "njord_talk_greet_3", "Come to fetch, or to fill?" },
-                    { "njord_talk_idle_1", "Gold in, goods out. That's the work." },
-                    { "njord_talk_idle_2", "Those chests are heavier than they look." },
-                    { "njord_talk_idle_3", "Keep the aisles clear. I like a tidy hall." },
-                    { "njord_talk_idle_4", "If it's in a chest nearby, I can find it." },
-                    { "njord_talk_idle_5", "Don't ask me to haul. I keep the books." },
-                    { "njord_talk_idle_6", "A place for every stack." },
-                    { "njord_talk_idle_7", "The sea takes ships. I take inventories." },
-                    { "njord_talk_idle_8", "Count twice. Lose nothing." },
-                    { "njord_talk_bye_1", "The chests will still be here." },
-                    { "njord_talk_bye_2", "I'll keep an eye on the stores." },
-                    { "njord_talk_bye_3", "Come back when the shelves need sorting." },
-                    { "njord_capacity", "Used: {0} / {1} slots" },
-                    { "njord_chests", "{0} chests" },
-                    { "njord_search", "Search…" },
-                    { "njord_deposit", "Deposit" },
-                    { "njord_quickstack", "Quick Stack" },
-                    { "njord_tab_items", "Items" },
-                    { "njord_tab_recipes", "Recipes" },
-                    { "njord_withdraw", "Withdraw" },
-                    { "njord_recipes_empty", "No known recipes." },
-                    { "njord_recipes_none", "No matching recipes." },
-                    { "njord_cat_all", "All" },
-                    { "njord_cat_weapons", "Weapons" },
-                    { "njord_cat_armor", "Armor" },
-                    { "njord_cat_food", "Food" },
-                    { "njord_cat_materials", "Materials" },
-                    { "njord_cat_trophies", "Trophies" },
-                    { "njord_cat_misc", "Misc" },
-                    { "njord_cat_favourites", "Favourites" },
-                    { "njord_sort_name", "Name" },
-                    { "njord_sort_qty", "Qty" },
-                    { "njord_sort_cat", "Cat" },
-                    { "njord_empty", "No items in range." },
-                    { "njord_empty_favourites", "No favourite items." },
-                    { "njord_nospace", "No space in nearby chests." },
-                    { "njord_playerfull", "Inventory full." },
-                    { "njord_resupply", "Resupply" },
-                    { "njord_resupply_none", "Nothing to resupply." },
-                    { "njord_restocked", "Deposited and resupplied from the stores." },
-                    { "njord_restock_none", "Nothing to deposit or resupply." },
-                    { "njord_hotkey_norange", "No warehouse keeper in range." },
-                    { "njord_recipe", "Recipe" },
-                    { "njord_recipes", "Recipes" },
-                    { "njord_recipe_hint", "Known recipes. Greyed out if nearby chests are short of ingredients. Withdraw takes what is there. Hover an ingredient to see have / need." },
-                    { "njord_station_all", "All" },
-                    { "njord_station_hand", "Handcraft" },
-                    { "njord_station_hammer", "Hammer" },
-                    { "njord_recipe_missing", "The nearby chests do not have those ingredients." },
-                    { "njord_recipe_ok", "Took the ingredients." },
-                    { "njord_recipe_partial", "Took what the stores had." },
-                    { "njord_preferences", "Preferences" },
-                    { "njord_pref_settings", "Settings" },
-                    { "njord_pref_skip_favourites", "Ignore favourite items on deposit" },
-                    { "njord_pref_hotkey", "Deposit + Resupply hotkey" },
-                    { "njord_pref_hotkey_none", "None" },
-                    { "njord_pref_hotkey_listen", "Press a key…" },
-                    { "njord_pref_resupply_hint", "Tick items to keep in your pack. Resupply pulls that many from nearby chests." },
-                    { "njord_reorganize", "Reorganize" },
-                    { "njord_reorganize_ok", "Tidied the stores. Freed {0} slots." },
-                    { "njord_reorganize_none", "The stores are already tidy." },
-                    { "njord_dressed", "Njord put on {0}." },
-                    { "njord_undressed", "Njord took off {0}." },
-                    { "njord_pose_draw", "Draw weapons" },
-                    { "njord_pose_sheathe", "Sheathe Weapons" },
-                    { "njord_hover_talk", "Talk" },
-                });
+                        throw new InvalidOperationException(
+                            "Embedded localization resource is unavailable: " + resourceName);
+                    }
+
+                    using (var reader = new StreamReader(stream))
+                    {
+                        var translations = JsonConvert.DeserializeObject<Dictionary<string, string>>(
+                            reader.ReadToEnd());
+                        if (translations == null || translations.Count == 0)
+                        {
+                            throw new InvalidDataException(
+                                "Localization catalog is empty: " + resourceName);
+                        }
+
+                        catalogs.Add(new Catalog(language, translations));
+                    }
+                }
+            }
+
+            return catalogs;
+        }
+
+        private static void Validate(IReadOnlyList<Catalog> catalogs)
+        {
+            var english = catalogs.FirstOrDefault(
+                c => string.Equals(c.Language, "English", StringComparison.OrdinalIgnoreCase));
+            if (english == null)
+            {
+                throw new InvalidDataException("English localization catalog is required.");
+            }
+
+            var duplicateLanguages = catalogs
+                .GroupBy(c => c.Language, StringComparer.OrdinalIgnoreCase)
+                .Where(group => group.Count() > 1)
+                .Select(group => group.Key)
+                .ToArray();
+            if (duplicateLanguages.Length > 0)
+            {
+                throw new InvalidDataException(
+                    "Duplicate localization languages: " + string.Join(", ", duplicateLanguages));
+            }
+
+            var referenceKeys = new HashSet<string>(english.Translations.Keys, StringComparer.Ordinal);
+            var errors = new List<string>();
+            foreach (var catalog in catalogs)
+            {
+                var keys = new HashSet<string>(catalog.Translations.Keys, StringComparer.Ordinal);
+                var missing = referenceKeys.Except(keys).OrderBy(key => key).ToArray();
+                var extra = keys.Except(referenceKeys).OrderBy(key => key).ToArray();
+                if (missing.Length > 0)
+                {
+                    errors.Add(catalog.Language + " is missing: " + string.Join(", ", missing));
+                }
+
+                if (extra.Length > 0)
+                {
+                    errors.Add(catalog.Language + " has unexpected keys: " + string.Join(", ", extra));
+                }
+
+                foreach (var key in referenceKeys.Intersect(keys).OrderBy(key => key))
+                {
+                    var expected = Placeholders(english.Translations[key]);
+                    var actual = Placeholders(catalog.Translations[key]);
+                    if (!expected.SequenceEqual(actual))
+                    {
+                        errors.Add(
+                            catalog.Language + " changes placeholders for " + key +
+                            ": expected " + string.Join(", ", expected) +
+                            ", got " + string.Join(", ", actual));
+                    }
+                }
+            }
+
+            if (errors.Count > 0)
+            {
+                throw new InvalidDataException(string.Join("; ", errors));
+            }
+        }
+
+        private static string[] Placeholders(string value)
+        {
+            return Placeholder.Matches(value ?? string.Empty)
+                .Cast<Match>()
+                .Select(match => match.Value)
+                .OrderBy(item => item, StringComparer.Ordinal)
+                .ToArray();
+        }
+
+        private sealed class Catalog
+        {
+            internal Catalog(string language, Dictionary<string, string> translations)
+            {
+                Language = language;
+                Translations = translations;
+            }
+
+            internal string Language { get; }
+
+            internal Dictionary<string, string> Translations { get; }
         }
     }
 }
