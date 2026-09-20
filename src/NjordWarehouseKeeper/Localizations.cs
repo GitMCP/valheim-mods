@@ -81,6 +81,15 @@ namespace NjordWarehouseKeeper
                     { "njord_reorganize", "Reorganize" },
                     { "njord_reorganize_ok", "Tidied the stores. Freed {0} slots." },
                     { "njord_reorganize_none", "The stores are already tidy." },
+                    { "njord_dressed", "Njord put on {0}." },
+                    { "njord_undressed", "Njord took off {0}." },
+                    { "njord_pose", "Njord: {0}" },
+                    { "njord_pose_sheathed", "Weapons sheathed" },
+                    { "njord_pose_drawn", "Weapons drawn" },
+                    { "njord_pose_sit", "Sitting" },
+                    { "njord_pose_flex", "Flexing" },
+                    { "njord_hover_talk", "Talk" },
+                    { "njord_hover_pose", "[<color=yellow><b>R</b></color>] Cycle pose — {0}" },
                 });
         }
     }

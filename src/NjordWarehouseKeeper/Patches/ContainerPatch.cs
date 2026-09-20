@@ -40,6 +40,21 @@ namespace NjordWarehouseKeeper.Patches
             return !NjordWarehouseKeeperMarker.IsHub(__instance);
         }
 
+        [HarmonyPostfix]
+        [HarmonyPatch(nameof(Container.GetHoverText))]
+        private static void HubHoverText(Container __instance, ref string __result)
+        {
+            if (!NjordWarehouseKeeperMarker.IsHub(__instance))
+            {
+                return;
+            }
+
+            var pose = Localization.instance.Localize(NjordOutfit.PoseToken(NjordOutfit.ReadPose(__instance)));
+            __result = Localization.instance.Localize(
+                "$njord_npc\n[<color=yellow><b>$KEY_Use</b></color>] $njord_hover_talk\n$njord_hover_pose")
+                .Replace("{0}", pose);
+        }
+
         private static bool GrantHub(Container container, long uid, long playerID, string response)
         {
             if (!NjordWarehouseKeeperMarker.IsHub(container))

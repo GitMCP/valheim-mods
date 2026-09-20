@@ -12,6 +12,7 @@ namespace NjordWarehouseKeeper.UI
         internal static Sprite StarFilled { get; private set; }
         internal static Sprite Cross { get; private set; }
         internal static Sprite Cog { get; private set; }
+        internal static Sprite Dress { get; private set; }
         internal static Sprite Deposit { get; private set; }
         internal static Sprite Resupply { get; private set; }
         internal static Sprite QuickStack { get; private set; }
@@ -27,9 +28,56 @@ namespace NjordWarehouseKeeper.UI
             StarEmpty = MakeSprite(DrawStar(filled: false), "hub_star_empty");
             Cross = MakeSprite(DrawCross(), "hub_cross");
             Cog = MakeSprite(DrawCog(), "hub_cog");
+            Dress = HildirDress() ?? MakeSprite(DrawDress(), "hub_dress");
             Deposit = NjordWarehouseKeeperAssets.LoadSprite("NjordWarehouseKeeper.Assets.hub_deposit.png");
             Resupply = NjordWarehouseKeeperAssets.LoadSprite("NjordWarehouseKeeper.Assets.hub_resupply.png");
             QuickStack = NjordWarehouseKeeperAssets.LoadSprite("NjordWarehouseKeeper.Assets.hub_quickstack.png");
+        }
+
+        internal static Sprite DressIcon()
+        {
+            if (Dress == null || Dress.name == "hub_dress")
+            {
+                var hildir = HildirDress();
+                if (hildir != null)
+                {
+                    Dress = hildir;
+                }
+            }
+
+            return Dress ?? (Dress = MakeSprite(DrawDress(), "hub_dress"));
+        }
+
+        private static Sprite HildirDress()
+        {
+            var map = Minimap.instance;
+            if (map?.m_icons == null)
+            {
+                return null;
+            }
+
+            Sprite fallback = null;
+            for (var i = 0; i < map.m_icons.Count; i++)
+            {
+                var data = map.m_icons[i];
+                if (data.m_icon == null)
+                {
+                    continue;
+                }
+
+                if (data.m_name == Minimap.PinType.Hildir1)
+                {
+                    return data.m_icon;
+                }
+
+                if (fallback == null &&
+                    (data.m_name == Minimap.PinType.Hildir2 || data.m_name == Minimap.PinType.Hildir3))
+                {
+                    fallback = data.m_icon;
+                }
+            }
+
+            return fallback;
         }
 
         private static Sprite MakeSprite(Texture2D texture, string name)
@@ -90,6 +138,36 @@ namespace NjordWarehouseKeeper.UI
                     var dist = Mathf.Min(DistanceToSegment(p, a, b), DistanceToSegment(p, c, d));
                     var alpha = Mathf.Clamp01(2.2f - dist);
                     tex.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
+                }
+            }
+
+            tex.Apply(false, true);
+            return tex;
+        }
+
+        private static Texture2D DrawDress()
+        {
+            const int size = 48;
+            var tex = new Texture2D(size, size, TextureFormat.ARGB32, false);
+            var c = new Vector2(size * 0.5f, size * 0.5f);
+            for (var y = 0; y < size; y++)
+            {
+                for (var x = 0; x < size; x++)
+                {
+                    var p = new Vector2(x + 0.5f, y + 0.5f);
+                    var dx = (p.x - c.x) / (size * 0.5f);
+                    var dy = (c.y - p.y) / (size * 0.5f);
+                    float a = 0f;
+                    var bodice = dy > -0.05f && dy < 0.42f && Mathf.Abs(dx) < 0.28f + dy * 0.08f;
+                    var skirt = dy <= 0f && dy > -0.72f && Mathf.Abs(dx) < 0.22f - dy * 0.42f;
+                    var strapL = Mathf.Abs(dx + 0.18f) < 0.07f && dy > 0.28f && dy < 0.62f;
+                    var strapR = Mathf.Abs(dx - 0.18f) < 0.07f && dy > 0.28f && dy < 0.62f;
+                    if (bodice || skirt || strapL || strapR)
+                    {
+                        a = 1f;
+                    }
+
+                    tex.SetPixel(x, y, new Color(1f, 1f, 1f, a));
                 }
             }
 

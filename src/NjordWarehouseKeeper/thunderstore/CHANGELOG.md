@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.3.0
+
+Njord can be dressed from the item list. Equipable rows show a small dress
+button (Hildir's map icon). Click it and he wears that piece; the item stays
+in the chest. One look per slot — helmet, chest, legs, cape, belt, trinket,
+and each hand. Dressing another item of the same slot replaces the last.
+Click the button again to take that piece off. He still starts in leather.
+
+Press **R** while talking to him or hovering him to cycle poses: weapons
+sheathed, weapons drawn, sitting, and flexing.
+
+His head turns toward the nearest player in range. Now and then he waves,
+flexes, or otherwise fidgets in place without walking off the spot.
+
 ## 1.2.2
 
 Favourite stars on pack slots. Open inventory (Tab, or while talking to Njord)
