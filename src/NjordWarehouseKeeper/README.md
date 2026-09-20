@@ -54,7 +54,9 @@ python tools/test-localization-registration.py
 ```
 
 The catalogs are embedded in `NjordWarehouseKeeper.dll`, so an installed mod
-does not need a separate localization file beside the plugin.
+does not need a separate localization file beside the plugin. Changing the
+language while a world is already loaded updates Njord's panel the same way
+vanilla UI does.
 
 ## Source
 

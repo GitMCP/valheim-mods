@@ -101,6 +101,11 @@ namespace NjordWarehouseKeeper.UI
             get { return _root != null && _root.activeSelf; }
         }
 
+        internal static void OnLanguageChanged()
+        {
+            PaintHotkeyButton();
+        }
+
         internal static void Build(Transform parent, GUIManager gui)
         {
             _root = new GameObject("Preferences", typeof(RectTransform));
@@ -113,7 +118,7 @@ namespace NjordWarehouseKeeper.UI
 
             PlaceSectionTitle(
                 gui,
-                Localization.instance.Localize("$njord_pref_settings"),
+                "$njord_pref_settings",
                 SettingsTitleY);
 
             var toggleGo = gui.CreateToggle(_root.transform, 26f, 26f);
@@ -126,7 +131,7 @@ namespace NjordWarehouseKeeper.UI
             var skipLabel = MakeLabel(
                 gui,
                 _root.transform,
-                Localization.instance.Localize("$njord_pref_skip_favourites"),
+                "$njord_pref_skip_favourites",
                 15,
                 Color.white,
                 TextAnchor.MiddleLeft);
@@ -135,7 +140,7 @@ namespace NjordWarehouseKeeper.UI
             var hotkeyLabel = MakeLabel(
                 gui,
                 _root.transform,
-                Localization.instance.Localize("$njord_pref_hotkey"),
+                "$njord_pref_hotkey",
                 15,
                 Color.white,
                 TextAnchor.MiddleLeft);
@@ -162,7 +167,7 @@ namespace NjordWarehouseKeeper.UI
             PaintHotkeyButton();
 
             var reorgGo = gui.CreateButton(
-                Localization.instance.Localize("$njord_reorganize"),
+                "$njord_reorganize",
                 _root.transform,
                 new Vector2(0.5f, 1f),
                 new Vector2(0.5f, 1f),
@@ -176,19 +181,18 @@ namespace NjordWarehouseKeeper.UI
             var reorgLabel = reorgGo.GetComponentInChildren<Text>();
             if (reorgLabel != null)
             {
-                reorgLabel.text = Localization.instance.Localize("$njord_reorganize");
                 reorgLabel.alignment = TextAnchor.MiddleCenter;
             }
 
             PlaceSectionTitle(
                 gui,
-                Localization.instance.Localize("$njord_resupply"),
+                "$njord_resupply",
                 ResupplyTitleY);
 
             var hint = MakeLabel(
                 gui,
                 _root.transform,
-                Localization.instance.Localize("$njord_pref_resupply_hint"),
+                "$njord_pref_resupply_hint",
                 13,
                 new Color(1f, 0.9f, 0.75f, 1f),
                 TextAnchor.UpperLeft);
@@ -202,7 +206,7 @@ namespace NjordWarehouseKeeper.UI
                 new Vector2(0.5f, 1f),
                 Vector2.zero,
                 InputField.ContentType.Standard,
-                Localization.instance.Localize("$njord_search"),
+                "$njord_search",
                 16,
                 176f,
                 30f).GetComponent<InputField>();
@@ -811,15 +815,20 @@ namespace NjordWarehouseKeeper.UI
 
             if (_capturing)
             {
-                _hotkeyLabel.text = Localization.instance.Localize("$njord_pref_hotkey_listen");
+                LocalizedUi.Capture(_hotkeyLabel, "$njord_pref_hotkey_listen");
                 return;
             }
 
             var shortcut = ClientPreferences.RestockHotkey;
             if (shortcut == null || shortcut.Value.MainKey == KeyCode.None)
             {
-                _hotkeyLabel.text = Localization.instance.Localize("$njord_pref_hotkey_none");
+                LocalizedUi.Capture(_hotkeyLabel, "$njord_pref_hotkey_none");
                 return;
+            }
+
+            if (Localization.instance != null)
+            {
+                Localization.instance.RemoveTextFromCache(_hotkeyLabel);
             }
 
             _hotkeyLabel.text = shortcut.Value.Serialize();

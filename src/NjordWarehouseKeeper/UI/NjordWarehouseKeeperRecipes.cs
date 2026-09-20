@@ -98,6 +98,7 @@ namespace NjordWarehouseKeeper.UI
                 return;
             }
 
+            LocalizedUi.RelocalizeRoot(_root.transform);
             HideVanillaCrafting();
             ResetSearch();
             _nextSnap = 0f;
@@ -198,7 +199,7 @@ namespace NjordWarehouseKeeper.UI
             _title = MakeText(
                 gui,
                 _root.transform,
-                Localization.instance.Localize("$njord_recipes"),
+                "$njord_recipes",
                 22,
                 gui.ValheimOrange,
                 TextAnchor.MiddleCenter);
@@ -236,7 +237,22 @@ namespace NjordWarehouseKeeper.UI
             divRt.sizeDelta = Vector2.zero;
 
             BuildDetail(gui);
+            LocalizedUi.CaptureRoot(_root.transform);
             _root.SetActive(false);
+        }
+
+        internal static void OnLanguageChanged()
+        {
+            LocalizedUi.RelocalizeRoot(_root != null ? _root.transform : null);
+            if (_stations.Count > 0)
+            {
+                RebuildStationButtons();
+            }
+
+            if (IsOpen)
+            {
+                Refresh();
+            }
         }
 
         private static void BuildPending()
@@ -445,7 +461,7 @@ namespace NjordWarehouseKeeper.UI
             _empty = MakeText(
                 gui,
                 host,
-                Localization.instance.Localize("$njord_recipes_empty"),
+                "$njord_recipes_empty",
                 14,
                 Color.white,
                 TextAnchor.MiddleCenter);
@@ -564,7 +580,7 @@ namespace NjordWarehouseKeeper.UI
         private static void BuildWithdraw(GUIManager gui, RectTransform detail)
         {
             var go = gui.CreateButton(
-                Localization.instance.Localize("$njord_withdraw"),
+                "$njord_withdraw",
                 detail,
                 new Vector2(0.5f, 0f),
                 new Vector2(0.5f, 0f),
@@ -584,7 +600,6 @@ namespace NjordWarehouseKeeper.UI
             _withdrawLabel = go.GetComponentInChildren<Text>();
             if (_withdrawLabel != null)
             {
-                _withdrawLabel.text = Localization.instance.Localize("$njord_withdraw");
                 _withdrawLabel.alignment = TextAnchor.MiddleCenter;
                 _withdrawLabel.resizeTextForBestFit = true;
                 _withdrawLabel.resizeTextMinSize = 16;
@@ -636,7 +651,7 @@ namespace NjordWarehouseKeeper.UI
                 mid,
                 Vector2.zero,
                 InputField.ContentType.Standard,
-                Localization.instance.Localize("$njord_search"),
+                "$njord_search",
                 16,
                 176f,
                 SearchHeight);
@@ -968,7 +983,7 @@ namespace NjordWarehouseKeeper.UI
                 var opt = _stations[i];
                 var captured = opt.Key;
                 var go = gui.CreateButton(
-                    Localization.instance.Localize(opt.Token),
+                    opt.Token,
                     _stationMenuParent,
                     new Vector2(0f, 1f),
                     new Vector2(1f, 1f),
@@ -998,6 +1013,8 @@ namespace NjordWarehouseKeeper.UI
 
                 button.onClick.AddListener(() => SelectStation(captured));
             }
+
+            LocalizedUi.CaptureRoot(_stationMenuParent);
         }
 
         private static void SelectStation(string key)

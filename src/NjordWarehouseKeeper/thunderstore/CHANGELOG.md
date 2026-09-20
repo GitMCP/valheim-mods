@@ -8,6 +8,8 @@ community pull request #21. Catalogs also cover Simplified Chinese,
 Traditional Chinese, German, French, Spanish, Portuguese (Brazil), Polish,
 Ukrainian, Italian, Turkish, Japanese, and Korean. Registration happens in
 Awake so the selected language applies instead of falling back to English.
+Changing language while a world is loaded rewrites the already-built panel
+the same way vanilla UI does.
 
 ## 1.3.0
 
