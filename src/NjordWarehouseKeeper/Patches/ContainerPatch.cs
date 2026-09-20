@@ -49,10 +49,11 @@ namespace NjordWarehouseKeeper.Patches
                 return;
             }
 
-            var pose = Localization.instance.Localize(NjordOutfit.PoseToken(NjordOutfit.ReadPose(__instance)));
+            var action = Localization.instance.Localize(
+                NjordOutfit.ActionToken(NjordOutfit.ReadPose(__instance)));
             __result = Localization.instance.Localize(
-                "$njord_npc\n[<color=yellow><b>$KEY_Use</b></color>] $njord_hover_talk\n$njord_hover_pose")
-                .Replace("{0}", pose);
+                "$njord_npc\n[<color=yellow><b>$KEY_Use</b></color>] $njord_hover_talk\n[<color=yellow><b>R</b></color>] ")
+                + action;
         }
 
         private static bool GrantHub(Container container, long uid, long playerID, string response)

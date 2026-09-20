@@ -10,8 +10,6 @@ namespace NjordWarehouseKeeper
     {
         Sheathed = 0,
         Drawn = 1,
-        Sit = 2,
-        Flex = 3,
     }
 
     internal enum NjordSlot
@@ -28,7 +26,7 @@ namespace NjordWarehouseKeeper
 
     internal static class NjordOutfit
     {
-        internal const int PoseCount = 4;
+        internal const int PoseCount = 2;
 
         private const string PoseKey = "njord.pose";
         private const string ChestKey = "njord.chest";
@@ -168,19 +166,9 @@ namespace NjordWarehouseKeeper
             return (NjordPose)value;
         }
 
-        internal static string PoseToken(NjordPose pose)
+        internal static string ActionToken(NjordPose pose)
         {
-            switch (pose)
-            {
-                case NjordPose.Drawn:
-                    return "$njord_pose_drawn";
-                case NjordPose.Sit:
-                    return "$njord_pose_sit";
-                case NjordPose.Flex:
-                    return "$njord_pose_flex";
-                default:
-                    return "$njord_pose_sheathed";
-            }
+            return pose == NjordPose.Drawn ? "$njord_pose_sheathe" : "$njord_pose_draw";
         }
 
         internal static void Apply(Container hub)
@@ -330,14 +318,9 @@ namespace NjordWarehouseKeeper
                 animator.SetFloat("sideway_speed", 0f);
                 animator.SetFloat("turn_speed", 0f);
 
-                var sitting = pose == NjordPose.Sit;
-                var flexing = pose == NjordPose.Flex;
-                SetEmoteBool(animator, "sit", sitting);
-                SetEmoteBool(animator, "flex", flexing);
-                if (!sitting && !flexing)
-                {
-                    animator.ResetTrigger("emote_stop");
-                }
+                animator.ResetTrigger("emote_stop");
+                animator.SetBool("emote_sit", false);
+                animator.SetBool("emote_flex", false);
 
                 var state = ItemDrop.ItemData.AnimationState.Unarmed;
                 if (pose == NjordPose.Drawn)
@@ -351,11 +334,6 @@ namespace NjordWarehouseKeeper
             catch (System.Exception)
             {
             }
-        }
-
-        internal static bool PoseUsesIdle(NjordPose pose)
-        {
-            return pose == NjordPose.Sheathed || pose == NjordPose.Drawn;
         }
 
         internal static int PrefabHash(ItemDrop.ItemData item)
@@ -594,11 +572,6 @@ namespace NjordWarehouseKeeper
         {
             var name = NjordLook.FindArmor(type, prefab, needles);
             return string.IsNullOrEmpty(name) ? 0 : name.GetStableHashCode();
-        }
-
-        private static void SetEmoteBool(Animator animator, string emote, bool on)
-        {
-            animator.SetBool("emote_" + emote, on);
         }
 
         private static bool Own(Container hub)

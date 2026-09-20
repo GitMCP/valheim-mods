@@ -4,7 +4,7 @@ using UnityEngine;
 namespace NjordWarehouseKeeper
 {
     /// <summary>
-    /// Player mesh on Njord: dressable like an armour stand, poses, look-at,
+    /// Player mesh on Njord: dressable like an armour stand, sheathed or drawn,
     /// and idle fidgets, without turning him into a Character.
     /// </summary>
     internal static class NjordLook
@@ -34,11 +34,6 @@ namespace NjordWarehouseKeeper
             body.transform.localScale = Vector3.one;
             Strip(body);
             WireView(body, host);
-
-            if (body.GetComponent<LookAt>() == null)
-            {
-                body.AddComponent<LookAt>();
-            }
 
             var look = body.GetComponent<NjordLookHook>();
             if (look == null)
@@ -117,7 +112,7 @@ namespace NjordWarehouseKeeper
             for (var i = 0; i < behaviours.Length; i++)
             {
                 var behaviour = behaviours[i];
-                if (behaviour == null || behaviour is VisEquipment || behaviour is NjordLookHook || behaviour is LookAt)
+                if (behaviour == null || behaviour is VisEquipment || behaviour is NjordLookHook)
                 {
                     continue;
                 }
@@ -252,12 +247,10 @@ namespace NjordWarehouseKeeper
             "comehere",
         };
 
-        private const float LookRange = 12f;
         private const float IdleRange = 14f;
 
         private GameObject _host;
         private Animator _animator;
-        private LookAt _lookAt;
         private VisEquipment _vis;
         private float _nextEmote;
         private float _nextApply;
@@ -266,20 +259,13 @@ namespace NjordWarehouseKeeper
         {
             _host = host;
             _animator = GetComponent<Animator>();
-            _lookAt = GetComponent<LookAt>();
             _vis = GetComponent<VisEquipment>();
-            TuneLook();
             WireAndDress();
             _nextEmote = Time.time + Random.Range(16f, 28f);
         }
 
         internal void Wave()
         {
-            if (!NjordOutfit.PoseUsesIdle(CurrentPose()))
-            {
-                return;
-            }
-
             PlayEmote("wave");
         }
 
@@ -290,17 +276,10 @@ namespace NjordWarehouseKeeper
                 _animator = GetComponent<Animator>();
             }
 
-            if (_lookAt == null)
-            {
-                _lookAt = GetComponent<LookAt>();
-            }
-
             if (_vis == null)
             {
                 _vis = GetComponent<VisEquipment>();
             }
-
-            TuneLook();
         }
 
         private void Start()
@@ -321,21 +300,7 @@ namespace NjordWarehouseKeeper
                 HoldAnimator();
             }
 
-            WatchNearestPlayer();
             IdleEmote();
-        }
-
-        private void TuneLook()
-        {
-            if (_lookAt == null)
-            {
-                return;
-            }
-
-            _lookAt.m_headWeight = 1f;
-            _lookAt.m_bodyWeight = 0.18f;
-            _lookAt.m_eyesWeight = 0.35f;
-            _lookAt.m_smoothTime = 0.35f;
         }
 
         private void WireAndDress()
@@ -389,12 +354,12 @@ namespace NjordWarehouseKeeper
                 return;
             }
 
-            var pose = NjordOutfit.CyclePose(hub);
+            var before = NjordOutfit.ReadPose(hub);
+            NjordOutfit.CyclePose(hub);
             var player = Player.m_localPlayer;
             player?.Message(
                 MessageHud.MessageType.Center,
-                Localization.instance.Localize("$njord_pose")
-                    .Replace("{0}", Localization.instance.Localize(NjordOutfit.PoseToken(pose))));
+                Localization.instance.Localize(NjordOutfit.ActionToken(before)));
         }
 
         private bool CanTakePoseInput()
@@ -448,23 +413,6 @@ namespace NjordWarehouseKeeper
             return marker != null && marker.gameObject == hub.gameObject;
         }
 
-        private void WatchNearestPlayer()
-        {
-            if (_lookAt == null || Jotunn.Managers.GUIManager.IsHeadless())
-            {
-                return;
-            }
-
-            var nearest = NearestPlayer(LookRange);
-            if (nearest == null)
-            {
-                _lookAt.ResetTarget();
-                return;
-            }
-
-            _lookAt.SetLoockAtTarget(nearest.GetEyePoint());
-        }
-
         private void IdleEmote()
         {
             if (Time.time < _nextEmote)
@@ -473,7 +421,7 @@ namespace NjordWarehouseKeeper
             }
 
             _nextEmote = Time.time + Random.Range(16f, 30f);
-            if (!NjordOutfit.PoseUsesIdle(CurrentPose()) || NearestPlayer(IdleRange) == null)
+            if (!PlayerNearby(IdleRange))
             {
                 return;
             }
@@ -481,34 +429,15 @@ namespace NjordWarehouseKeeper
             PlayEmote(IdleEmotes[Random.Range(0, IdleEmotes.Length)]);
         }
 
-        private Player NearestPlayer(float range)
+        private bool PlayerNearby(float range)
         {
-            var players = Player.GetAllPlayers();
-            if (players == null || players.Count == 0)
+            var player = Player.m_localPlayer;
+            if (player == null || player.IsDead())
             {
-                return null;
+                return false;
             }
 
-            Player best = null;
-            var bestDist = range;
-            var here = transform.position;
-            for (var i = 0; i < players.Count; i++)
-            {
-                var player = players[i];
-                if (player == null || player.IsDead())
-                {
-                    continue;
-                }
-
-                var dist = Vector3.Distance(player.transform.position, here);
-                if (dist <= bestDist)
-                {
-                    bestDist = dist;
-                    best = player;
-                }
-            }
-
-            return best;
+            return Vector3.Distance(player.transform.position, transform.position) <= range;
         }
 
         private void PlayEmote(string emote)

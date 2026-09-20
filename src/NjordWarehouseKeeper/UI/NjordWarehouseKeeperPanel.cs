@@ -1400,7 +1400,7 @@ namespace NjordWarehouseKeeper.UI
             nameRt.anchorMin = new Vector2(0f, 0f);
             nameRt.anchorMax = new Vector2(1f, 1f);
             nameRt.offsetMin = new Vector2(56f, 4f);
-            nameRt.offsetMax = new Vector2(-72f, -4f);
+            nameRt.offsetMax = new Vector2(-86f, -4f);
             var name = nameGo.GetComponent<Text>();
             name.alignment = TextAnchor.MiddleLeft;
             name.horizontalOverflow = HorizontalWrapMode.Overflow;
@@ -1424,8 +1424,8 @@ namespace NjordWarehouseKeeper.UI
             qtyRt.anchorMin = new Vector2(1f, 0f);
             qtyRt.anchorMax = new Vector2(1f, 1f);
             qtyRt.pivot = new Vector2(1f, 0.5f);
-            qtyRt.sizeDelta = new Vector2(64f, 28f);
-            qtyRt.anchoredPosition = new Vector2(-12f, 0f);
+            qtyRt.sizeDelta = new Vector2(40f, 28f);
+            qtyRt.anchoredPosition = new Vector2(-8f, 0f);
             var qty = qtyGo.GetComponent<Text>();
             qty.alignment = TextAnchor.MiddleRight;
             qty.raycastTarget = false;
@@ -1464,11 +1464,11 @@ namespace NjordWarehouseKeeper.UI
             dress.sprite = HubSprites.DressIcon();
             dress.color = new Color(1f, 1f, 1f, 0.9f);
             var dressRt = dress.rectTransform;
-            dressRt.anchorMin = new Vector2(0f, 1f);
-            dressRt.anchorMax = new Vector2(0f, 1f);
-            dressRt.pivot = new Vector2(1f, 1f);
-            dressRt.sizeDelta = new Vector2(16f, 16f);
-            dressRt.anchoredPosition = new Vector2(48f, -2f);
+            dressRt.anchorMin = new Vector2(1f, 0.5f);
+            dressRt.anchorMax = new Vector2(1f, 0.5f);
+            dressRt.pivot = new Vector2(1f, 0.5f);
+            dressRt.sizeDelta = new Vector2(22f, 22f);
+            dressRt.anchoredPosition = new Vector2(-52f, 0f);
             var dressBtn = dressGo.GetComponent<Button>();
             dressBtn.targetGraphic = dress;
             dressBtn.transition = Selectable.Transition.None;
@@ -1556,10 +1556,7 @@ namespace NjordWarehouseKeeper.UI
                 return;
             }
 
-            if (view.Dress.sprite == null)
-            {
-                view.Dress.sprite = HubSprites.DressIcon();
-            }
+            view.Dress.sprite = HubSprites.DressIcon();
 
             var wearing = NjordOutfit.IsWearing(NjordWarehouseKeeperMarker.OpenHub, item);
             view.Dress.color = wearing
