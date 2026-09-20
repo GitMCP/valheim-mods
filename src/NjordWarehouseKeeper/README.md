@@ -58,8 +58,8 @@ in front of the list, so the scroll mask does not crop it.
   inventory is open (Tab included), not only while talking to Njord. The
   Favourites category lists only starred items. The star next to the sort
   buttons filters the current category the same way.
-- **Click the dress button** on an equipable listed item (Hildir's dress
-  map pin, to the right of the row before the quantity) to make Njord wear
+- **Click the dress button** on an equipable listed item (the shirt icon
+  to the right of the row, before the quantity) to make Njord wear
   that piece. The item stays in the chest and can still be taken. He wears
   one item per slot; dressing another helmet, chest, cape, or weapon
   replaces the last. Click the same button again to take that piece off.

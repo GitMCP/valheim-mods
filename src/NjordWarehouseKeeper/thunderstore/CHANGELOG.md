@@ -3,8 +3,9 @@
 ## 1.3.0
 
 Njord can be dressed from the item list. Equipable rows show a small dress
-button (Hildir's dress map pin) to the right of the name, before the
-quantity. Click it and he wears that piece; the item stays in the chest.
+button (a drawn shirt, same style as the favourite star) to the right
+of the name, before the quantity. Click it and he wears that piece; the
+item stays in the chest.
 One look per slot — helmet, chest, legs, cape, belt, trinket, and each
 hand. Dressing another item of the same slot replaces the last. Click the
 button again to take that piece off. He still starts in leather.

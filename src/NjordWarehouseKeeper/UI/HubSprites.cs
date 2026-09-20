@@ -3,8 +3,9 @@ using UnityEngine;
 namespace NjordWarehouseKeeper.UI
 {
     /// <summary>
-    /// Stars and the preferences cog are drawn in code. Deposit, Resupply, and
-    /// Quick Stack use the painted wood-tile icons shipped in Assets.
+    /// Stars, the dress shirt, and the preferences cog are drawn in code.
+    /// Deposit, Resupply, and Quick Stack use the painted wood-tile icons
+    /// shipped in Assets.
     /// </summary>
     internal static class HubSprites
     {
@@ -28,7 +29,7 @@ namespace NjordWarehouseKeeper.UI
             StarEmpty = MakeSprite(DrawStar(filled: false), "hub_star_empty");
             Cross = MakeSprite(DrawCross(), "hub_cross");
             Cog = MakeSprite(DrawCog(), "hub_cog");
-            Dress = FindHildirDress() ?? MakeSprite(DrawShirt(), "hub_dress");
+            Dress = MakeSprite(DrawShirt(), "hub_dress");
             Deposit = NjordWarehouseKeeperAssets.LoadSprite("NjordWarehouseKeeper.Assets.hub_deposit.png");
             Resupply = NjordWarehouseKeeperAssets.LoadSprite("NjordWarehouseKeeper.Assets.hub_resupply.png");
             QuickStack = NjordWarehouseKeeperAssets.LoadSprite("NjordWarehouseKeeper.Assets.hub_quickstack.png");
@@ -36,95 +37,7 @@ namespace NjordWarehouseKeeper.UI
 
         internal static Sprite DressIcon()
         {
-            if (Dress != null && Dress.name != "hub_dress")
-            {
-                return Dress;
-            }
-
-            var hildir = FindHildirDress();
-            if (hildir != null)
-            {
-                Dress = hildir;
-                return Dress;
-            }
-
             return Dress ?? (Dress = MakeSprite(DrawShirt(), "hub_dress"));
-        }
-
-        private static Sprite FindHildirDress()
-        {
-            var map = Minimap.instance;
-            if (map != null)
-            {
-                var fromPin = map.GetSprite(Minimap.PinType.Hildir1)
-                    ?? map.GetSprite(Minimap.PinType.Hildir2)
-                    ?? map.GetSprite(Minimap.PinType.Hildir3);
-                if (fromPin != null)
-                {
-                    return fromPin;
-                }
-
-                if (map.m_icons != null)
-                {
-                    for (var i = 0; i < map.m_icons.Count; i++)
-                    {
-                        var data = map.m_icons[i];
-                        if (data.m_icon != null &&
-                            (data.m_name == Minimap.PinType.Hildir1
-                             || data.m_name == Minimap.PinType.Hildir2
-                             || data.m_name == Minimap.PinType.Hildir3))
-                        {
-                            return data.m_icon;
-                        }
-                    }
-                }
-
-                if (map.m_locationIcons != null)
-                {
-                    for (var i = 0; i < map.m_locationIcons.Count; i++)
-                    {
-                        var data = map.m_locationIcons[i];
-                        var name = data.m_name ?? "";
-                        if (data.m_icon != null &&
-                            name.IndexOf("hildir", System.StringComparison.OrdinalIgnoreCase) >= 0)
-                        {
-                            return data.m_icon;
-                        }
-                    }
-                }
-            }
-
-            var sprites = Resources.FindObjectsOfTypeAll<Sprite>();
-            if (sprites == null)
-            {
-                return null;
-            }
-
-            Sprite named = null;
-            for (var i = 0; i < sprites.Length; i++)
-            {
-                var sprite = sprites[i];
-                var name = sprite == null ? "" : sprite.name ?? "";
-                if (name.IndexOf("hildir", System.StringComparison.OrdinalIgnoreCase) < 0)
-                {
-                    continue;
-                }
-
-                if (name.IndexOf("map", System.StringComparison.OrdinalIgnoreCase) >= 0
-                    || name.IndexOf("icon", System.StringComparison.OrdinalIgnoreCase) >= 0
-                    || name.IndexOf("pin", System.StringComparison.OrdinalIgnoreCase) >= 0
-                    || name.IndexOf("dress", System.StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    return sprite;
-                }
-
-                if (named == null)
-                {
-                    named = sprite;
-                }
-            }
-
-            return named;
         }
 
         private static Sprite MakeSprite(Texture2D texture, string name)
@@ -196,31 +109,44 @@ namespace NjordWarehouseKeeper.UI
         {
             const int size = 48;
             var tex = new Texture2D(size, size, TextureFormat.ARGB32, false);
-            var c = new Vector2(size * 0.5f, size * 0.52f);
+            var points = ShirtPoints(size);
             for (var y = 0; y < size; y++)
             {
                 for (var x = 0; x < size; x++)
                 {
                     var p = new Vector2(x + 0.5f, y + 0.5f);
-                    var dx = (p.x - c.x) / (size * 0.5f);
-                    var dy = (c.y - p.y) / (size * 0.5f);
-                    float a = 0f;
-                    var body = dy > -0.55f && dy < 0.22f && Mathf.Abs(dx) < 0.34f;
-                    var sleeveL = dy > -0.08f && dy < 0.28f && dx > -0.72f && dx < -0.22f;
-                    var sleeveR = dy > -0.08f && dy < 0.28f && dx > 0.22f && dx < 0.72f;
-                    var neck = dy > 0.18f && dy < 0.38f && Mathf.Abs(dx) < 0.16f;
-                    var collarCut = dy > 0.26f && Mathf.Abs(dx) < 0.10f;
-                    if ((body || sleeveL || sleeveR || neck) && !collarCut)
-                    {
-                        a = 1f;
-                    }
-
+                    var a = InsidePolygon(p, points) ? 1f : EdgeAlpha(p, points, 1.6f);
                     tex.SetPixel(x, y, new Color(1f, 1f, 1f, a));
                 }
             }
 
             tex.Apply(false, true);
             return tex;
+        }
+
+        private static Vector2[] ShirtPoints(int size)
+        {
+            var s = size;
+            return new[]
+            {
+                new Vector2(s * 0.30f, s * 0.10f),
+                new Vector2(s * 0.70f, s * 0.10f),
+                new Vector2(s * 0.71f, s * 0.46f),
+                new Vector2(s * 0.92f, s * 0.40f),
+                new Vector2(s * 0.94f, s * 0.62f),
+                new Vector2(s * 0.84f, s * 0.70f),
+                new Vector2(s * 0.68f, s * 0.68f),
+                new Vector2(s * 0.62f, s * 0.78f),
+                new Vector2(s * 0.56f, s * 0.64f),
+                new Vector2(s * 0.50f, s * 0.60f),
+                new Vector2(s * 0.44f, s * 0.64f),
+                new Vector2(s * 0.38f, s * 0.78f),
+                new Vector2(s * 0.32f, s * 0.68f),
+                new Vector2(s * 0.16f, s * 0.70f),
+                new Vector2(s * 0.06f, s * 0.62f),
+                new Vector2(s * 0.08f, s * 0.40f),
+                new Vector2(s * 0.29f, s * 0.46f),
+            };
         }
 
         private static Texture2D DrawCog()
