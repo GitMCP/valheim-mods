@@ -3,8 +3,9 @@ using UnityEngine;
 namespace NjordWarehouseKeeper.UI
 {
     /// <summary>
-    /// Stars and the preferences cog are drawn in code. Deposit, Resupply, and
-    /// Quick Stack use the painted wood-tile icons shipped in Assets.
+    /// Stars, the dress shirt, and the preferences cog are drawn in code.
+    /// Deposit, Resupply, and Quick Stack use the painted wood-tile icons
+    /// shipped in Assets.
     /// </summary>
     internal static class HubSprites
     {
@@ -12,6 +13,7 @@ namespace NjordWarehouseKeeper.UI
         internal static Sprite StarFilled { get; private set; }
         internal static Sprite Cross { get; private set; }
         internal static Sprite Cog { get; private set; }
+        internal static Sprite Dress { get; private set; }
         internal static Sprite Deposit { get; private set; }
         internal static Sprite Resupply { get; private set; }
         internal static Sprite QuickStack { get; private set; }
@@ -27,9 +29,15 @@ namespace NjordWarehouseKeeper.UI
             StarEmpty = MakeSprite(DrawStar(filled: false), "hub_star_empty");
             Cross = MakeSprite(DrawCross(), "hub_cross");
             Cog = MakeSprite(DrawCog(), "hub_cog");
+            Dress = MakeSprite(DrawShirt(), "hub_dress");
             Deposit = NjordWarehouseKeeperAssets.LoadSprite("NjordWarehouseKeeper.Assets.hub_deposit.png");
             Resupply = NjordWarehouseKeeperAssets.LoadSprite("NjordWarehouseKeeper.Assets.hub_resupply.png");
             QuickStack = NjordWarehouseKeeperAssets.LoadSprite("NjordWarehouseKeeper.Assets.hub_quickstack.png");
+        }
+
+        internal static Sprite DressIcon()
+        {
+            return Dress ?? (Dress = MakeSprite(DrawShirt(), "hub_dress"));
         }
 
         private static Sprite MakeSprite(Texture2D texture, string name)
@@ -95,6 +103,50 @@ namespace NjordWarehouseKeeper.UI
 
             tex.Apply(false, true);
             return tex;
+        }
+
+        private static Texture2D DrawShirt()
+        {
+            const int size = 48;
+            var tex = new Texture2D(size, size, TextureFormat.ARGB32, false);
+            var points = ShirtPoints(size);
+            for (var y = 0; y < size; y++)
+            {
+                for (var x = 0; x < size; x++)
+                {
+                    var p = new Vector2(x + 0.5f, y + 0.5f);
+                    var a = InsidePolygon(p, points) ? 1f : EdgeAlpha(p, points, 1.6f);
+                    tex.SetPixel(x, y, new Color(1f, 1f, 1f, a));
+                }
+            }
+
+            tex.Apply(false, true);
+            return tex;
+        }
+
+        private static Vector2[] ShirtPoints(int size)
+        {
+            var s = size;
+            return new[]
+            {
+                new Vector2(s * 0.30f, s * 0.10f),
+                new Vector2(s * 0.70f, s * 0.10f),
+                new Vector2(s * 0.71f, s * 0.46f),
+                new Vector2(s * 0.92f, s * 0.40f),
+                new Vector2(s * 0.94f, s * 0.62f),
+                new Vector2(s * 0.84f, s * 0.70f),
+                new Vector2(s * 0.68f, s * 0.68f),
+                new Vector2(s * 0.62f, s * 0.78f),
+                new Vector2(s * 0.56f, s * 0.64f),
+                new Vector2(s * 0.50f, s * 0.60f),
+                new Vector2(s * 0.44f, s * 0.64f),
+                new Vector2(s * 0.38f, s * 0.78f),
+                new Vector2(s * 0.32f, s * 0.68f),
+                new Vector2(s * 0.16f, s * 0.70f),
+                new Vector2(s * 0.06f, s * 0.62f),
+                new Vector2(s * 0.08f, s * 0.40f),
+                new Vector2(s * 0.29f, s * 0.46f),
+            };
         }
 
         private static Texture2D DrawCog()

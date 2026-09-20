@@ -81,6 +81,11 @@ namespace NjordWarehouseKeeper
                     { "njord_reorganize", "Reorganize" },
                     { "njord_reorganize_ok", "Tidied the stores. Freed {0} slots." },
                     { "njord_reorganize_none", "The stores are already tidy." },
+                    { "njord_dressed", "Njord put on {0}." },
+                    { "njord_undressed", "Njord took off {0}." },
+                    { "njord_pose_draw", "Draw weapons" },
+                    { "njord_pose_sheathe", "Sheathe Weapons" },
+                    { "njord_hover_talk", "Talk" },
                 });
         }
     }

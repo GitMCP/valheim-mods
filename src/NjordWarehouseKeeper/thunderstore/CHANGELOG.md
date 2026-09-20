@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.3.0
+
+Njord can be dressed from the item list. Equipable rows show a small dress
+button (a drawn shirt, same style as the favourite star) to the right
+of the name, before the quantity. Click it and he wears that piece; the
+item stays in the chest.
+One look per slot — helmet, chest, legs, cape, belt, trinket, and each
+hand. Dressing another item of the same slot replaces the last. Click the
+button again to take that piece off. Empty slots fall back to rags, no
+cloak, and a wooden club and wooden shield.
+
+Press **R** while talking to him or hovering him to draw or sheathe his
+weapons. The hover text is **Draw weapons** or **Sheathe Weapons**.
+
+Now and then he waves, flexes, or otherwise fidgets in place without
+walking off the spot.
+
+The piece still registers if dressing the preview mesh fails, so already
+placed Njords and the hammer recipe do not vanish.
+
 ## 1.2.2
 
 Favourite stars on pack slots. Open inventory (Tab, or while talking to Njord)

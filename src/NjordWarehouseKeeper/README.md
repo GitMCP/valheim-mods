@@ -34,8 +34,9 @@ open a pull request or an issue. You do not need to ask first.
 | 200 gold coins | Hammer, Furniture |
 
 No workbench, and no other materials. Place him like any furniture. He stands
-where you put him, in a leather tunic and pants, and will remark on the stores
-now and then the way a vendor does.
+where you put him, starts in rags with a wooden club and wooden shield, and
+will remark on the stores now and then the way a vendor does. Dress him from
+the item list, and cycle his pose with **R**.
 
 ## Using it
 
@@ -57,6 +58,16 @@ in front of the list, so the scroll mask does not crop it.
   inventory is open (Tab included), not only while talking to Njord. The
   Favourites category lists only starred items. The star next to the sort
   buttons filters the current category the same way.
+- **Click the dress button** on an equipable listed item (the shirt icon
+  to the right of the row, before the quantity) to make Njord wear
+  that piece. The item stays in the chest and can still be taken. He wears
+  one item per slot; dressing another helmet, chest, cape, or weapon
+  replaces the last. Click the same button again to take that piece off.
+  Empty slots go back to rags, no cloak, and a wooden club and shield.
+- **Press R** while talking to Njord or hovering him to draw or sheathe
+  his weapons. The hover text says **Draw weapons** or **Sheathe Weapons**.
+- From time to time he waves, flexes, cheers, or otherwise fidgets without
+  leaving the spot.
 - **Click an item in your inventory**, then click the panel (or a row) to
   store it. Dropping on a row stores the dragged item; it does not withdraw.
 - **Shift-click** an item in your inventory, or press **Deposit**, to send it

@@ -1400,7 +1400,7 @@ namespace NjordWarehouseKeeper.UI
             nameRt.anchorMin = new Vector2(0f, 0f);
             nameRt.anchorMax = new Vector2(1f, 1f);
             nameRt.offsetMin = new Vector2(56f, 4f);
-            nameRt.offsetMax = new Vector2(-72f, -4f);
+            nameRt.offsetMax = new Vector2(-86f, -4f);
             var name = nameGo.GetComponent<Text>();
             name.alignment = TextAnchor.MiddleLeft;
             name.horizontalOverflow = HorizontalWrapMode.Overflow;
@@ -1424,8 +1424,8 @@ namespace NjordWarehouseKeeper.UI
             qtyRt.anchorMin = new Vector2(1f, 0f);
             qtyRt.anchorMax = new Vector2(1f, 1f);
             qtyRt.pivot = new Vector2(1f, 0.5f);
-            qtyRt.sizeDelta = new Vector2(64f, 28f);
-            qtyRt.anchoredPosition = new Vector2(-12f, 0f);
+            qtyRt.sizeDelta = new Vector2(40f, 28f);
+            qtyRt.anchoredPosition = new Vector2(-8f, 0f);
             var qty = qtyGo.GetComponent<Text>();
             qty.alignment = TextAnchor.MiddleRight;
             qty.raycastTarget = false;
@@ -1452,6 +1452,28 @@ namespace NjordWarehouseKeeper.UI
             starBtn.transition = Selectable.Transition.None;
             starBtn.navigation = new Navigation { mode = Navigation.Mode.None };
 
+            var dressGo = new GameObject(
+                "Dress",
+                typeof(RectTransform),
+                typeof(CanvasRenderer),
+                typeof(Image),
+                typeof(Button));
+            dressGo.transform.SetParent(row.transform, false);
+            var dress = dressGo.GetComponent<Image>();
+            dress.preserveAspect = true;
+            dress.sprite = HubSprites.DressIcon();
+            dress.color = new Color(1f, 1f, 1f, 0.9f);
+            var dressRt = dress.rectTransform;
+            dressRt.anchorMin = new Vector2(1f, 0.5f);
+            dressRt.anchorMax = new Vector2(1f, 0.5f);
+            dressRt.pivot = new Vector2(1f, 0.5f);
+            dressRt.sizeDelta = new Vector2(22f, 22f);
+            dressRt.anchoredPosition = new Vector2(-52f, 0f);
+            var dressBtn = dressGo.GetComponent<Button>();
+            dressBtn.targetGraphic = dress;
+            dressBtn.transition = Selectable.Transition.None;
+            dressBtn.navigation = new Navigation { mode = Navigation.Mode.None };
+
             var button = row.GetComponent<Button>();
             var view = new RowView
             {
@@ -1460,12 +1482,15 @@ namespace NjordWarehouseKeeper.UI
                 Name = name,
                 Qty = qty,
                 Star = star,
+                Dress = dress,
+                DressGo = dressGo,
                 Hover = row.AddComponent<HubItemHover>(),
                 PlainColors = button.colors,
                 PlainName = name.color,
             };
             button.onClick.AddListener(() => OnRowClicked(view));
             starBtn.onClick.AddListener(() => OnStarClicked(view));
+            dressBtn.onClick.AddListener(() => OnDressClicked(view));
             return view;
         }
 
@@ -1509,6 +1534,34 @@ namespace NjordWarehouseKeeper.UI
                     ? new Color(1f, 0.82f, 0.28f, 1f)
                     : new Color(1f, 1f, 1f, 0.8f);
             }
+
+            PaintDress(view, live);
+        }
+
+        private static void PaintDress(RowView view, ItemDrop.ItemData item)
+        {
+            if (view?.DressGo == null)
+            {
+                return;
+            }
+
+            var equipable = NjordOutfit.IsEquipable(item);
+            if (view.DressGo.activeSelf != equipable)
+            {
+                view.DressGo.SetActive(equipable);
+            }
+
+            if (!equipable || view.Dress == null)
+            {
+                return;
+            }
+
+            view.Dress.sprite = HubSprites.DressIcon();
+
+            var wearing = NjordOutfit.IsWearing(NjordWarehouseKeeperMarker.OpenHub, item);
+            view.Dress.color = wearing
+                ? new Color(1f, 0.78f, 0.35f, 1f)
+                : new Color(1f, 0.92f, 0.82f, 0.95f);
         }
 
         private static void PaintRarity(RowView view, ItemDrop.ItemData item)
@@ -1591,6 +1644,42 @@ namespace NjordWarehouseKeeper.UI
 
             ClientPreferences.ToggleFavourite(live);
             ItemKey.Persist(part.Source != null ? part.Source.GetInventory() : null);
+            Refresh();
+        }
+
+        private static void OnDressClicked(RowView view)
+        {
+            if (view == null || view.Stack == null)
+            {
+                return;
+            }
+
+            if (IsDragging())
+            {
+                DepositDragged();
+                return;
+            }
+
+            var live = view.Stack.FirstLive();
+            var hub = NjordWarehouseKeeperMarker.OpenHub;
+            if (live == null || hub == null || !NjordOutfit.IsEquipable(live))
+            {
+                return;
+            }
+
+            var wearing = NjordOutfit.IsWearing(hub, live);
+            if (!NjordOutfit.Toggle(hub, live))
+            {
+                return;
+            }
+
+            var name = live.m_shared != null
+                ? Localization.instance.Localize(live.m_shared.m_name)
+                : view.Stack.DisplayName;
+            var token = wearing ? "$njord_undressed" : "$njord_dressed";
+            Player.m_localPlayer?.Message(
+                MessageHud.MessageType.Center,
+                Localization.instance.Localize(token).Replace("{0}", name));
             Refresh();
         }
 
@@ -1880,6 +1969,8 @@ namespace NjordWarehouseKeeper.UI
             internal Text Name;
             internal Text Qty;
             internal Image Star;
+            internal Image Dress;
+            internal GameObject DressGo;
             internal HubItemHover Hover;
             internal IndexedStack Stack;
             internal ColorBlock PlainColors;

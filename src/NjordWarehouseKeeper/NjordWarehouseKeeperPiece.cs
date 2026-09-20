@@ -76,7 +76,15 @@ namespace NjordWarehouseKeeper
                 pieceComp.m_description = $"${PrefabName}_description";
             }
 
-            NjordLook.Attach(prefab);
+            try
+            {
+                NjordLook.Attach(prefab);
+            }
+            catch (System.Exception ex)
+            {
+                NjordWarehouseKeeperPlugin.Log.LogError("Njord body failed to attach: " + ex);
+            }
+
             NjordLook.HideHostVisuals(prefab);
             FitCollider(prefab);
 

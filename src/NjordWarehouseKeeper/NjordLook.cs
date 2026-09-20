@@ -4,9 +4,8 @@ using UnityEngine;
 namespace NjordWarehouseKeeper
 {
     /// <summary>
-    /// Keeps Njord on the player mesh in a leather tunic and pants, without
-    /// turning him into a second Character the HUD or combat systems would
-    /// treat as a person.
+    /// Player mesh on Njord: dressable like an armour stand, sheathed or drawn,
+    /// and idle fidgets, without turning him into a Character.
     /// </summary>
     internal static class NjordLook
     {
@@ -35,11 +34,6 @@ namespace NjordWarehouseKeeper
             body.transform.localScale = Vector3.one;
             Strip(body);
             WireView(body, host);
-
-            if (body.GetComponent<LookAt>() == null)
-            {
-                body.AddComponent<LookAt>();
-            }
 
             var look = body.GetComponent<NjordLookHook>();
             if (look == null)
@@ -79,43 +73,21 @@ namespace NjordWarehouseKeeper
             }
         }
 
-        internal static void Dress(VisEquipment vis)
+        internal static void Dress(VisEquipment vis, Container hub = null)
         {
             if (vis == null)
             {
                 return;
             }
 
-            if (vis.m_nview == null && vis.m_nViewOverride != null)
-            {
-                vis.m_nview = vis.m_nViewOverride;
-            }
-
-            if (vis.m_nview == null)
-            {
-                return;
-            }
-
-            vis.SetHelmetItem(0);
-            vis.SetShoulderItem(0, 0, 0);
-            vis.SetUtilityItem(0);
-            vis.SetLeftItem(0, 0, 0);
-            vis.SetRightItem(0, 0);
-            vis.SetLeftBackItem(0, 0, 0);
-            vis.SetRightBackItem(0, 0);
-            var chest = FindArmor(ItemDrop.ItemData.ItemType.Chest, "ArmorLeatherChest", "leather");
-            var legs = FindArmor(ItemDrop.ItemData.ItemType.Legs, "ArmorLeatherLegs", "leather");
-            if (!string.IsNullOrEmpty(chest))
-            {
-                vis.SetChestItem(chest.GetStableHashCode());
-            }
-
-            if (!string.IsNullOrEmpty(legs))
-            {
-                vis.SetLegItem(legs.GetStableHashCode());
-            }
-
-            vis.UpdateVisuals();
+            var host = hub != null
+                ? hub
+                : vis.m_nview != null
+                    ? vis.m_nview.GetComponent<Container>()
+                    : vis.m_nViewOverride != null
+                        ? vis.m_nViewOverride.GetComponent<Container>()
+                        : null;
+            NjordOutfit.Apply(host, vis, vis.GetComponent<Animator>());
         }
 
         private static void WireView(GameObject body, GameObject host)
@@ -140,7 +112,7 @@ namespace NjordWarehouseKeeper
             for (var i = 0; i < behaviours.Length; i++)
             {
                 var behaviour = behaviours[i];
-                if (behaviour == null || behaviour is VisEquipment || behaviour is NjordLookHook || behaviour is LookAt)
+                if (behaviour == null || behaviour is VisEquipment || behaviour is NjordLookHook)
                 {
                     continue;
                 }
@@ -216,7 +188,7 @@ namespace NjordWarehouseKeeper
                 : null;
         }
 
-        private static string FindArmor(ItemDrop.ItemData.ItemType type, string prefab, params string[] needles)
+        internal static string FindArmor(ItemDrop.ItemData.ItemType type, string prefab, params string[] needles)
         {
             var db = ObjectDB.instance;
             if (db == null)
@@ -266,21 +238,30 @@ namespace NjordWarehouseKeeper
         private static readonly string[] IdleEmotes =
         {
             "wave",
+            "flex",
+            "cheer",
+            "challenge",
+            "thumbsup",
+            "nono",
+            "point",
+            "comehere",
         };
+
+        private const float IdleRange = 14f;
 
         private GameObject _host;
         private Animator _animator;
-        private LookAt _lookAt;
+        private VisEquipment _vis;
         private float _nextEmote;
+        private float _nextApply;
 
         internal void Bind(GameObject host)
         {
             _host = host;
             _animator = GetComponent<Animator>();
-            _lookAt = GetComponent<LookAt>();
+            _vis = GetComponent<VisEquipment>();
             WireAndDress();
-            IdlePose();
-            _nextEmote = Time.time + Random.Range(22f, 36f);
+            _nextEmote = Time.time + Random.Range(16f, 28f);
         }
 
         internal void Wave()
@@ -295,90 +276,163 @@ namespace NjordWarehouseKeeper
                 _animator = GetComponent<Animator>();
             }
 
-            if (_lookAt == null)
+            if (_vis == null)
             {
-                _lookAt = GetComponent<LookAt>();
+                _vis = GetComponent<VisEquipment>();
             }
         }
 
         private void Start()
         {
             WireAndDress();
-            IdlePose();
         }
 
         private void Update()
         {
-            IdlePose();
-            WatchPlayer();
-            if (Time.time >= _nextEmote)
+            TickPoseKey();
+            if (Time.time >= _nextApply)
             {
-                _nextEmote = Time.time + Random.Range(22f, 36f);
-                if (PlayerNearby(12f))
-                {
-                    PlayEmote(IdleEmotes[Random.Range(0, IdleEmotes.Length)]);
-                }
+                _nextApply = Time.time + 0.25f;
+                WireAndDress();
             }
+            else
+            {
+                HoldAnimator();
+            }
+
+            IdleEmote();
         }
 
         private void WireAndDress()
         {
-            var vis = GetComponent<VisEquipment>();
-            var host = _host != null
-                ? _host
-                : transform.parent != null ? transform.parent.gameObject : null;
-            var view = host == null ? null : host.GetComponent<ZNetView>();
-            if (vis != null)
+            try
             {
-                vis.m_nViewOverride = view;
-                vis.m_nview = view;
-                vis.m_playerComponent = null;
+                NjordOutfit.Apply(Hub(), _vis, _animator);
             }
-
-            NjordLook.Dress(vis);
+            catch (System.Exception ex)
+            {
+                NjordWarehouseKeeperPlugin.Log.LogWarning("Njord look failed: " + ex);
+            }
         }
 
-        private void IdlePose()
+        private void HoldAnimator()
         {
-            if (_animator == null)
+            var pose = CurrentPose();
+            var drawn = pose == NjordPose.Drawn;
+            var zdo = Zdo();
+            var right = drawn && zdo != null ? zdo.GetInt("njord.handR", 0) : 0;
+            var left = drawn && zdo != null ? zdo.GetInt("njord.handL", 0) : 0;
+            NjordOutfit.ApplyAnimator(_animator, pose, right, left);
+            if (_vis != null && _vis.m_nview != null)
+            {
+                try
+                {
+                    _vis.UpdateVisuals();
+                }
+                catch (System.Exception ex)
+                {
+                    NjordWarehouseKeeperPlugin.Log.LogWarning("Njord visuals failed: " + ex);
+                }
+            }
+        }
+
+        private void TickPoseKey()
+        {
+            if (!CanTakePoseInput())
             {
                 return;
             }
 
-            _animator.SetBool("onGround", true);
-            _animator.SetBool("encumbered", false);
-            _animator.SetBool("crouching", false);
-            _animator.SetBool("flying", false);
-            _animator.SetBool("inWater", false);
-            _animator.SetBool("wakeup", false);
-            _animator.SetBool("intro", false);
-            _animator.SetBool("dead", false);
-            _animator.SetFloat("forward_speed", 0f);
-            _animator.SetFloat("sideway_speed", 0f);
-            _animator.SetFloat("turn_speed", 0f);
-        }
-
-        private void WatchPlayer()
-        {
-            if (_lookAt == null || GUIManager.IsHeadless())
+            if (!ZInput.GetKeyDown(KeyCode.R, false) && !Input.GetKeyDown(KeyCode.R))
             {
                 return;
+            }
+
+            var hub = Hub();
+            if (hub == null)
+            {
+                return;
+            }
+
+            var before = NjordOutfit.ReadPose(hub);
+            NjordOutfit.CyclePose(hub);
+            var player = Player.m_localPlayer;
+            player?.Message(
+                MessageHud.MessageType.Center,
+                Localization.instance.Localize(NjordOutfit.ActionToken(before)));
+        }
+
+        private bool CanTakePoseInput()
+        {
+            if (Jotunn.Managers.GUIManager.IsHeadless())
+            {
+                return false;
+            }
+
+            try
+            {
+                if (Console.IsVisible() || Menu.IsVisible() || TextInput.IsVisible())
+                {
+                    return false;
+                }
+            }
+            catch (System.Exception)
+            {
+                return false;
+            }
+
+            if (Chat.instance != null && Chat.instance.HasFocus())
+            {
+                return false;
+            }
+
+            if (UI.NjordWarehouseKeeperPanel.SearchHasFocus())
+            {
+                return false;
+            }
+
+            var hub = Hub();
+            if (hub == null)
+            {
+                return false;
+            }
+
+            if (NjordWarehouseKeeperMarker.OpenHub != null)
+            {
+                return NjordWarehouseKeeperMarker.OpenHub == hub;
             }
 
             var player = Player.m_localPlayer;
-            if (player == null || !PlayerNearby(10f))
+            var hover = player == null ? null : player.GetHoverObject();
+            if (hover == null)
             {
-                _lookAt.ResetTarget();
+                return false;
+            }
+
+            var marker = hover.GetComponentInParent<NjordWarehouseKeeperMarker>();
+            return marker != null && marker.gameObject == hub.gameObject;
+        }
+
+        private void IdleEmote()
+        {
+            if (Time.time < _nextEmote)
+            {
                 return;
             }
 
-            _lookAt.SetLoockAtTarget(player.GetEyePoint());
+            _nextEmote = Time.time + Random.Range(16f, 30f);
+            if (!PlayerNearby(IdleRange))
+            {
+                return;
+            }
+
+            PlayEmote(IdleEmotes[Random.Range(0, IdleEmotes.Length)]);
         }
 
         private bool PlayerNearby(float range)
         {
             var player = Player.m_localPlayer;
-            if (player == null)
+            if (player == null || player.IsDead())
             {
                 return false;
             }
@@ -395,6 +449,28 @@ namespace NjordWarehouseKeeper
 
             _animator.ResetTrigger("emote_stop");
             _animator.SetTrigger("emote_" + emote);
+        }
+
+        private NjordPose CurrentPose()
+        {
+            return NjordOutfit.ReadPose(Hub());
+        }
+
+        private Container Hub()
+        {
+            if (_host != null)
+            {
+                return _host.GetComponent<Container>();
+            }
+
+            var parent = transform.parent;
+            return parent == null ? null : parent.GetComponent<Container>();
+        }
+
+        private ZDO Zdo()
+        {
+            var view = NjordOutfit.ViewOf(Hub());
+            return view == null || !view.IsValid() ? null : view.GetZDO();
         }
     }
 }
