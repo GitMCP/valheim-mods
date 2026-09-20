@@ -95,6 +95,7 @@ namespace NjordWarehouseKeeper.UI
                 return;
             }
 
+            RelocalizeChrome();
             SetPrefsOpen(false);
             ResetSearch();
             _nextSnap = 0f;
@@ -352,7 +353,7 @@ namespace NjordWarehouseKeeper.UI
 
             _title = MakeText(
                 gui,
-                Localization.instance.Localize("$njord_npc"),
+                "$njord_npc",
                 new Vector2(0f, -28f),
                 22,
                 gui.ValheimOrange,
@@ -392,7 +393,7 @@ namespace NjordWarehouseKeeper.UI
                 mid,
                 Vector2.zero,
                 InputField.ContentType.Standard,
-                Localization.instance.Localize("$njord_search"),
+                "$njord_search",
                 16,
                 176f,
                 30f).GetComponent<InputField>();
@@ -476,7 +477,7 @@ namespace NjordWarehouseKeeper.UI
 
             _empty = MakeText(
                 gui,
-                Localization.instance.Localize("$njord_empty"),
+                "$njord_empty",
                 new Vector2(0f, -80f),
                 16,
                 Color.white,
@@ -491,7 +492,25 @@ namespace NjordWarehouseKeeper.UI
 
             NjordWarehouseKeeperPrefs.Build(_root.transform, gui);
             NjordWarehouseKeeperRecipes.EnsureBuilt();
+            LocalizedUi.CaptureRoot(_root.transform);
             _root.SetActive(false);
+        }
+
+        internal static void OnLanguageChanged()
+        {
+            RelocalizeChrome();
+            NjordWarehouseKeeperRecipes.OnLanguageChanged();
+            if (_root != null && _root.activeSelf)
+            {
+                ApplyChrome();
+                Refresh();
+            }
+        }
+
+        private static void RelocalizeChrome()
+        {
+            LocalizedUi.RelocalizeRoot(_root != null ? _root.transform : null);
+            NjordWarehouseKeeperPrefs.OnLanguageChanged();
         }
 
         /// <summary>
@@ -740,7 +759,7 @@ namespace NjordWarehouseKeeper.UI
             if (_title != null)
             {
                 var token = prefs ? "$njord_preferences" : "$njord_npc";
-                _title.text = Localization.instance.Localize(token);
+                LocalizedUi.Capture(_title, token);
             }
 
             Tint(_cogButton, prefs);
@@ -767,7 +786,7 @@ namespace NjordWarehouseKeeper.UI
         {
             const float width = 154f;
             var go = gui.CreateButton(
-                Localization.instance.Localize(token),
+                token,
                 _root.transform,
                 new Vector2(0.5f, 1f),
                 new Vector2(0.5f, 1f),
@@ -950,7 +969,7 @@ namespace NjordWarehouseKeeper.UI
             {
                 var captured = cat;
                 var go = gui.CreateButton(
-                    Localization.instance.Localize("$" + ItemCategories.Token(cat)),
+                    "$" + ItemCategories.Token(cat),
                     _root.transform,
                     new Vector2(0.5f, 1f),
                     new Vector2(0.5f, 1f),
@@ -1013,7 +1032,7 @@ namespace NjordWarehouseKeeper.UI
             {
                 var captured = modes[i];
                 var go = gui.CreateButton(
-                    Localization.instance.Localize(tokens[i]),
+                    tokens[i],
                     _root.transform,
                     new Vector2(0.5f, 1f),
                     new Vector2(0.5f, 1f),
@@ -1184,7 +1203,7 @@ namespace NjordWarehouseKeeper.UI
 
             if (_title != null && !_prefsOpen)
             {
-                _title.text = Localization.instance.Localize("$njord_npc");
+                LocalizedUi.Capture(_title, "$njord_npc");
             }
 
             var snapshot = StorageNetwork.Snapshot(hub);

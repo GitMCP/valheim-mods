@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>NjordWarehouseKeeper</AssemblyName>
     <RootNamespace>NjordWarehouseKeeper</RootNamespace>
-    <Version>1.3.0</Version>
+    <Version>1.3.1</Version>
     <Authors>GitMCP</Authors>
     <Description>Njord, Warehouse Keeper. Lists and moves items across nearby chests.</Description>
   </PropertyGroup>
@@ -11,6 +11,12 @@
   <ItemGroup>
     <!-- See the Bicicreta project file for why Jotunn's build assets are excluded. -->
     <PackageReference Include="JotunnLib" Version="2.30.0" ExcludeAssets="build" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Language catalogs travel inside the single plugin DLL. Add a new JSON file
+         named after the Valheim language to extend the catalog without code changes. -->
+    <EmbeddedResource Include="Localization\*.json" />
   </ItemGroup>
 
 </Project>

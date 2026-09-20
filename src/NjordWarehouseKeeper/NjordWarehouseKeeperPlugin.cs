@@ -48,6 +48,10 @@ namespace NjordWarehouseKeeper
         private void Awake()
         {
             Log = Logger;
+            // Register before Valheim builds its localization table. Jötunn copies
+            // custom translations into that table during its localization load.
+            Localizations.Register();
+            Localization.OnLanguageChange += OnLanguageChanged;
             BindConfig();
             ClientPreferences.Bind(Config);
 
@@ -127,7 +131,6 @@ namespace NjordWarehouseKeeper
         {
             PrefabManager.OnVanillaPrefabsAvailable -= RegisterContent;
 
-            Localizations.Register();
             NjordWarehouseKeeperAssets.Load();
             NjordWarehouseKeeperPiece.Register();
 
@@ -135,8 +138,14 @@ namespace NjordWarehouseKeeper
             Log.LogInfo($"{PluginName} {PluginVersion} registered its content, {patched} method(s) patched.");
         }
 
+        private static void OnLanguageChanged()
+        {
+            NjordWarehouseKeeperPanel.OnLanguageChanged();
+        }
+
         private void OnDestroy()
         {
+            Localization.OnLanguageChange -= OnLanguageChanged;
             _harmony?.UnpatchSelf();
         }
     }
