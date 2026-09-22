@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.3.3
+
+Recipe ingredient icons no longer turn into white squares after leaving a
+world and talking to Njord again without quitting the game. The old slot
+widgets were destroyed with the inventory canvas, but the plugin still
+held them; binding then threw and search stopped updating. The recipe
+panel forgets those references and rebuilds clean slots.
+
 ## 1.3.2
 
 Item-row quantities with four or more digits stay on one line. The count

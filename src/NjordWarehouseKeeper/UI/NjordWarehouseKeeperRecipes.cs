@@ -160,6 +160,8 @@ namespace NjordWarehouseKeeper.UI
                 return;
             }
 
+            ForgetBuilt();
+
             var gui = GUIManager.Instance;
             if (gui == null || GUIManager.CustomGUIFront == null)
             {
@@ -237,6 +239,37 @@ namespace NjordWarehouseKeeper.UI
             BuildDetail(gui);
             LocalizedUi.CaptureRoot(_root.transform);
             _root.SetActive(false);
+        }
+
+        /// <summary>
+        /// The plugin lives across world loads. Valheim destroys the inventory
+        /// canvas, so leftover slot references would throw on SetActive and
+        /// freeze recipe search.
+        /// </summary>
+        private static void ForgetBuilt()
+        {
+            _root = null;
+            _stationIcon = null;
+            _title = null;
+            _rowParent = null;
+            _stationButton = null;
+            _stationLabel = null;
+            _stationMenu = null;
+            _stationCatcher = null;
+            _stationMenuParent = null;
+            _detailIcon = null;
+            _detailName = null;
+            _detailBody = null;
+            _withdraw = null;
+            _withdrawLabel = null;
+            _empty = null;
+            _search = null;
+            _ingredients.Clear();
+            _rows.Clear();
+            _stations.Clear();
+            _selected = null;
+            _selectedKey = null;
+            HubItemHover.ForgetOverlay();
         }
 
         internal static void OnLanguageChanged()
@@ -565,6 +598,8 @@ namespace NjordWarehouseKeeper.UI
             Place(amount.rectTransform, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0f), -4f, 2f, 40f, 18f);
 
             var hover = go.AddComponent<HubItemHover>();
+            icon.enabled = false;
+            go.SetActive(false);
             return new IngredientSlot
             {
                 Go = go,
@@ -1508,6 +1543,11 @@ namespace NjordWarehouseKeeper.UI
 
         private static void BindIngredient(IngredientSlot slot, StorageNetwork.IngredientLine? line)
         {
+            if (slot == null || slot.Go == null)
+            {
+                return;
+            }
+
             var has = line.HasValue && line.Value.Need > 0;
             slot.Go.SetActive(has);
             if (!has)

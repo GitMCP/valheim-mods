@@ -108,8 +108,24 @@ namespace NjordWarehouseKeeper.UI
             PaintHotkeyButton();
         }
 
+        internal static void ForgetBuilt()
+        {
+            _root = null;
+            _skipFavourites = null;
+            _resetFilters = null;
+            _hotkeyButton = null;
+            _hotkeyLabel = null;
+            _search = null;
+            _rowParent = null;
+            _rows.Clear();
+            _query = "";
+            _suppress = false;
+            _capturing = false;
+        }
+
         internal static void Build(Transform parent, GUIManager gui)
         {
+            ForgetBuilt();
             _root = new GameObject("Preferences", typeof(RectTransform));
             _root.transform.SetParent(parent, false);
             var rootRt = _root.GetComponent<RectTransform>();

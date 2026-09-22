@@ -333,6 +333,7 @@ namespace NjordWarehouseKeeper.UI
                 return;
             }
 
+            ForgetBuilt();
             HubSprites.Load();
             var gui = GUIManager.Instance;
             var parent = GUIManager.CustomGUIFront.transform;
@@ -498,6 +499,35 @@ namespace NjordWarehouseKeeper.UI
             NjordWarehouseKeeperRecipes.EnsureBuilt();
             LocalizedUi.CaptureRoot(_root.transform);
             _root.SetActive(false);
+        }
+
+        /// <summary>
+        /// Drop destroyed widget references after a world unload. The plugin
+        /// stays loaded; the inventory canvas does not.
+        /// </summary>
+        private static void ForgetBuilt()
+        {
+            _root = null;
+            _title = null;
+            _capacity = null;
+            _empty = null;
+            _search = null;
+            _scrollRect = null;
+            _rowParent = null;
+            _depositGo = null;
+            _resupplyGo = null;
+            _quickStackGo = null;
+            _cogButton = null;
+            _favFilterButton = null;
+            _rows.Clear();
+            _categoryButtons.Clear();
+            _sortButtons.Clear();
+            _itemTabUi.Clear();
+            _chromeUi.Clear();
+            _prefsOpen = false;
+            _searchBlocked = false;
+            NjordWarehouseKeeperPrefs.ForgetBuilt();
+            HubItemHover.ForgetOverlay();
         }
 
         internal static void OnLanguageChanged()
