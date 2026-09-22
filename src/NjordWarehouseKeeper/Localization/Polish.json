@@ -58,6 +58,7 @@
   "njord_preferences": "Preferencje",
   "njord_pref_settings": "Ustawienia",
   "njord_pref_skip_favourites": "Ignoruj ulubione przy chowaniu",
+  "njord_pref_reset_filters": "Resetuj filtry i sortowanie przy zamykaniu",
   "njord_pref_hotkey": "Skrót Schowaj + Uzupełnij",
   "njord_pref_hotkey_none": "Brak",
   "njord_pref_hotkey_listen": "Naciśnij klawisz…",

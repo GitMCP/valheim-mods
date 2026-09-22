@@ -97,7 +97,6 @@ namespace NjordWarehouseKeeper.UI
 
             RelocalizeChrome();
             SetPrefsOpen(false);
-            ResetSearch();
             _nextSnap = 0f;
             SnapBetweenInventoryAndCrafting();
             _root.SetActive(true);
@@ -112,7 +111,12 @@ namespace NjordWarehouseKeeper.UI
             _pending = null;
             _splitGroup = null;
             UnfocusSearch();
-            ResetSearch();
+            if (WantsResetFilters())
+            {
+                ResetFilters();
+                NjordWarehouseKeeperRecipes.ResetFilters();
+            }
+
             HubItemHover.Hide();
             SetPrefsOpen(false);
             NjordWarehouseKeeperRecipes.Close();
@@ -1129,6 +1133,20 @@ namespace NjordWarehouseKeeper.UI
             _query = "";
             SearchField.SetText(_search, "", OnSearch);
             NjordWarehouseKeeperPrefs.ResetSearch();
+        }
+
+        private static bool WantsResetFilters()
+        {
+            return ClientPreferences.ResetFiltersOnClose == null
+                || ClientPreferences.ResetFiltersOnClose.Value;
+        }
+
+        private static void ResetFilters()
+        {
+            _category = ItemCategory.All;
+            _sort = SortMode.Name;
+            _favouritesOnly = false;
+            ResetSearch();
         }
 
         private static void OnDeposit()

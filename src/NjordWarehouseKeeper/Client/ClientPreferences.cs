@@ -13,6 +13,7 @@ namespace NjordWarehouseKeeper.Client
     internal static class ClientPreferences
     {
         internal static ConfigEntry<bool> DepositSkipFavourites;
+        internal static ConfigEntry<bool> ResetFiltersOnClose;
         internal static ConfigEntry<KeyboardShortcut> RestockHotkey;
 
         private static ConfigEntry<string> FavouritesRaw;
@@ -29,6 +30,12 @@ namespace NjordWarehouseKeeper.Client
                 "DepositSkipFavourites",
                 true,
                 "Ignore favourite items on deposit. When depositing everything, leave starred items in your pack.");
+
+            ResetFiltersOnClose = config.Bind(
+                "Client",
+                "ResetFiltersOnClose",
+                true,
+                "Reset search, category, favourites filter, and sort when Njord's panel closes.");
 
             FavouritesRaw = config.Bind(
                 "Client",

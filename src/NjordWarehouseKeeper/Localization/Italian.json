@@ -58,6 +58,7 @@
   "njord_preferences": "Preferenze",
   "njord_pref_settings": "Impostazioni",
   "njord_pref_skip_favourites": "Ignora i preferiti al deposito",
+  "njord_pref_reset_filters": "Reimposta filtri e ordinamento alla chiusura",
   "njord_pref_hotkey": "Tasto Deposita + Rifornisci",
   "njord_pref_hotkey_none": "Nessuno",
   "njord_pref_hotkey_listen": "Premi un tasto…",

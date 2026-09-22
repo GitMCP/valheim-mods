@@ -58,6 +58,7 @@
   "njord_preferences": "Einstellungen",
   "njord_pref_settings": "Optionen",
   "njord_pref_skip_favourites": "Favoriten beim Einlagern ignorieren",
+  "njord_pref_reset_filters": "Filter und Sortierung beim Schließen zurücksetzen",
   "njord_pref_hotkey": "Hotkey: Einlagern + Auffüllen",
   "njord_pref_hotkey_none": "Keine",
   "njord_pref_hotkey_listen": "Taste drücken…",
