@@ -8,7 +8,8 @@ the dress button.
 
 Closing the panel now clears search, category, the favourites filter, and
 sort. That is a Preferences toggle, on by default. Turn it off to keep
-the last filters the next time you talk to Njord.
+the last filters the next time you talk to Njord. The previous sort
+button no longer stays highlighted after that reset.
 
 ## 1.3.1
 

@@ -1147,6 +1147,7 @@ namespace NjordWarehouseKeeper.UI
             _sort = SortMode.Name;
             _favouritesOnly = false;
             ResetSearch();
+            TintFilters();
         }
 
         private static void OnDeposit()
@@ -1323,8 +1324,15 @@ namespace NjordWarehouseKeeper.UI
             var highlight = new Color(1f, 0.78f, 0.35f, 1f);
             colors.normalColor = selected ? highlight : Color.white;
             colors.highlightedColor = selected ? highlight : new Color(1f, 0.9f, 0.7f, 1f);
-            colors.selectedColor = highlight;
+            colors.selectedColor = selected ? highlight : Color.white;
             button.colors = colors;
+
+            if (!selected &&
+                EventSystem.current != null &&
+                EventSystem.current.currentSelectedGameObject == button.gameObject)
+            {
+                EventSystem.current.SetSelectedGameObject(null);
+            }
         }
 
         private static List<IndexedStack> Filter(List<IndexedStack> items)
