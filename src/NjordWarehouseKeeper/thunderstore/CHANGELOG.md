@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.2
+
+Item-row quantities with four or more digits stay on one line. The count
+label is wide enough for `x` plus five digits and no longer wraps under
+the dress button.
+
 ## 1.3.1
 
 Njord follows the language selected in Valheim. UI, dialogue, build-piece
