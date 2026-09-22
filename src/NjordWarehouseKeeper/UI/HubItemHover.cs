@@ -136,6 +136,16 @@ namespace NjordWarehouseKeeper.UI
             Owner = null;
         }
 
+        /// <summary>
+        /// The hover overlay is parented to CustomGUIFront, which Valheim
+        /// destroys on world unload. Drop it so the next talk builds a new one.
+        /// </summary>
+        internal static void ForgetOverlay()
+        {
+            Hide();
+            Overlay = null;
+        }
+
         private void BeginHover()
         {
             _over = true;
