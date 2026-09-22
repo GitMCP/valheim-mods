@@ -58,6 +58,7 @@
   "njord_preferences": "Настройки",
   "njord_pref_settings": "Параметры",
   "njord_pref_skip_favourites": "Не складывать избранные предметы",
+  "njord_pref_reset_filters": "Сбрасывать фильтры и сортировку при закрытии",
   "njord_pref_hotkey": "Горячая клавиша: сложить + пополнить",
   "njord_pref_hotkey_none": "Нет",
   "njord_pref_hotkey_listen": "Нажмите клавишу…",

@@ -58,6 +58,7 @@
   "njord_preferences": "設定",
   "njord_pref_settings": "オプション",
   "njord_pref_skip_favourites": "預けるときお気に入りを無視する",
+  "njord_pref_reset_filters": "閉じるときにフィルターと並べ替えをリセット",
   "njord_pref_hotkey": "預ける + 補給のホットキー",
   "njord_pref_hotkey_none": "なし",
   "njord_pref_hotkey_listen": "キーを押してください…",

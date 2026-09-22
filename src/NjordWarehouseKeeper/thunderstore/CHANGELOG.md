@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.3.2
+
+Item-row quantities with four or more digits stay on one line. The count
+label is wide enough for `x` plus five digits and no longer wraps under
+the dress button.
+
+Closing the panel now clears search, category, the favourites filter, and
+sort. That is a Preferences toggle, on by default. Turn it off to keep
+the last filters the next time you talk to Njord. The previous sort
+button no longer stays highlighted after that reset.
+
 ## 1.3.1
 
 Njord follows the language selected in Valheim. UI, dialogue, build-piece

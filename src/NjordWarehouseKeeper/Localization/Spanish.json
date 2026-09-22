@@ -58,6 +58,7 @@
   "njord_preferences": "Preferencias",
   "njord_pref_settings": "Ajustes",
   "njord_pref_skip_favourites": "Ignorar favoritos al depositar",
+  "njord_pref_reset_filters": "Restablecer filtros y orden al cerrar",
   "njord_pref_hotkey": "Atajo Depositar + Reabastecer",
   "njord_pref_hotkey_none": "Ninguno",
   "njord_pref_hotkey_listen": "Pulsa una tecla…",

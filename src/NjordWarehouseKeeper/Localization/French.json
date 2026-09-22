@@ -58,6 +58,7 @@
   "njord_preferences": "Préférences",
   "njord_pref_settings": "Réglages",
   "njord_pref_skip_favourites": "Ignorer les favoris au dépôt",
+  "njord_pref_reset_filters": "Réinitialiser filtres et tri à la fermeture",
   "njord_pref_hotkey": "Raccourci Déposer + Réapprovisionner",
   "njord_pref_hotkey_none": "Aucun",
   "njord_pref_hotkey_listen": "Appuyez sur une touche…",

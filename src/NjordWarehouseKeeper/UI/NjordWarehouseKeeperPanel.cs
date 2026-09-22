@@ -97,7 +97,6 @@ namespace NjordWarehouseKeeper.UI
 
             RelocalizeChrome();
             SetPrefsOpen(false);
-            ResetSearch();
             _nextSnap = 0f;
             SnapBetweenInventoryAndCrafting();
             _root.SetActive(true);
@@ -112,7 +111,12 @@ namespace NjordWarehouseKeeper.UI
             _pending = null;
             _splitGroup = null;
             UnfocusSearch();
-            ResetSearch();
+            if (WantsResetFilters())
+            {
+                ResetFilters();
+                NjordWarehouseKeeperRecipes.ResetFilters();
+            }
+
             HubItemHover.Hide();
             SetPrefsOpen(false);
             NjordWarehouseKeeperRecipes.Close();
@@ -1131,6 +1135,21 @@ namespace NjordWarehouseKeeper.UI
             NjordWarehouseKeeperPrefs.ResetSearch();
         }
 
+        private static bool WantsResetFilters()
+        {
+            return ClientPreferences.ResetFiltersOnClose == null
+                || ClientPreferences.ResetFiltersOnClose.Value;
+        }
+
+        private static void ResetFilters()
+        {
+            _category = ItemCategory.All;
+            _sort = SortMode.Name;
+            _favouritesOnly = false;
+            ResetSearch();
+            TintFilters();
+        }
+
         private static void OnDeposit()
         {
             if (IsDragging())
@@ -1305,8 +1324,15 @@ namespace NjordWarehouseKeeper.UI
             var highlight = new Color(1f, 0.78f, 0.35f, 1f);
             colors.normalColor = selected ? highlight : Color.white;
             colors.highlightedColor = selected ? highlight : new Color(1f, 0.9f, 0.7f, 1f);
-            colors.selectedColor = highlight;
+            colors.selectedColor = selected ? highlight : Color.white;
             button.colors = colors;
+
+            if (!selected &&
+                EventSystem.current != null &&
+                EventSystem.current.currentSelectedGameObject == button.gameObject)
+            {
+                EventSystem.current.SetSelectedGameObject(null);
+            }
         }
 
         private static List<IndexedStack> Filter(List<IndexedStack> items)
@@ -1419,7 +1445,7 @@ namespace NjordWarehouseKeeper.UI
             nameRt.anchorMin = new Vector2(0f, 0f);
             nameRt.anchorMax = new Vector2(1f, 1f);
             nameRt.offsetMin = new Vector2(56f, 4f);
-            nameRt.offsetMax = new Vector2(-86f, -4f);
+            nameRt.offsetMax = new Vector2(-110f, -4f);
             var name = nameGo.GetComponent<Text>();
             name.alignment = TextAnchor.MiddleLeft;
             name.horizontalOverflow = HorizontalWrapMode.Overflow;
@@ -1443,10 +1469,12 @@ namespace NjordWarehouseKeeper.UI
             qtyRt.anchorMin = new Vector2(1f, 0f);
             qtyRt.anchorMax = new Vector2(1f, 1f);
             qtyRt.pivot = new Vector2(1f, 0.5f);
-            qtyRt.sizeDelta = new Vector2(40f, 28f);
+            qtyRt.sizeDelta = new Vector2(64f, 28f);
             qtyRt.anchoredPosition = new Vector2(-8f, 0f);
             var qty = qtyGo.GetComponent<Text>();
             qty.alignment = TextAnchor.MiddleRight;
+            qty.horizontalOverflow = HorizontalWrapMode.Overflow;
+            qty.verticalOverflow = VerticalWrapMode.Overflow;
             qty.raycastTarget = false;
 
             var starGo = new GameObject(
@@ -1487,7 +1515,7 @@ namespace NjordWarehouseKeeper.UI
             dressRt.anchorMax = new Vector2(1f, 0.5f);
             dressRt.pivot = new Vector2(1f, 0.5f);
             dressRt.sizeDelta = new Vector2(22f, 22f);
-            dressRt.anchoredPosition = new Vector2(-52f, 0f);
+            dressRt.anchoredPosition = new Vector2(-76f, 0f);
             var dressBtn = dressGo.GetComponent<Button>();
             dressBtn.targetGraphic = dress;
             dressBtn.transition = Selectable.Transition.None;

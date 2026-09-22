@@ -58,6 +58,7 @@
   "njord_preferences": "Налаштування",
   "njord_pref_settings": "Параметри",
   "njord_pref_skip_favourites": "Не складати обрані предмети",
+  "njord_pref_reset_filters": "Скидати фільтри й сортування при закритті",
   "njord_pref_hotkey": "Гаряча клавіша: скласти + поповнити",
   "njord_pref_hotkey_none": "Немає",
   "njord_pref_hotkey_listen": "Натисніть клавішу…",

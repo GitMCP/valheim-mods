@@ -58,6 +58,7 @@
   "njord_preferences": "환경설정",
   "njord_pref_settings": "설정",
   "njord_pref_skip_favourites": "보관할 때 즐겨찾기 무시",
+  "njord_pref_reset_filters": "닫을 때 필터와 정렬 초기화",
   "njord_pref_hotkey": "보관 + 보급 단축키",
   "njord_pref_hotkey_none": "없음",
   "njord_pref_hotkey_listen": "키를 누르세요…",

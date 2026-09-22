@@ -12,23 +12,25 @@ namespace NjordWarehouseKeeper.UI
 {
     /// <summary>
     /// Client-only hub settings shown when the cog is open. Settings holds the
-    /// deposit skip toggle, restock hotkey, and Reorganize. Resupply holds
-    /// search and the list of items to keep in the pack.
+    /// deposit skip toggle, reset-filters toggle, restock hotkey, and Reorganize.
+    /// Resupply holds search and the list of items to keep in the pack.
     /// </summary>
     internal static class NjordWarehouseKeeperPrefs
     {
         private const float RowHeight = 42f;
         private const float SettingsTitleY = 0f;
         private const float ToggleY = 26f;
-        private const float HotkeyY = 56f;
-        private const float ReorgY = 90f;
-        private const float ResupplyTitleY = 132f;
-        private const float HintY = 156f;
-        private const float SearchY = 192f;
-        private const float ListTop = 228f;
+        private const float ResetFiltersY = 56f;
+        private const float HotkeyY = 86f;
+        private const float ReorgY = 120f;
+        private const float ResupplyTitleY = 162f;
+        private const float HintY = 186f;
+        private const float SearchY = 222f;
+        private const float ListTop = 258f;
 
         private static GameObject _root;
         private static Toggle _skipFavourites;
+        private static Toggle _resetFilters;
         private static Button _hotkeyButton;
         private static Text _hotkeyLabel;
         private static InputField _search;
@@ -136,6 +138,22 @@ namespace NjordWarehouseKeeper.UI
                 Color.white,
                 TextAnchor.MiddleLeft);
             PlaceTopStretch(skipLabel.GetComponent<RectTransform>(), 38f, ToggleY, 26f, 0f);
+
+            var resetGo = gui.CreateToggle(_root.transform, 26f, 26f);
+            resetGo.transform.SetParent(_root.transform, false);
+            _resetFilters = resetGo.GetComponent<Toggle>();
+            HideToggleLabel(resetGo);
+            PlaceTopLeft(resetGo.GetComponent<RectTransform>(), 4f, ResetFiltersY, 26f, 26f);
+            _resetFilters.onValueChanged.AddListener(OnResetFiltersChanged);
+
+            var resetLabel = MakeLabel(
+                gui,
+                _root.transform,
+                "$njord_pref_reset_filters",
+                15,
+                Color.white,
+                TextAnchor.MiddleLeft);
+            PlaceTopStretch(resetLabel.GetComponent<RectTransform>(), 38f, ResetFiltersY, 26f, 0f);
 
             var hotkeyLabel = MakeLabel(
                 gui,
@@ -331,9 +349,14 @@ namespace NjordWarehouseKeeper.UI
             }
 
             _suppress = true;
-            if (_skipFavourites != null)
+            if (_skipFavourites != null && ClientPreferences.DepositSkipFavourites != null)
             {
                 _skipFavourites.isOn = ClientPreferences.DepositSkipFavourites.Value;
+            }
+
+            if (_resetFilters != null && ClientPreferences.ResetFiltersOnClose != null)
+            {
+                _resetFilters.isOn = ClientPreferences.ResetFiltersOnClose.Value;
             }
 
             _suppress = false;
@@ -396,6 +419,16 @@ namespace NjordWarehouseKeeper.UI
             }
 
             ClientPreferences.DepositSkipFavourites.Value = on;
+        }
+
+        private static void OnResetFiltersChanged(bool on)
+        {
+            if (_suppress || ClientPreferences.ResetFiltersOnClose == null)
+            {
+                return;
+            }
+
+            ClientPreferences.ResetFiltersOnClose.Value = on;
         }
 
         private static void OnReorganize()

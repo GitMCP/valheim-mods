@@ -100,7 +100,6 @@ namespace NjordWarehouseKeeper.UI
 
             LocalizedUi.RelocalizeRoot(_root.transform);
             HideVanillaCrafting();
-            ResetSearch();
             _nextSnap = 0f;
             SnapToCrafting();
             _root.SetActive(true);
@@ -126,7 +125,6 @@ namespace NjordWarehouseKeeper.UI
             _selectedKey = null;
             SetMenuOpen(false);
             UnfocusSearch();
-            ResetSearch();
             HubItemHover.Hide();
             if (_root != null)
             {
@@ -710,6 +708,12 @@ namespace NjordWarehouseKeeper.UI
         {
             _query = "";
             SearchField.SetText(_search, "", OnSearch);
+        }
+
+        internal static void ResetFilters()
+        {
+            _station = AllKey;
+            ResetSearch();
         }
 
         private static void OnSearchClicked(BaseEventData _)

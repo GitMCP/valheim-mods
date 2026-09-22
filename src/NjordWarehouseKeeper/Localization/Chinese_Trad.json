@@ -58,6 +58,7 @@
   "njord_preferences": "偏好設定",
   "njord_pref_settings": "設定",
   "njord_pref_skip_favourites": "存放時忽略收藏物品",
+  "njord_pref_reset_filters": "關閉時重設篩選和排序",
   "njord_pref_hotkey": "存放 + 補給快速鍵",
   "njord_pref_hotkey_none": "無",
   "njord_pref_hotkey_listen": "請按下一個鍵…",

@@ -58,6 +58,7 @@
   "njord_preferences": "Preferences",
   "njord_pref_settings": "Settings",
   "njord_pref_skip_favourites": "Ignore favourite items on deposit",
+  "njord_pref_reset_filters": "Reset filters and sort when closing",
   "njord_pref_hotkey": "Deposit + Resupply hotkey",
   "njord_pref_hotkey_none": "None",
   "njord_pref_hotkey_listen": "Press a key…",

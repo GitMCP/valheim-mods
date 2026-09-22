@@ -122,7 +122,8 @@ in front of the list, so the scroll mask does not crop it.
   have / need. Vanilla crafting comes back when you leave Njord, including Tab
   inventory, handcraft, and every workbench.
 - **The cog** opens client Preferences. **Settings** holds ignore favourite
-  items on deposit, the Deposit+Resupply hotkey, and **Reorganize**. **Resupply**
+  items on deposit, reset filters and sort when closing (on by default),
+  the Deposit+Resupply hotkey, and **Reorganize**. **Resupply**
   has its own search and the list of items to keep in your pack, with a
   quantity for each.
 - While in range of Njord (the same radius as the network), the hotkey deposits
@@ -142,8 +143,9 @@ out of the scan.
 
 `BepInEx/config/com.gitmcp.njord.cfg` is written on first launch. The
 server's values for radius, line of sight, the hotbar, and reorganize are
-authoritative and are synced to clients. Favourites, Resupply, and the
-deposit-skip toggle are **client-only** and stay on that machine.
+authoritative and are synced to clients. Favourites, Resupply, the
+deposit-skip toggle, and reset-filters-on-close are **client-only** and stay
+on that machine.
 
 | Setting | Default | Description |
 | --- | --- | --- |
@@ -153,6 +155,7 @@ deposit-skip toggle are **client-only** and stay on that machine.
 | `Njord / Reorganize` | `true` | Merge leftover piles of the same item so they use as few chest slots as possible. |
 | `Njord / ReorganizeInterval` | `60` | Seconds between tidy passes (15–1800). |
 | `Client / DepositSkipFavourites` | `true` | Ignore favourite items on deposit. Also set from the cog. |
+| `Client / ResetFiltersOnClose` | `true` | Clear search, category, favourites filter, and sort when the panel closes. Also set from the cog. |
 | `Client / RestockHotkey` | *(none)* | In range of Njord, Deposit then Resupply. Bound from the cog. |
 | `Client / Favourites` | *(empty)* | Starred item keys. Edited from the item list or from pack slots. |
 | `Client / Resupply` | *(empty)* | Item keys and counts for the Resupply button. Edited from the cog. |
