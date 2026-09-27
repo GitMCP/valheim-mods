@@ -51,8 +51,11 @@ namespace NjordWarehouseKeeper.Patches
 
             var action = Localization.instance.Localize(
                 NjordOutfit.ActionToken(NjordOutfit.ReadPose(__instance)));
+            var poseKey = NjordWarehouseKeeper.Client.HubInput.PoseHint();
             __result = Localization.instance.Localize(
-                "$njord_npc\n[<color=yellow><b>$KEY_Use</b></color>] $njord_hover_talk\n[<color=yellow><b>R</b></color>] ")
+                "$njord_npc\n[<color=yellow><b>$KEY_Use</b></color>] $njord_hover_talk\n[<color=yellow><b>")
+                + poseKey
+                + "</b></color>] "
                 + action;
         }
 

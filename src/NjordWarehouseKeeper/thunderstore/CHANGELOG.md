@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.3.4
+
+Gamepad. The stick cursor is used for every Njord hit test, so deposit,
+search, and row clicks land where the cursor is. D-pad and left stick
+move the item list and the recipe list; left/right cycles category or
+station. Right stick scrolls. **A** takes or withdraws, **X** stars an
+item (or withdraws a recipe), **Y** dresses. **X** also draws or
+sheathes his weapons while talking to him or hovering him. **B** backs
+out of search and Preferences without closing the inventory.
+
 ## 1.3.3
 
 Recipe ingredient icons no longer turn into white squares after leaving a

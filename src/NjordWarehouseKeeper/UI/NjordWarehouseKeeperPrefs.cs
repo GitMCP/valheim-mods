@@ -52,7 +52,7 @@ namespace NjordWarehouseKeeper.UI
                 return false;
             }
 
-            if (Input.GetKeyDown(KeyCode.Escape))
+            if (Input.GetKeyDown(KeyCode.Escape) || ZInput.GetButtonDown("JoyButtonB"))
             {
                 _capturing = false;
                 PaintHotkeyButton();

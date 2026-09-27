@@ -71,7 +71,19 @@ namespace NjordWarehouseKeeper.UI
         private static Container _pending;
         private static IndexedStack _splitGroup;
         private static bool _searchBlocked;
+        private static int _padRow;
         private static readonly Vector3[] Corners = new Vector3[4];
+        private static readonly ItemCategory[] Categories =
+        {
+            ItemCategory.All,
+            ItemCategory.Weapons,
+            ItemCategory.Armor,
+            ItemCategory.Food,
+            ItemCategory.Materials,
+            ItemCategory.Trophies,
+            ItemCategory.Misc,
+            ItemCategory.Favourites,
+        };
 
         internal static void Open(Container hub)
         {
@@ -110,6 +122,7 @@ namespace NjordWarehouseKeeper.UI
             NjordWarehouseKeeperMarker.OpenHub = null;
             _pending = null;
             _splitGroup = null;
+            _padRow = 0;
             UnfocusSearch();
             if (WantsResetFilters())
             {
@@ -147,6 +160,7 @@ namespace NjordWarehouseKeeper.UI
 
             NjordWarehouseKeeperRecipes.Tick();
             SyncSearchFocus();
+            HubGamepad.Tick();
             if (_prefsOpen)
             {
                 return;
@@ -526,6 +540,7 @@ namespace NjordWarehouseKeeper.UI
             _chromeUi.Clear();
             _prefsOpen = false;
             _searchBlocked = false;
+            _padRow = 0;
             NjordWarehouseKeeperPrefs.ForgetBuilt();
             HubItemHover.ForgetOverlay();
         }
@@ -770,6 +785,21 @@ namespace NjordWarehouseKeeper.UI
             var button = go.GetComponent<Button>();
             button.onClick.AddListener(onClick);
             return button;
+        }
+
+        internal static bool IsHubOpen
+        {
+            get { return _root != null && _root.activeSelf && NjordWarehouseKeeperMarker.OpenHub != null; }
+        }
+
+        internal static bool PrefsOpen
+        {
+            get { return _prefsOpen; }
+        }
+
+        internal static void SetPrefsOpenFromPad(bool on)
+        {
+            SetPrefsOpen(on);
         }
 
         private static void SetPrefsOpen(bool on)
@@ -1298,28 +1328,213 @@ namespace NjordWarehouseKeeper.UI
                 _rows.Add(MakeRow());
             }
 
+            if (_padRow >= visible.Count)
+            {
+                _padRow = Mathf.Max(0, visible.Count - 1);
+            }
+
             for (var i = 0; i < visible.Count; i++)
             {
                 BindRow(_rows[i], visible[i]);
+                PaintPadRow(_rows[i], HubInput.Gamepad() && i == _padRow);
             }
+        }
+
+        internal static bool PointerOverList()
+        {
+            if (_scrollRect == null)
+            {
+                return _rowParent != null && HubInput.Over(_rowParent.gameObject);
+            }
+
+            return HubInput.Over(_scrollRect.gameObject);
+        }
+
+        internal static void ScrollBy(float axis)
+        {
+            var scroll = ListScroll();
+            if (scroll == null)
+            {
+                return;
+            }
+
+            scroll.verticalNormalizedPosition = Mathf.Clamp01(
+                scroll.verticalNormalizedPosition + axis * Time.deltaTime * 1.4f);
+        }
+
+        internal static void MovePadRow(int delta)
+        {
+            if (_rows.Count == 0)
+            {
+                _padRow = 0;
+                return;
+            }
+
+            _padRow = Mathf.Clamp(_padRow + delta, 0, _rows.Count - 1);
+            ScrollPadRowIntoView();
+            for (var i = 0; i < _rows.Count; i++)
+            {
+                PaintPadRow(_rows[i], i == _padRow);
+            }
+        }
+
+        internal static void CycleCategory(int delta)
+        {
+            var index = 0;
+            for (var i = 0; i < Categories.Length; i++)
+            {
+                if (Categories[i] == _category)
+                {
+                    index = i;
+                    break;
+                }
+            }
+
+            index = (index + delta) % Categories.Length;
+            if (index < 0)
+            {
+                index += Categories.Length;
+            }
+
+            _category = Categories[index];
+            _padRow = 0;
+            Refresh();
+        }
+
+        internal static int PadTargetRow()
+        {
+            var under = RowUnderPointer();
+            return under >= 0 ? under : _padRow;
+        }
+
+        internal static void ActivateRow(int index)
+        {
+            var view = RowAt(index);
+            if (view != null)
+            {
+                OnRowClicked(view);
+            }
+        }
+
+        internal static void FavouriteRow(int index)
+        {
+            var view = RowAt(index);
+            if (view != null)
+            {
+                OnStarClicked(view);
+            }
+        }
+
+        internal static void DressRow(int index)
+        {
+            var view = RowAt(index);
+            if (view != null)
+            {
+                OnDressClicked(view);
+            }
+        }
+
+        private static RowView RowAt(int index)
+        {
+            if (index < 0 || index >= _rows.Count)
+            {
+                return null;
+            }
+
+            return _rows[index];
+        }
+
+        private static int RowUnderPointer()
+        {
+            for (var i = 0; i < _rows.Count; i++)
+            {
+                if (_rows[i].Go != null && HubInput.Over(_rows[i].Go))
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        private static void ScrollPadRowIntoView()
+        {
+            var scroll = ListScroll();
+            var view = RowAt(_padRow);
+            if (scroll == null || view == null || view.Go == null)
+            {
+                return;
+            }
+
+            var row = view.Go.GetComponent<RectTransform>();
+            var content = scroll.content;
+            var viewport = scroll.viewport;
+            if (row == null || content == null || viewport == null)
+            {
+                return;
+            }
+
+            var rowPos = (Vector2)content.InverseTransformPoint(row.position);
+            var top = -rowPos.y + row.rect.height * 0.5f;
+            var bottom = top + row.rect.height;
+            var viewH = viewport.rect.height;
+            var y = content.anchoredPosition.y;
+            if (top < y)
+            {
+                content.anchoredPosition = new Vector2(content.anchoredPosition.x, top);
+            }
+            else if (bottom > y + viewH)
+            {
+                content.anchoredPosition = new Vector2(content.anchoredPosition.x, bottom - viewH);
+            }
+        }
+
+        private static ScrollRect ListScroll()
+        {
+            if (_rowParent != null)
+            {
+                var found = _rowParent.GetComponentInParent<ScrollRect>();
+                if (found != null)
+                {
+                    return found;
+                }
+            }
+
+            return _scrollRect != null ? _scrollRect.GetComponentInChildren<ScrollRect>(true) : null;
+        }
+
+        private static void PaintPadRow(RowView view, bool on)
+        {
+            if (view == null || view.Go == null)
+            {
+                return;
+            }
+
+            var button = view.Go.GetComponent<Button>();
+            if (button == null)
+            {
+                return;
+            }
+
+            if (on)
+            {
+                var colors = view.PlainColors;
+                var highlight = new Color(1f, 0.78f, 0.35f, 1f);
+                colors.normalColor = highlight;
+                colors.highlightedColor = highlight;
+                colors.selectedColor = highlight;
+                button.colors = colors;
+                return;
+            }
+
+            PaintRarity(view, view.Stack != null ? view.Stack.FirstLive() : null);
         }
 
         private static void TintFilters()
         {
-            var cats = new[]
+            for (var i = 0; i < _categoryButtons.Count && i < Categories.Length; i++)
             {
-                ItemCategory.All,
-                ItemCategory.Weapons,
-                ItemCategory.Armor,
-                ItemCategory.Food,
-                ItemCategory.Materials,
-                ItemCategory.Trophies,
-                ItemCategory.Misc,
-                ItemCategory.Favourites,
-            };
-            for (var i = 0; i < _categoryButtons.Count && i < cats.Length; i++)
-            {
-                Tint(_categoryButtons[i], cats[i] == _category);
+                Tint(_categoryButtons[i], Categories[i] == _category);
             }
 
             var sorts = new[] { SortMode.Name, SortMode.Quantity, SortMode.Category };
@@ -1762,6 +1977,11 @@ namespace NjordWarehouseKeeper.UI
 
         private static void OnRowClicked(RowView view)
         {
+            if (HubGamepad.EatDuplicateClick())
+            {
+                return;
+            }
+
             if (view == null || view.Stack == null)
             {
                 return;
@@ -1872,14 +2092,8 @@ namespace NjordWarehouseKeeper.UI
             }
 
             var rt = _root.GetComponent<RectTransform>();
-            var cam = null as Camera;
             var canvas = _root.GetComponentInParent<Canvas>();
-            if (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay)
-            {
-                cam = canvas.worldCamera;
-            }
-
-            return RectTransformUtility.RectangleContainsScreenPoint(rt, Input.mousePosition, cam);
+            return HubInput.Over(rt, canvas);
         }
 
         private static void WirePanelDrop()
@@ -1959,7 +2173,7 @@ namespace NjordWarehouseKeeper.UI
                 return;
             }
 
-            if (ZInput.GetMouseButtonDown(0) && PointerOverSearch())
+            if (HubInput.ClickDown() && PointerOverSearch())
             {
                 if (IsDragging())
                 {
@@ -1980,17 +2194,8 @@ namespace NjordWarehouseKeeper.UI
                 return false;
             }
 
-            var cam = null as Camera;
             var canvas = _search.GetComponentInParent<Canvas>();
-            if (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay)
-            {
-                cam = canvas.worldCamera;
-            }
-
-            return RectTransformUtility.RectangleContainsScreenPoint(
-                _search.GetComponent<RectTransform>(),
-                Input.mousePosition,
-                cam);
+            return HubInput.Over(_search.GetComponent<RectTransform>(), canvas);
         }
 
         private static void FocusSearch()

@@ -343,7 +343,7 @@ namespace NjordWarehouseKeeper
                 return;
             }
 
-            if (!ZInput.GetKeyDown(KeyCode.R, false) && !Input.GetKeyDown(KeyCode.R))
+            if (!Client.HubInput.PoseDown())
             {
                 return;
             }
