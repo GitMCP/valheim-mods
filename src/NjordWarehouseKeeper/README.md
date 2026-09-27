@@ -128,6 +128,14 @@ in front of the list, so the scroll mask does not crop it.
   quantity for each.
 - While in range of Njord (the same radius as the network), the hotkey deposits
   and then resupplies without talking to him.
+- **Gamepad.** The stick cursor aims at Njord the same way it aims at
+  the pack. D-pad or left stick up/down moves the highlighted row;
+  left/right cycles category (items) or station (recipes). Right stick
+  scrolls. **A** takes a stack or withdraws recipe ingredients. **X**
+  stars the row, or withdraws from the recipe panel. **Y** dresses
+  Njord in the highlighted piece. While hovering or talking to him,
+  **X** draws or sheathes his weapons (same as **R** on the keyboard).
+  **B** leaves search or Preferences without closing the inventory.
 - Click the search box to type. It keeps focus, so E does not close the panel.
 - Hold use, the same as a vanilla chest, to stack everything that will fit.
 - **From time to time** Njord merges leftover piles of the same item in nearby

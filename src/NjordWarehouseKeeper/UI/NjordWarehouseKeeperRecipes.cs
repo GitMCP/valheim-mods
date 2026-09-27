@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using NjordWarehouseKeeper.Client;
 using NjordWarehouseKeeper.Storage;
 using Jotunn.Managers;
 using UnityEngine;
@@ -749,6 +750,84 @@ namespace NjordWarehouseKeeper.UI
         {
             _station = AllKey;
             ResetSearch();
+        }
+
+        internal static bool PointerOver()
+        {
+            return _root != null && _root.activeSelf && HubInput.Over(_root);
+        }
+
+        internal static void ScrollBy(float axis)
+        {
+            var scroll = _rowParent != null ? _rowParent.GetComponentInParent<ScrollRect>() : null;
+            if (scroll == null)
+            {
+                return;
+            }
+
+            scroll.verticalNormalizedPosition = Mathf.Clamp01(
+                scroll.verticalNormalizedPosition + axis * Time.deltaTime * 1.4f);
+        }
+
+        internal static void MoveSelection(int delta)
+        {
+            if (_rows.Count == 0)
+            {
+                return;
+            }
+
+            var index = 0;
+            for (var i = 0; i < _rows.Count; i++)
+            {
+                if (_rows[i].Offer != null && OfferKey(_rows[i].Offer) == _selectedKey)
+                {
+                    index = i;
+                    break;
+                }
+            }
+
+            index = Mathf.Clamp(index + delta, 0, _rows.Count - 1);
+            var view = _rows[index];
+            if (view != null && view.Offer != null)
+            {
+                OnClicked(view);
+            }
+        }
+
+        internal static void CycleStation(int delta)
+        {
+            if (_stations.Count == 0)
+            {
+                RebuildStations();
+            }
+
+            if (_stations.Count == 0)
+            {
+                return;
+            }
+
+            var index = 0;
+            for (var i = 0; i < _stations.Count; i++)
+            {
+                if (_stations[i].Key == _station)
+                {
+                    index = i;
+                    break;
+                }
+            }
+
+            index = (index + delta) % _stations.Count;
+            if (index < 0)
+            {
+                index += _stations.Count;
+            }
+
+            SelectStation(_stations[index].Key);
+        }
+
+        internal static void WithdrawSelected()
+        {
+            OnWithdraw();
         }
 
         private static void OnSearchClicked(BaseEventData _)

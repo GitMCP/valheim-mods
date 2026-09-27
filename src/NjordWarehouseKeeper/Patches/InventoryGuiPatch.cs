@@ -235,7 +235,8 @@ namespace NjordWarehouseKeeper.Patches
                 NjordWarehouseKeeperRecipes.HideVanillaCrafting();
             }
 
-            if (!NjordWarehouseKeeperPanel.SearchHasFocus())
+            if (!NjordWarehouseKeeperPanel.SearchHasFocus()
+                && !NjordWarehouseKeeperPanel.PrefsOpen)
             {
                 return;
             }
